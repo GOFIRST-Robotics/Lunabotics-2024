@@ -1,0 +1,50 @@
+From b87a298488199c41954d3fa6d741165eaa72258b Mon Sep 17 00:00:00 2001
+From: Jonathan Blixt <jmblixt3@gmail.com>
+Date: Tue, 12 Sep 2023 13:56:11 -0500
+Subject: [PATCH 1/1] configure for zed-wrapper for nvblox
+
+---
+ zed_wrapper/config/common.yaml                  |  2 +-
+ zed_wrapper/launch/include/zed_camera.launch.py | 13 ++++++++++++-
+ 2 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/zed_wrapper/config/common.yaml b/zed_wrapper/config/common.yaml
+index 22d4437..8ccf5d5 100644
+--- a/zed_wrapper/config/common.yaml
++++ b/zed_wrapper/config/common.yaml
+@@ -111,7 +111,7 @@
+             qos_durability: 2 # '1': TRANSIENT_LOCAL - '2': VOLATILE
+ 
+         sensors:
+-            publish_imu_tf: true # [usually overwritten by launch file] enable/disable the IMU TF broadcasting
++            publish_imu_tf: false # [usually overwritten by launch file] enable/disable the IMU TF broadcasting
+             sensors_image_sync: false # Synchronize Sensors messages with latest published video/depth message
+             sensors_pub_rate: 200. # frequency of publishing of sensors data. MAX: 400. - MIN: grab rate
+             qos_history: 1 # '1': KEEP_LAST - '2': KEEP_ALL
+diff --git a/zed_wrapper/launch/include/zed_camera.launch.py b/zed_wrapper/launch/include/zed_camera.launch.py
+index e3c398c..68e9861 100644
+--- a/zed_wrapper/launch/include/zed_camera.launch.py
++++ b/zed_wrapper/launch/include/zed_camera.launch.py
+@@ -154,7 +154,18 @@ def launch_setup(context, *args, **kwargs):
+                 'sensors.publish_imu_tf': publish_imu_tf
+             },
+             ros_params_override_path,
+-        ]
++        ],
++        remappings=[('/zed2i/zed_node/left/image_rect_color',
++                     '/front/stereo_camera/left/rgb'),
++                    ('/zed2i/zed_node/left/camera_info',
++                     '/front/stereo_camera/left/camera_info'),
++                    ('/zed2i/zed_node/right/image_rect_color',
++                     '/front/stereo_camera/right/rgb'),
++                    ('/zed2i/zed_node/right/camera_info',
++                     '/front/stereo_camera/right/camera_info'),
++                    ('/zed2i/zed_node/depth/depth_registered',
++                     '/front/stereo_camera/left/depth'),
++                    ]
+     )
+ 
+     return [
+-- 
+2.34.1
+
