@@ -47,6 +47,14 @@ To normalize line endings in git, use the command:
 git config --global core.autocrlf true
 ```
 
+## Unity Integration
+
+Start the connection by running:
+
+```
+ros2 launch ros_tcp_endpoint endpoint.py ROS_IP:=127.0.0.1
+```
+
 ## Joystick Node
 
 ```
