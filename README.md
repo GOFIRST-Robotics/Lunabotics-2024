@@ -55,6 +55,12 @@ Start the connection by running:
 ros2 launch ros_tcp_endpoint endpoint.py ROS_IP:=127.0.0.1
 ```
 
+Play the ZED SVO file by running:
+
+```
+ros2 launch zed_wrapper zed2i.launch.py svo_path:=ros-bags/room.9.10.23.svo
+```
+
 ## Joystick Node
 
 ```
