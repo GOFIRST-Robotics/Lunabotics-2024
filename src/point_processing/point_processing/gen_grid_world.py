@@ -14,7 +14,6 @@ import sensor_msgs.msg as sensor_msgs
 from sensor_msgs.msg import PointCloud2, PointField
 
 import numpy as np
-import open3d as o3d
 
 # define constants
 CELL_SIZE = 40  # size of each cell in mm
@@ -37,13 +36,13 @@ class PointcloudSubscriber(Node):
         self.get_logger().info("Node trying to start")
         #
         # This is for visualization of the received point cloud.
-        self.vis = o3d.visualization.Visualizer()
-        self.vis.create_window()
-        self.o3d_pcd = o3d.geometry.PointCloud()
+        # self.vis = o3d.visualization.Visualizer()
+        # self.vis.create_window()
+        # self.o3d_pcd = o3d.geometry.PointCloud()
         #
         self.subscription = self.create_subscription(
             sensor_msgs.PointCloud2,
-            "points",  # this is the topic which the node is subscribed to
+            "/zed2i/zed_node/mapping/fused_cloud",  # this is the topic which the node is subscribed to
             self.listener_callback,
             10,
         )
@@ -72,6 +71,7 @@ class PointcloudSubscriber(Node):
         # self.get_logger().info(f'new line')
         #
         # The rest here is for visualization. (modified from https://github.com/SebastianGrans/ROS2-Point-Cloud-Demo/blob/master/pcd_demo/pcd_subscriber/pcd_subscriber_node.py)
+        """
         self.vis.remove_geometry(self.o3d_pcd)
         self.o3d_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(all_points))
         #
@@ -80,7 +80,7 @@ class PointcloudSubscriber(Node):
         self.vis.add_geometry(self.o3d_pcd)
         #
         self.vis.poll_events()
-        self.vis.update_renderer()
+        self.vis.update_renderer()"""
 
     #
 
