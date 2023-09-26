@@ -14,36 +14,23 @@ class ImuListener(Node):
 
         self.tf_buffer = Buffer()
 
-        self.target_frame = (
-            self.declare_parameter("target_frame", "camera_link")
-            .get_parameter_value()
-            .string_value
-        )
+        self.target_frame = self.declare_parameter("target_frame", "camera_link").get_parameter_value().string_value
 
-        self.imu_subscription = self.create_subscription(
-            Imu, "imu/data", self.imu_listener_callback, 1
-        )
+        self.imu_subscription = self.create_subscription(Imu, "imu/data", self.imu_listener_callback, 1)
         self.imu_subscription  # prevent unused variable warning
 
         self.publisher = self.create_publisher(Twist, "camera_link/base_link", 1)
 
     def imu_listener_callback(self, msg: Quaternion):
-        self.get_logger().info(
-            "(IMU) x: %s y: %s z: %s"
-            % (msg.orientation.x, msg.orientation.y, msg.orientation.z)
-        )
+        self.get_logger().info("(IMU) x: %s y: %s z: %s" % (msg.orientation.x, msg.orientation.y, msg.orientation.z))
 
         from_frame_rel = self.target_frame
         to_frame_rel = "base_link"
 
         try:
-            t = self.tf_buffer.lookup_transform(
-                to_frame_rel, from_frame_rel, rclpy.time.Time()
-            )
+            t = self.tf_buffer.lookup_transform(to_frame_rel, from_frame_rel, rclpy.time.Time())
         except TransformException as ex:
-            self.get_logger().info(
-                f"Could not transform {to_frame_rel} to {from_frame_rel}: {ex}"
-            )
+            self.get_logger().info(f"Could not transform {to_frame_rel} to {from_frame_rel}: {ex}")
             return
 
         relay = Twist()

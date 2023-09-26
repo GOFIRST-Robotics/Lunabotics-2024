@@ -18,9 +18,7 @@ class MinimalPublisher(Node):
         self.i = 0
 
     def timer_callback(self):
-        msg = OccupancyGrid(
-            info=MapMetaData(width=3, height=3), data=[0, 0, 0, 0, -1, 0, 0, 0, 0]
-        )
+        msg = OccupancyGrid(info=MapMetaData(width=3, height=3), data=[0, 0, 0, 0, -1, 0, 0, 0, 0])
         msg.header.frame_id = "/map"
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing: "%s"' % msg.data)

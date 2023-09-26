@@ -22,7 +22,7 @@ If your machine does not have an Nvidia GPU, build using this command instead:
 colcon build --symlink-install --packages-skip-regex zed*
 ```
 
-If you need to rebuild the remote container uncomment sections in devcontainer that reference remote then, run the following command with devcontainer cli installed:
+If you need to rebuild the remote container, uncomment the sections in devcontainer that reference remote, then run the following command with the devcontainer cli installed:
 
 ```
 devcontainer build --push true --workspace-folder . --platform="linux/amd64,linux/arm64" --image-name "umnrobotics/ros"
@@ -36,7 +36,16 @@ Run `rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y` to install pa
 
 Run `rm -r build install log` to clean your workspace.
 
-To configure Sonarlint & Intellisense for C++ development, run `colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1`. Then, point Sonarlint to the `compile_commands.json` file that is created in your `build` directory.
+To configure Sonarlint for C++ linting, run the following command:
+```
+colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+```
+Then, point Sonarlint to the `compile_commands.json` file that is created in your `build` directory.
+
+To normalize line endings in git, use the command:
+```
+git config --global core.autocrlf true
+```
 
 ## Joystick Node
 

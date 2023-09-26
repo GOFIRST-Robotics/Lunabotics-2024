@@ -25,7 +25,7 @@ def generate_launch_description():
         executable="motor_control_node",
         name="motor_control_node",
     )
-    
+
     drivetrain = Node(
         package="drivetrain",
         executable="drivetrain_node",

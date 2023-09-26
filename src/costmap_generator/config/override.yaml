@@ -1,0 +1,9 @@
+/**:
+    ros__parameters:
+        general: 
+            svo_file: "/home/blixt/Lunabotics-2024/ros-bags/room.9.10.23.svo"
+            svo_loop: true 
+        depth:
+            remove_saturated_areas: false
+        mapping:
+            mapping_enabled: true

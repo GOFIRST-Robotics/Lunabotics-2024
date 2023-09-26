@@ -1,8 +1,7 @@
 #include <ezButton.h> // This library makes it easier for us to work with limit switches
 #include <Servo.h>    // Allows us to treat a PWM Talon SRX / Victor SP as a Servo with writeMicroseconds()
 
-Servo small_linear_actuator;
-Servo big_linear_actuator;
+Servo linear_actuator;
 
 ezButton limit_switch_extend(8);  // extend limit switch pin
 ezButton limit_switch_retract(7); // retract limit switch pin
@@ -18,13 +17,11 @@ void setup()
 {
   Serial.begin(9600); // open serial communication with a baud rate of 9600 bps
 
-  small_linear_actuator.attach(3); // Victor SP PWM pin
-  big_linear_actuator.attach(9);   // Victor SP PWM pin
+  linear_actuator.attach(9);   // Victor SP PWM pin
 
   pinMode(LED_BUILTIN, OUTPUT); // This is the built-in LED on the Arduino
 
-  stop_actuator();                    // stop the linear actuator by default
-  victor_stop(small_linear_actuator); // stop the small linear actuator by default
+  stop_actuator(); // stop the linear actuator by default
 }
 
 // put main loop code in this method to run repeatedly:
@@ -41,22 +38,17 @@ void loop()
       extend(buffer[1]); // extend the linear actuator
     if (buffer[0] == 'r')
       retract(buffer[1]); // retract the linear actuator
-
-    if (buffer[0] == 'a')
-      extend_small_actuator(buffer[1]); // extend the small linear actuator
-    if (buffer[0] == 'b')
-      retract_small_actuator(buffer[1]); // retract the small linear actuator
   }
 
   // check if the extend limit switch is pressed and we are currently extending
-  if (limit_switch_extend.isPressed() && extending)
+  if (limit_switch_extend.getState() == 0 && extending)
   {
     stop_actuator();   // stop the linear actuator
     Serial.write('f'); // send a message over serial to the Jetson
   }
 
   // check if the retract limit switch is pressed and we are currently retracting
-  if (limit_switch_retract.isPressed() && retracting)
+  if (limit_switch_retract.getState() == 0 && retracting)
   {
     stop_actuator();   // stop the linear actuator
     Serial.write('s'); // send a message over serial to the Jetson
@@ -68,7 +60,7 @@ void extend(char speed)
 {
   extending = true;
   retracting = false;
-  victor_set_forward_power(big_linear_actuator, speed);
+  victor_set_forward_power(linear_actuator, speed);
   digitalWrite(LED_BUILTIN, HIGH); // Turn on the built-in LED
 }
 // retract the linear actuator by running the motor in reverse
@@ -76,31 +68,16 @@ void retract(char speed)
 {
   retracting = true;
   extending = false;
-  victor_set_reverse_power(big_linear_actuator, speed);
+  victor_set_reverse_power(linear_actuator, speed);
   digitalWrite(LED_BUILTIN, HIGH); // Turn on the built-in LED
 }
 // stop the linear actuator motor
 void stop_actuator()
 {
-  victor_stop(big_linear_actuator);
+  victor_stop(linear_actuator);
   digitalWrite(LED_BUILTIN, LOW); // Turn off the built-in LED
   extending = false;
   retracting = false;
-}
-
-// extend the small linear actuator by running the motor forwards
-void extend_small_actuator(char speed)
-{ // input speed is 0-100
-  victor_set_forward_power(small_linear_actuator, speed);
-  delay(4000);                        // wait for 4 seconds before stopping
-  victor_stop(small_linear_actuator); // stop the small linear actuator
-}
-// retract the small linear actuator by running the motor in reverse
-void retract_small_actuator(char speed)
-{ // input speed is 0-100
-  victor_set_reverse_power(small_linear_actuator, speed);
-  delay(4000);                        // wait for 4 seconds before stopping
-  victor_stop(small_linear_actuator); // stop the small linear actuator
 }
 
 void victor_set_forward_power(Servo victor, char speed)

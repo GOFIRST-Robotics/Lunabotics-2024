@@ -10,7 +10,10 @@
 	// 	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 	// 	"dockerfile": "DOCKERFILE"
 	// },
-	"runArgs": ["--privileged","--env=DISPLAY=${localEnv:DISPLAY}"],
+	"runArgs": [
+		"--privileged",
+		"--env=DISPLAY=${localEnv:DISPLAY}"
+	],
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -23,19 +26,39 @@
 			"extensions": [
 				"ms-vscode.cpptools",
 				"ms-vscode.cpptools-extension-pack",
-				"GitHub.copilot",
 				"VisualStudioExptTeam.vscodeintellicode",
-				"ms-vscode.makefile-tools",
-				"ms-vscode.hexeditor",
 				"ms-python.python",
 				"donjayamanne.python-extension-pack",
-				"eamodio.gitlens",
 				"ms-python.black-formatter",
+				"charliermarsh.ruff",
 				"wayou.vscode-todo-highlight",
 				"SonarSource.sonarlint-vscode",
 				"ms-azuretools.vscode-docker",
 				"nonanonno.vscode-ros2"
-			]
+			],
+			"settings": {
+				"git.autofetch": true,
+				"editor.inlineSuggest.enabled": true,
+				"files.autoSave": "afterDelay",
+				"editor.formatOnSave": true,
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter",
+					"editor.codeActionsOnSave": {
+						"source.fixAll": true
+					}
+				},
+				"black-formatter.args": [
+					"--line-length",
+					"120"
+				],
+				"ruff.args": [
+					"--ignore=E501" // Ignore line too long
+				],
+				"[c++]": {
+					"editor.defaultFormatter": "ms-vscode.cpptools"
+				},
+				"C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 120 }"
+			}
 		}
 	}
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.

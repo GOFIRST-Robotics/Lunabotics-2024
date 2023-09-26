@@ -5,6 +5,8 @@ FROM ros:humble
 ENV DEBIAN_FRONTEND=noninteractive
 # Set ROS distro
 ENV ROS_DISTRO=humble
+# Suppress the setuptools deprecated warning
+ENV PYTHONWARNINGS="ignore:setup.py install is deprecated::setuptools.command.install"
 
 # Check the CPU architecture
 ARG TARGETARCH

@@ -16,19 +16,19 @@ class ConveyorNode(Node):
     def __init__(self):
         """Initialize the ROS 2 conveyor node."""
         super().__init__("conveyor")
-        
+
         # Define service clients here
         self.cli_motor_set = self.create_client(MotorCommandSet, "motor/set")
-        
+
         # Define services (methods callable from the outside) here
-        self.srv_toggle = self.create_service(ConveyorSetPower, 'conveyor/toggle', self.toggle_callback)
-        self.srv_stop = self.create_service(Stop, 'conveyor/stop', self.stop_callback)
-        self.srv_setPower = self.create_service(ConveyorSetPower, 'conveyor/setPower', self.set_power_callback)
-        
+        self.srv_toggle = self.create_service(ConveyorSetPower, "conveyor/toggle", self.toggle_callback)
+        self.srv_stop = self.create_service(Stop, "conveyor/stop", self.stop_callback)
+        self.srv_setPower = self.create_service(ConveyorSetPower, "conveyor/setPower", self.set_power_callback)
+
         # Define motor CAN IDs here
         self.DRUM_BELT_MOTOR = 7
         self.CONVEYOR_BELT_MOTOR = 6
-        
+
         # Current subsystem state
         self.running = False
 
@@ -36,14 +36,22 @@ class ConveyorNode(Node):
     def set_power(self, drum_belt_power: float, conveyor_power: float) -> None:
         """This method sets power to the conveyor belts."""
         self.running = True
-        self.cli_motor_set.call_async(MotorCommandSet.Request(type="duty_cycle", can_id=self.DRUM_BELT_MOTOR, value=-1*drum_belt_power))
-        self.cli_motor_set.call_async(MotorCommandSet.Request(type="duty_cycle", can_id=self.CONVEYOR_BELT_MOTOR, value=conveyor_power))
+        self.cli_motor_set.call_async(
+            MotorCommandSet.Request(type="duty_cycle", can_id=self.DRUM_BELT_MOTOR, value=-1 * drum_belt_power)
+        )
+        self.cli_motor_set.call_async(
+            MotorCommandSet.Request(type="duty_cycle", can_id=self.CONVEYOR_BELT_MOTOR, value=conveyor_power)
+        )
 
     def stop(self) -> None:
         """This method stops both conveyor belts."""
         self.running = False
-        self.cli_motor_set.call_async(MotorCommandSet.Request(type="duty_cycle", can_id=self.DRUM_BELT_MOTOR, value=0.0))
-        self.cli_motor_set.call_async(MotorCommandSet.Request(type="duty_cycle", can_id=self.CONVEYOR_BELT_MOTOR, value=0.0))
+        self.cli_motor_set.call_async(
+            MotorCommandSet.Request(type="duty_cycle", can_id=self.DRUM_BELT_MOTOR, value=0.0)
+        )
+        self.cli_motor_set.call_async(
+            MotorCommandSet.Request(type="duty_cycle", can_id=self.CONVEYOR_BELT_MOTOR, value=0.0)
+        )
 
     def toggle(self, drum_belt_power: float, conveyor_belt_power: float) -> None:
         """This method toggles the conveyor belts."""
@@ -51,33 +59,33 @@ class ConveyorNode(Node):
             self.stop()
         else:
             self.set_power(drum_belt_power, conveyor_belt_power)
-            
+
     # Define service callback methods here
     def set_power_callback(self, request, response) -> None:
         """This service request sets power to the conveyor belts."""
         self.set_power(request.drum_belt_power, request.conveyor_belt_power)
-        response.success = 0 # indicates success
+        response.success = 0  # indicates success
         return response
 
     def stop_callback(self, request, response) -> None:
         """This service request stops the conveyor belts."""
         self.stop()
-        response.success = 0 # indicates success
+        response.success = 0  # indicates success
         return response
 
     def toggle_callback(self, request, response) -> None:
         """This service request toggles the conveyor belts."""
         self.toggle(request.drum_belt_power, request.conveyor_belt_power)
-        response.success = 0 # indicates success
+        response.success = 0  # indicates success
         return response
-    
+
 
 def main(args=None):
     """The main function."""
     rclpy.init(args=args)
-    print("Initializing the Conveyor subsystem!")
 
     node = ConveyorNode()
+    node.get_logger().info("Initializing the Conveyor subsystem!")
     rclpy.spin(node)
 
     node.destroy_node()

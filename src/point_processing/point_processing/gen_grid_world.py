@@ -19,9 +19,7 @@ import open3d as o3d
 # define constants
 CELL_SIZE = 40  # size of each cell in mm
 CELL_POINTS_CUTOFF = 2  # minimum number of points required for a cell to be considered statistically valuable\
-GRAD_THRESH = (
-    1  # gradient threshold to mark a cell as dangerous, always positive, 1 = 45 degrees
-)
+GRAD_THRESH = 1  # gradient threshold to mark a cell as dangerous, always positive, 1 = 45 degrees
 
 
 class Cell:
@@ -116,9 +114,7 @@ class PointcloudSubscriber(Node):
         # cell_num_z = (maxz - minz) / CELL_SIZE
         #
         cells = []
-        for _ in range(
-            cell_num_x
-        ):  # fill every cell with a cell object in a new 2d array
+        for _ in range(cell_num_x):  # fill every cell with a cell object in a new 2d array
             new_list = []
             for _ in range(cell_num_y):
                 new_list.append(Cell())
@@ -162,18 +158,14 @@ class PointcloudSubscriber(Node):
                             if sorted_points[i - 1][0].danger == 1:
                                 cell.danger = 2
                                 continue
-                            x_grad = self.get_gradient(
-                                cell.avg, sorted_points[i - 1][0].avg
-                            )
+                            x_grad = self.get_gradient(cell.avg, sorted_points[i - 1][0].avg)
                             if x_grad > GRAD_THRESH:
                                 cell.danger = 2
                     else:
                         if sorted_points[i][j - 1].danger == 1:
                             cell.danger = 2
                             continue
-                        y_grad = self.get_gradient(
-                            cell.avg, sorted_points[i][j - 1].avg
-                        )  # check top gradient
+                        y_grad = self.get_gradient(cell.avg, sorted_points[i][j - 1].avg)  # check top gradient
                         if y_grad > GRAD_THRESH:
                             cell.danger = 2
                             continue
@@ -181,9 +173,7 @@ class PointcloudSubscriber(Node):
                             if sorted_points[i - 1][0].danger == 1:
                                 cell.danger = 2
                                 continue
-                            x_grad = self.get_gradient(
-                                cell.avg, sorted_points[i - 1][0].avg
-                            )
+                            x_grad = self.get_gradient(cell.avg, sorted_points[i - 1][0].avg)
                             if x_grad > GRAD_THRESH:
                                 cell.danger = 2
         #
@@ -214,9 +204,9 @@ class PointcloudSubscriber(Node):
             #
             cell = cells[x_index][y_index]
             if cell.danger == 1:
-                point_color = [1, 0, 0]  # 0-1 rgb scale
+                pass  # 0-1 rgb scale
             elif cell.danger == 2:
-                point_color = [0, 0, 1]
+                pass
         # no return value because object is directly edited
 
 
@@ -300,11 +290,7 @@ def _get_struct_fmt(is_bigendian, fields, field_names=None):
     fmt = ">" if is_bigendian else "<"
 
     offset = 0
-    for field in (
-        f
-        for f in sorted(fields, key=lambda f: f.offset)
-        if field_names is None or f.name in field_names
-    ):
+    for field in (f for f in sorted(fields, key=lambda f: f.offset) if field_names is None or f.name in field_names):
         if offset < field.offset:
             fmt += "x" * (field.offset - offset)
             offset = field.offset
