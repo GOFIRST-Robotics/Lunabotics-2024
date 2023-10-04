@@ -88,3 +88,14 @@ gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, encoding-name=H264, payload
 ## Useful Resources/References
 
 [VESC CAN Status Frames Spreadsheet](https://github.com/codermonkey42/VESC_CAN)
+
+## Zed Node
+Start realtime mapping
+```
+ros2 launch zed_display_rviz2 display_zed2i.launch.py config_path:=/home/umn-robotics/Lunabotics-2024/config/zed_common.yaml
+```
+
+Play the recording:
+```
+ros2 launch zed_wrapper zed2i.launch.py svo_path:=/home/umn-robotics/Lunabotics-2024/ros-bags/sand.9.10.23.svo config_path:=/home/umn-robotics/Lunabotics-2024/config/zed_common.yaml
+```
