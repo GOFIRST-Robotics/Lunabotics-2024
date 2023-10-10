@@ -21,6 +21,9 @@ setup(
     license="MIT License",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": ["conveyor_node = conveyor.conveyor_node:main"],
+        "console_scripts": [
+        "conveyor_node = conveyor.conveyor_node:main", 
+        "check_load = conveyor.check_load:main"
+        ],
     },
 )

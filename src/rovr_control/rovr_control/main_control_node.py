@@ -14,7 +14,7 @@ from sensor_msgs.msg import Joy
 from tf2_msgs.msg import TFMessage
 
 # Import custom ROS 2 interfaces
-from rovr_interfaces.srv import ConveyorSetPower, SetPower
+from rovr_interfaces.srv import ConveyorSetPower
 from rovr_interfaces.srv import Stop, Drive, MotorCommandGet
 
 # Import Python Modules
@@ -63,19 +63,15 @@ class MainControlNode(Node):
         self.declare_parameter("max_turn_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("linear_actuator_power", 8)  # Duty Cycle value between 0-100 (not 0.0-1.0)
         self.declare_parameter("linear_actuator_up_power", 40)  # Duty Cycle value between 0-100 (not 0.0-1.0)
-        self.declare_parameter("digger_rotation_power", 0.4)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("drum_belt_power", 0.2)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("conveyor_belt_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
-        self.declare_parameter("offload_belt_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
 
         # Assign the ROS Parameters to member variables below #
         self.autonomous_driving_power = self.get_parameter("autonomous_driving_power").value
         self.max_drive_power = self.get_parameter("max_drive_power").value
         self.max_turn_power = self.get_parameter("max_turn_power").value
-        self.digger_rotation_power = self.get_parameter("digger_rotation_power").value
         self.drum_belt_power = self.get_parameter("drum_belt_power").value
         self.conveyor_belt_power = self.get_parameter("conveyor_belt_power").value
-        self.offload_belt_power = self.get_parameter("offload_belt_power").value
         self.linear_actuator_power = self.get_parameter("linear_actuator_power").value
         self.linear_actuator_up_power = self.get_parameter("linear_actuator_up_power").value
 
@@ -85,10 +81,8 @@ class MainControlNode(Node):
         print("max_turn_power has been set to:", self.max_turn_power)
         print("linear_actuator_power has been set to:", self.linear_actuator_power)
         print("linear_actuator_up_power has been set to:", self.linear_actuator_up_power)
-        print("digger_rotation_power has been set to:", self.digger_rotation_power)
         print("drum_belt_power has been set to:", self.drum_belt_power)
         print("conveyor_belt_power has been set to:", self.conveyor_belt_power)
-        print("offload_belt_power has been set to:", self.offload_belt_power)
 
         # NOTE: The code commented out below is for dynamic ip address asignment, but we haven't gotten it to work consistantly yet
         # self.target_ip = get_target_ip('blixt-G14', '192.168.1.110', self.get_logger().info)
@@ -111,7 +105,7 @@ class MainControlNode(Node):
         self.autonomous_offload_process = None
 
         # This is a hard-coded physical constant (how far off-center the apriltag camera is)
-        self.typeapriltag_camera_offset = 0.1905  # Measured in Meters
+        self.apriltag_camera_offset = 0.1905  # Measured in Meters
 
         # These variables store the most recent Apriltag pose
         self.apriltagX = 0.0
@@ -119,15 +113,9 @@ class MainControlNode(Node):
         self.apriltagYaw = 0.0
 
         # Define service clients here
-        self.cli_offloader_toggle = self.create_client(SetPower, "offloader/toggle")
-        self.cli_offloader_stop = self.create_client(Stop, "offloader/stop")
-        self.cli_offloader_setPower = self.create_client(SetPower, "offloader/setPower")
         self.cli_conveyor_toggle = self.create_client(ConveyorSetPower, "conveyor/toggle")
         self.cli_conveyor_stop = self.create_client(Stop, "conveyor/stop")
         self.cli_conveyor_setPower = self.create_client(ConveyorSetPower, "conveyor/setPower")
-        self.cli_digger_toggle = self.create_client(SetPower, "digger/toggle")
-        self.cli_digger_stop = self.create_client(Stop, "digger/stop")
-        self.cli_digger_setPower = self.create_client(SetPower, "digger/setPower")
         self.cli_drivetrain_stop = self.create_client(Stop, "drivetrain/stop")
         self.cli_drivetrain_drive = self.create_client(Drive, "drivetrain/drive")
         self.cli_motor_get = self.create_client(MotorCommandGet, "motor/get")
@@ -140,9 +128,7 @@ class MainControlNode(Node):
 
     def stop_all_subsystems(self) -> None:
         """This method stops all subsystems on the robot."""
-        self.cli_offloader_stop.call_async(Stop.Request())  # Stop the offloader
         self.cli_conveyor_stop.call_async(Stop.Request())  # Stop the conveyor
-        self.cli_digger_stop.call_async(Stop.Request())  # Stop the digger
         self.cli_drivetrain_stop.call_async(Stop.Request())  # Stop the drivetrain
         self.arduino.write(f"e{chr(0)}".encode("ascii"))  # Stop the linear actuator
 
@@ -155,7 +141,6 @@ class MainControlNode(Node):
         """This method lays out the procedure for autonomously digging!"""
         print("\nStarting Autonomous Digging Procedure!")
         try:  # Wrap the autonomous procedure in a try-except
-            await self.cli_digger_setPower.call_async(SetPower.Request(power=self.digger_rotation_power))
             await self.cli_conveyor_setPower.call_async(
                 ConveyorSetPower.Request(
                     drum_belt_power=self.drum_belt_power, conveyor_belt_power=self.conveyor_belt_power
@@ -178,12 +163,7 @@ class MainControlNode(Node):
             while reading != "s":
                 reading = self.arduino.read().decode("ascii")
                 await asyncio.sleep(0.01)  # Trick to allow other tasks to run ;)
-            # Reverse the digging drum
-            await self.cli_digger_stop.call_async(Stop.Request())
-            await asyncio.sleep(0.5)  # Let the digger slow down
-            await self.cli_digger_setPower.call_async(SetPower.Request(power=-1 * self.digger_rotation_power))
             await asyncio.sleep(5)  # Wait for 5 seconds
-            await self.cli_digger_stop.call_async(Stop.Request())
             await self.cli_conveyor_stop.call_async(Stop.Request())
             print("Autonomous Digging Procedure Complete!\n")
             self.end_autonomous()  # Return to Teleop mode
@@ -230,12 +210,7 @@ class MainControlNode(Node):
             await asyncio.sleep(4)
             await self.cli_drivetrain_stop.call_async(Stop.Request())
             print("Commence Offloading!")
-            await self.cli_offloader_setPower.call_async(
-                SetPower.Request(power=self.offload_belt_power)
-            )  # start offloading
-            # TODO: Tune this timing (how long to run the offloader for)
             await asyncio.sleep(10)
-            await self.cli_offloader_stop.call_async(Stop.Request())  # stop offloading
             print("Autonomous Offload Procedure Complete!\n")
             self.end_autonomous()  # Return to Teleop mode
         except asyncio.CancelledError:  # Put termination code here
@@ -250,7 +225,7 @@ class MainControlNode(Node):
         # Create a PoseWithCovarianceStamped object from the Apriltag detection
         pose_object = PoseWithCovarianceStamped()
         pose_object.header = entry.header
-        pose_object.pose.pose.position.x = entry.transform.translation.x + self.typeapriltag_camera_offset
+        pose_object.pose.pose.position.x = entry.transform.translation.x + self.apriltag_camera_offset
         pose_object.pose.pose.position.y = entry.transform.translation.y
         pose_object.pose.pose.position.z = entry.transform.translation.z
         pose_object.pose.pose.orientation.x = entry.transform.rotation.x
@@ -263,7 +238,7 @@ class MainControlNode(Node):
         ## Set the value of these variables used for docking with an Apriltag ##
 
         # Left-Right Distance to the tag (measured in meters)
-        self.apriltagX = entry.transform.translation.x + self.typeapriltag_camera_offset
+        self.apriltagX = entry.transform.translation.x + self.apriltag_camera_offset
         # Forward-Backward Distance to the tag (measured in meters)
         self.apriltagZ = entry.transform.translation.z
         # Yaw Angle error to the tag's orientation (measured in radians)
@@ -281,25 +256,13 @@ class MainControlNode(Node):
             turn_power = msg.axes[LEFT_JOYSTICK_HORIZONTAL_AXIS] * self.max_turn_power  # Turning power
             self.drive_power_publisher.publish(Twist(linear=Vector3(x=drive_power), angular=Vector3(z=turn_power)))
 
-            # Check if the digger button is pressed #
+            # Check if the conveyor button is pressed #
             if msg.buttons[X_BUTTON] == 1 and buttons[X_BUTTON] == 0:
-                self.cli_digger_toggle.call_async(SetPower.Request(power=self.digger_rotation_power))
                 self.cli_conveyor_toggle.call_async(
                     ConveyorSetPower.Request(
                         drum_belt_power=self.drum_belt_power, conveyor_belt_power=self.conveyor_belt_power
                     )
                 )
-            # Reverse the digging drum (set negative power) #
-            if msg.buttons[RIGHT_BUMPER] == 1 and buttons[RIGHT_BUMPER] == 0:
-                self.cli_digger_setPower.call_async(SetPower.Request(power=-1 * self.digger_rotation_power))
-                self.cli_conveyor_toggle.call_async(
-                    ConveyorSetPower.Request(
-                        drum_belt_power=self.drum_belt_power, conveyor_belt_power=self.conveyor_belt_power
-                    )
-                )
-            # Check if the offloader button is pressed #
-            if msg.buttons[B_BUTTON] == 1 and buttons[B_BUTTON] == 0:
-                self.cli_offloader_toggle.call_async(SetPower.Request(power=self.offload_belt_power))
 
             # Check if the digger_extend button is pressed #
             if msg.buttons[A_BUTTON] == 1 and buttons[A_BUTTON] == 0:
@@ -349,7 +312,7 @@ class MainControlNode(Node):
                     self.back_camera = None
                 # self.get_logger().info(f'using ip {self.target_ip}')
                 self.front_camera = subprocess.Popen(
-                    'gst-launch-1.0 v4l2src device=/dev/front_webcam ! "video/x-raw,width=640,height=480,framerate=15/1" ! nvvidconv ! "video/x-raw,format=I420" ! x264enc bitrate=300 tune=zerolatency speed-preset=ultrafast ! "video/x-h264,stream-format=byte-stream" ! h264parse ! rtph264pay ! udpsink host=192.168.1.110 port=5000',
+                    'gst-launch-1.0 v4l2src device=/dev/front_webcam ! "video/x-raw,width=640,height=480,framerate=15/1" ! nvvidconv ! "video/x-raw(memory:NVMM),format=NV12" ! nvv4l2av1enc bitrate=200000 ! "video/x-av1" ! udpsink host=10.133.232.197 port=5000',
                     shell=True,
                     preexec_fn=os.setsid,
                 )
@@ -360,7 +323,7 @@ class MainControlNode(Node):
                     self.front_camera = None
                 # self.get_logger().info(f'using ip {self.target_ip}')
                 self.back_camera = subprocess.Popen(
-                    'gst-launch-1.0 v4l2src device=/dev/back_webcam ! "video/x-raw,width=640,height=480,framerate=15/1" ! nvvidconv ! "video/x-raw,format=I420" ! x264enc bitrate=300 tune=zerolatency speed-preset=ultrafast ! "video/x-h264,stream-format=byte-stream" ! h264parse ! rtph264pay ! udpsink host=192.168.1.110  port=5000',
+                    'gst-launch-1.0 v4l2src device=/dev/back_webcam ! "video/x-raw,width=640,height=480,framerate=15/1" ! nvvidconv ! "video/x-raw(memory:NVMM),format=NV12" ! nvv4l2av1enc bitrate=200000 ! "video/x-av1" ! udpsink host=10.133.232.197  port=5000',
                     shell=True,
                     preexec_fn=os.setsid,
                 )
