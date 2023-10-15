@@ -14,7 +14,7 @@ from sensor_msgs.msg import Joy
 from tf2_msgs.msg import TFMessage
 
 # Import custom ROS 2 interfaces
-from rovr_interfaces.srv import ConveyorSetPower
+from rovr_interfaces.srv import SetPower
 from rovr_interfaces.srv import Stop, Drive, MotorCommandGet
 
 # Import Python Modules
@@ -63,14 +63,12 @@ class MainControlNode(Node):
         self.declare_parameter("max_turn_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("linear_actuator_power", 8)  # Duty Cycle value between 0-100 (not 0.0-1.0)
         self.declare_parameter("linear_actuator_up_power", 40)  # Duty Cycle value between 0-100 (not 0.0-1.0)
-        self.declare_parameter("drum_belt_power", 0.2)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("conveyor_belt_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
 
         # Assign the ROS Parameters to member variables below #
         self.autonomous_driving_power = self.get_parameter("autonomous_driving_power").value
         self.max_drive_power = self.get_parameter("max_drive_power").value
         self.max_turn_power = self.get_parameter("max_turn_power").value
-        self.drum_belt_power = self.get_parameter("drum_belt_power").value
         self.conveyor_belt_power = self.get_parameter("conveyor_belt_power").value
         self.linear_actuator_power = self.get_parameter("linear_actuator_power").value
         self.linear_actuator_up_power = self.get_parameter("linear_actuator_up_power").value
@@ -81,7 +79,6 @@ class MainControlNode(Node):
         print("max_turn_power has been set to:", self.max_turn_power)
         print("linear_actuator_power has been set to:", self.linear_actuator_power)
         print("linear_actuator_up_power has been set to:", self.linear_actuator_up_power)
-        print("drum_belt_power has been set to:", self.drum_belt_power)
         print("conveyor_belt_power has been set to:", self.conveyor_belt_power)
 
         # NOTE: The code commented out below is for dynamic ip address asignment, but we haven't gotten it to work consistantly yet
@@ -113,9 +110,9 @@ class MainControlNode(Node):
         self.apriltagYaw = 0.0
 
         # Define service clients here
-        self.cli_conveyor_toggle = self.create_client(ConveyorSetPower, "conveyor/toggle")
+        self.cli_conveyor_toggle = self.create_client(SetPower, "conveyor/toggle")
         self.cli_conveyor_stop = self.create_client(Stop, "conveyor/stop")
-        self.cli_conveyor_setPower = self.create_client(ConveyorSetPower, "conveyor/setPower")
+        self.cli_conveyor_setPower = self.create_client(SetPower, "conveyor/setPower")
         self.cli_drivetrain_stop = self.create_client(Stop, "drivetrain/stop")
         self.cli_drivetrain_drive = self.create_client(Drive, "drivetrain/drive")
         self.cli_motor_get = self.create_client(MotorCommandGet, "motor/get")
@@ -142,8 +139,8 @@ class MainControlNode(Node):
         print("\nStarting Autonomous Digging Procedure!")
         try:  # Wrap the autonomous procedure in a try-except
             await self.cli_conveyor_setPower.call_async(
-                ConveyorSetPower.Request(
-                    drum_belt_power=self.drum_belt_power, conveyor_belt_power=self.conveyor_belt_power
+                SetPower.Request(
+                    conveyor_belt_power=self.conveyor_belt_power
                 )
             )
             self.arduino.read_all()  # Read all messages from the serial buffer to clear them out
@@ -259,8 +256,8 @@ class MainControlNode(Node):
             # Check if the conveyor button is pressed #
             if msg.buttons[X_BUTTON] == 1 and buttons[X_BUTTON] == 0:
                 self.cli_conveyor_toggle.call_async(
-                    ConveyorSetPower.Request(
-                        drum_belt_power=self.drum_belt_power, conveyor_belt_power=self.conveyor_belt_power
+                    SetPower.Request(
+                        conveyor_belt_power=self.conveyor_belt_power
                     )
                 )
 

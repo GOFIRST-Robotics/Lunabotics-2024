@@ -5,5 +5,4 @@ main_control_node:
     max_turn_power: 1.0              # Measured in Duty Cycle (0.0-1.0)
     linear_actuator_power: 8         # Duty Cycle value between 0-100 (not 0.0-1.0)
     linear_actuator_up_power: 40     # Duty Cycle value between 0-100 (not 0.0-1.0)
-    drum_belt_power: 0.2             # Measured in Duty Cycle (0.0-1.0)
     conveyor_belt_power: 0.35        # Measured in Duty Cycle (0.0-1.0)
