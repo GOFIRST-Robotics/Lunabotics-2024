@@ -4,6 +4,7 @@
 [submodule "src/zed-ros2-wrapper"]
 	path = src/zed-ros2-wrapper
 	url = https://github.com/stereolabs/zed-ros2-wrapper.git
-[submodule "ROS-TCP-Endpoint"]
-	path = ROS-TCP-Endpoint
-	url = git@github.com:Unity-Technologies/ROS-TCP-Endpoint.git
+[submodule "src/ROS-TCP-Endpoint"]
+	path = src/ROS-TCP-Endpoint
+	url = https://github.com/Unity-Technologies/ROS-TCP-Endpoint.git
+	branch = main-ros2
