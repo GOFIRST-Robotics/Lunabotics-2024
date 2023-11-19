@@ -2,14 +2,15 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
 	"name": "Existing Dockerfile",
-	"image": "umnrobotics/ros",
-	// Comment out image and uncomment build to update container definition on dockerhub
-	// "build": {
-	// 	// Sets the run context to one level up instead of the .devcontainer folder.
-	// 	// "context": "..",
-	// 	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
-	// 	"dockerfile": "DOCKERFILE"
-	// },
+	//"image": "umnrobotics/ros:isaac_ros_devcontainer",
+	//Comment out image and uncomment build to update container definition on dockerhub
+	"build": {
+		// Sets the run context to one level up instead of the .devcontainer folder.
+		// "context": "..",
+		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+		"dockerfile": "Dockerfile"
+	},
+	// TODO fix these to somehow sync with isaac_ros
 	"runArgs": [
 		"--privileged",
 		"--env=DISPLAY=${localEnv:DISPLAY}"
@@ -18,8 +19,8 @@
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-	"initializeCommand": "git submodule update --init --recursive",
-	"postStartCommand": "apt-get update && rosdep install -i -y --from-path src",
+	"initializeCommand": "git config --global --add safe.directory /workspaces/Lunabotics-2024 && git reset --soft && git submodule update --init --recursive && git config --global submodule.recurse true && git pull",
+	"postStartCommand": "sudo apt-get update && rosdep update && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys 'nvblox'",
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
@@ -60,7 +61,7 @@
 				"C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 120 }"
 			}
 		}
-	}
+	},
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "umnrobotics"
+	"remoteUser": "admin"
 }

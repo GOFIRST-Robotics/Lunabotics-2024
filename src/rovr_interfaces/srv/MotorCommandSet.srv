@@ -1,5 +1,5 @@
 # This service sends a command to the motor_control_node to execute a motor_control SET method
-string type # Type of command to send
+string type # Type of command to send (duty_cycle, position, velocity, current) 
 uint32 can_id # CAN ID of the VESC
 float32 value # Value to pass to the motor_control method
 ---

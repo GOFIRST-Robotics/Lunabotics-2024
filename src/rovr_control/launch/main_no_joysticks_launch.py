@@ -18,22 +18,30 @@ def generate_launch_description():
         package="motor_control",
         executable="motor_control_node",
         name="motor_control_node",
+        parameters=["config/motor_control.yaml"],
+        output="screen",
+        emulate_tty=True,
     )
 
     drivetrain = Node(
         package="drivetrain",
         executable="drivetrain_node",
         name="drivetrain_node",
+        parameters=["config/drivetrain_config.yaml"],
+        output="screen",
+        emulate_tty=True,
     )
-    conveyor = Node(
-        package="conveyor",
-        executable="conveyor_node",
-        name="conveyor_node",
+    skimmer = Node(
+        package="skimmer",
+        executable="skimmer_node",
+        name="skimmer_node",
+        output="screen",
+        emulate_tty=True,
     )
 
     ld.add_action(rovr_control)
     ld.add_action(motor_control)
     ld.add_action(drivetrain)
-    ld.add_action(conveyor)
+    ld.add_action(skimmer)
 
     return ld
