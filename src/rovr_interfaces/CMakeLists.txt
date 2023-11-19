@@ -23,7 +23,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/MotorCommandSet.srv"
   "srv/Stop.srv"
   "srv/SetPower.srv"
-  "srv/ConveyorSetPower.srv"
+  "srv/SetHeight.srv"
   "srv/Drive.srv"
 )
 ament_export_dependencies(rosidl_default_runtime)

@@ -1,11 +1,7 @@
 main_control_node:
   ros__parameters:
-    autonomous_driving_power: 0.25   # Measured in Duty Cycle (0.0-1.0)
-    max_drive_power: 1.0             # Measured in Duty Cycle (0.0-1.0)
-    max_turn_power: 1.0              # Measured in Duty Cycle (0.0-1.0)
-    linear_actuator_power: 8         # Duty Cycle value between 0-100 (not 0.0-1.0)
-    linear_actuator_up_power: 40     # Duty Cycle value between 0-100 (not 0.0-1.0)
-    digger_rotation_power: 0.4       # Measured in Duty Cycle (0.0-1.0)
-    drum_belt_power: 0.2             # Measured in Duty Cycle (0.0-1.0)
-    conveyor_belt_power: 0.35        # Measured in Duty Cycle (0.0-1.0)
-    offload_belt_power: 0.35         # Measured in Duty Cycle (0.0-1.0)
+    autonomous_driving_power: 0.25      # Measured in Duty Cycle (0.0-1.0)
+    max_drive_power: 1.0                # Measured in Duty Cycle (0.0-1.0)
+    max_turn_power: 1.0                 # Measured in Duty Cycle (0.0-1.0)
+    skimmer_belt_power: 0.35           # Measured in Duty Cycle (0.0-1.0)
+    skimmer_height_manual_power: 0.35  # Measured in Duty Cycle (0.0-1.0)

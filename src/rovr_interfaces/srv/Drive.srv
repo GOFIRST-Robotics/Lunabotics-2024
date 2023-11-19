@@ -1,4 +1,5 @@
-# This service drives the robot with the given forward and turning powers
+# This service drives the robot with the given forward, horizontal, and turning powers
+float32 horizontal_power # duty cycle
 float32 forward_power # duty cycle
 float32 turning_power # duty cycle
 ---

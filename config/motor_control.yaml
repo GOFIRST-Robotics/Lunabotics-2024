@@ -1,0 +1,4 @@
+motor_control_node:
+  ros__parameters:
+    CAN_INTERFACE_TRANSMIT: "can1" # can0, can1, slcan0, slcan1 are common values
+    CAN_INTERFACE_RECEIVE: "can1" # can0, can1, slcan0, slcan1 are common values

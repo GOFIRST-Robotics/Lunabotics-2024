@@ -1,0 +1,12 @@
+main_control_node:
+  ros__parameters:
+        BACK_LEFT_DRIVE: 1 # CAN ID of the back left drive motor
+        BACK_LEFT_TURN: 2 # CAN ID of the back left turn motor
+        FRONT_LEFT_DRIVE: 3 # CAN ID of the front left drive motor
+        FRONT_LEFT_TURN: 4 # CAN ID of the front left turn motor
+        BACK_RIGHT_DRIVE: 5 # CAN ID of the back right drive motor
+        BACK_RIGHT_TURN: 6 # CAN ID of the back right turn motor
+        FRONT_RIGHT_DRIVE: 7 # CAN ID of the front right drive motor
+        FRONT_RIGHT_TURN: 8 # CAN ID of the front right turn motor
+        WHEEL_BASE: 0.5  # HALF of the wheelbase length in meters # TODO: Change this value when we know the final measurement
+        TRACK_WIDTH: 0.5  # HALF of the trackwidth length in meters # TODO: Change this value when we know the final measurement

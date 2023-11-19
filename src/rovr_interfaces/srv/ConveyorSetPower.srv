@@ -1,5 +1,0 @@
-# This service sets power to the conveyor belts
-float32 drum_belt_power # duty cycle
-float32 conveyor_belt_power # duty cycle
----
-int32 success
