@@ -16,7 +16,7 @@ After opening the container, run the following commands in the terminal:
 ```
 source /opt/ros/humble/setup.bash
 colcon build --symlink-install
-source install/setup.sh
+source install/setup.bash
 ```
 
 If your machine does not have an Nvidia GPU, build using a command like this instead: (select the packages you want)
