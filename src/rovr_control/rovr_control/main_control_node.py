@@ -56,11 +56,11 @@ class MainControlNode(Node):
         self.skimmer_height_manual_power = self.get_parameter("skimmer_height_manual_power").value
 
         # Print the ROS Parameters to the terminal below #
-        self.get_logger().info("autonomous_driving_power has been set to:", self.autonomous_driving_power)
-        self.get_logger().info("max_drive_power has been set to:", self.max_drive_power)
-        self.get_logger().info("max_turn_power has been set to:", self.max_turn_power)
-        self.get_logger().info("skimmer_belt_power has been set to:", self.skimmer_belt_power)
-        self.get_logger().info("skimmer_height_manual_power has been set to:", self.skimmer_height_manual_power)
+        self.get_logger().info("autonomous_driving_power has been set to: " + str(self.autonomous_driving_power))
+        self.get_logger().info("max_drive_power has been set to: " + str(self.max_drive_power))
+        self.get_logger().info("max_turn_power has been set to: " + str(self.max_turn_power))
+        self.get_logger().info("skimmer_belt_power has been set to: " + str(self.skimmer_belt_power))
+        self.get_logger().info("skimmer_height_manual_power has been set to: " + str(self.skimmer_height_manual_power))
 
         # Define some initial states here
         self.state = states["Teleop"]

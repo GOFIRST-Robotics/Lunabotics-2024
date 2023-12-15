@@ -27,7 +27,7 @@ def generate_launch_description():
         package="drivetrain",
         executable="drivetrain_node",
         name="drivetrain_node",
-        parameters=["config/drivetrain_config.yaml"],
+        parameters=["config/drivetrain_config.yaml", "config/motor_control.yaml"],
         output="screen",
         emulate_tty=True,
     )
@@ -35,6 +35,7 @@ def generate_launch_description():
         package="skimmer",
         executable="skimmer_node",
         name="skimmer_node",
+        parameters=["config/motor_control.yaml"],
         output="screen",
         emulate_tty=True,
     )

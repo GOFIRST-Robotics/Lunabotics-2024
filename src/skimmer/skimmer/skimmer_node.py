@@ -38,10 +38,18 @@ class SkimmerNode(Node):
 
         # Define timers here
         self.timer = self.create_timer(0.1, self.timer_callback)
-
-        # Define motor CAN IDs here
-        self.SKIMMER_BELT_MOTOR = 9
-        self.HEIGHT_ADJUST_MOTOR = 10
+        
+        # Define default values for our ROS parameters below #
+        self.declare_parameter("SKIMMER_BELT_MOTOR", 9)
+        self.declare_parameter("HEIGHT_ADJUST_MOTOR", 10)
+        
+        # Assign the ROS Parameters to member variables below #
+        self.SKIMMER_BELT_MOTOR = self.get_parameter("SKIMMER_BELT_MOTOR").value
+        self.HEIGHT_ADJUST_MOTOR = self.get_parameter("HEIGHT_ADJUST_MOTOR").value
+        
+        # Print the ROS Parameters to the terminal below #
+        self.get_logger().info("SKIMMER_BELT_MOTOR has been set to: " + str(self.SKIMMER_BELT_MOTOR))
+        self.get_logger().info("HEIGHT_ADJUST_MOTOR has been set to: " + str(self.HEIGHT_ADJUST_MOTOR))
 
         # Current state of the skimmer belt
         self.running = False
