@@ -43,11 +43,28 @@ cd ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/docker
 It is also worth noting that the docker buildkit doesn't respect Nvidia runtime for building which is needed for zed, so if you setup a new jetson you will need to do one of the following (https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/issues/98#issuecomment-1777711989)
 </details>
 
-If you need to rebuild the remote container image, update the x86_64 and aarch64 images, then run the following command with the devcontainer cli installed:
+If you need to rebuild the remote container image, first update the x86_64 and aarch64 images:
 ```
+cd ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/docker
+
+docker build --build-arg="BASE_IMAGE=nvcr.io/nvidia/isaac/ros:x86_64-ros2_humble_bcf535ea3b9d16a854aaeb1701ab5a86" -f Dockerfile.user -t umnrobotics/isaac_ros:x86_64.ros2_humble.user .
+docker build --build-arg="BASE_IMAGE=umnrobotics/isaac_ros:x86_64.ros2_humble.user" -f Dockerfile.umn -t umnrobotics/isaac_ros:x86_64.ros2_humble.user.umn .
+docker push umnrobotics/isaac_ros:x86_64.ros2_humble.user.umn
+
+docker build --build-arg="BASE_IMAGE=nvcr.io/nvidia/isaac/ros:aarch64-ros2_humble_b7e1ed6c02a6fa3c1c7392479291c035" -f Dockerfile.user -t umnrobotics/isaac_ros:arm64.ros2_humble.user --platform "arm64" .
+docker build --build-arg="BASE_IMAGE=umnrobotics/isaac_ros:arm64.ros2_humble.user" -f Dockerfile.umn -t umnrobotics/isaac_ros:arm64.ros2_humble.user.umn --platform "arm64" .
+docker push umnrobotics/isaac_ros:arm64.ros2_humble.user.umn
+```
+
+Then, run the following command with the devcontainer cli installed:
+```
+docker pull umnrobotics/isaac_ros:x86_64.ros2_humble.user.zed.realsense.umn
+docker pull umnrobotics/isaac_ros:arm64.ros2_humble.user.zed.realsense.umn --platform "arm64"
+
 docker manifest rm umnrobotics/isaac_ros:latest
-docker manifest create umnrobotics/isaac_ros:latest --amend umnrobotics/isaac_ros:aarch64-humble-zed --amend umnrobotics/isaac_ros:x86_64-humble-zed
+docker manifest create umnrobotics/isaac_ros:latest --amend umnrobotics/isaac_ros:arm64.ros2_humble.user.umn --amend umnrobotics/isaac_ros:x86_64.ros2_humble.user.umn
 docker manifest push umnrobotics/isaac_ros:latest
+
 docker buildx create --use
 devcontainer build --push true --workspace-folder . --platform="linux/amd64,linux/arm64" --image-name "umnrobotics/ros:isaac_ros_devcontainer"
 ```
@@ -59,17 +76,6 @@ Make sure to `source install/setup.bash` in every new terminal.
 Run `rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys "nvblox"` to install package dependencies.
 
 Run `rm -r build install log` to clean your workspace.
-
-<details>
-<summary>Sonarlint Configuration (Optional)</summary>
-<br>
-  
-To configure Sonarlint for C++ linting, run the following command:
-```
-colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-```
-Then, point Sonarlint to the `compile_commands.json` file that is created in your `build` directory.
-</details>
 
 To normalize line endings in git, use the command:
 ```

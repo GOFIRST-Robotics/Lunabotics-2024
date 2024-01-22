@@ -2,15 +2,13 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
 	"name": "Existing Dockerfile",
-	//"image": "umnrobotics/ros:isaac_ros_devcontainer",
-	//Comment out image and uncomment build to update container definition on dockerhub
 	"build": {
 		// Sets the run context to one level up instead of the .devcontainer folder.
 		// "context": "..",
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "Dockerfile"
 	},
-	// TODO fix these to somehow sync with isaac_ros
+	// TODO: fix these to somehow sync with isaac_ros
 	"runArgs": [
 		"--privileged",
 		"--env=DISPLAY=${localEnv:DISPLAY}"
@@ -20,7 +18,7 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	"initializeCommand": "git config --global --add safe.directory /workspaces/Lunabotics-2024 && git reset --soft && git submodule update --init --recursive && git config --global submodule.recurse true && git pull",
-	"postStartCommand": "sudo apt-get update && rosdep update && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys 'nvblox'",
+	"postStartCommand": "echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc && sudo apt-get update && rosdep update && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys 'nvblox'",
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
@@ -33,7 +31,6 @@
 				"ms-python.black-formatter",
 				"charliermarsh.ruff",
 				"wayou.vscode-todo-highlight",
-				"SonarSource.sonarlint-vscode",
 				"ms-azuretools.vscode-docker",
 				"nonanonno.vscode-ros2"
 			],
@@ -52,7 +49,7 @@
 					"--line-length",
 					"120"
 				],
-				"ruff.args": [
+				"ruff.lint.args": [
 					"--ignore=E501" // Ignore line too long
 				],
 				"[c++]": {
