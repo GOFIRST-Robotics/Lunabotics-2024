@@ -11,4 +11,4 @@
     FRONT_RIGHT_DRIVE: 7 # CAN ID of the front right drive motor
     FRONT_RIGHT_TURN: 8 # CAN ID of the front right turn motor
     SKIMMER_BELT_MOTOR: 9 # CAN ID of the skimmer belt motor
-    HEIGHT_ADJUST_MOTOR: 10 # CAN ID of the skimmer height adjust motor
+    SKIMMER_LIFT_MOTOR: 10 # CAN ID of the skimmer lift motor

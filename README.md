@@ -22,7 +22,7 @@ source install/setup.bash
 If your machine does not have an Nvidia GPU, build using a command like this instead: (select the packages you want)
 
 ```
-colcon build --symlink-install --packages-select rovr_control motor_control drivetrain conveyor rovr_interfaces ros2socketcan_bridge
+colcon build --symlink-install --packages-up-to rovr_control motor_control ros2socketcan_bridge
 ```
 </details>
 

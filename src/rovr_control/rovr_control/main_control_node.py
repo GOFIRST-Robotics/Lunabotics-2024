@@ -16,7 +16,7 @@ from std_msgs.msg import Bool
 
 # Import custom ROS 2 interfaces
 from rovr_interfaces.srv import SetPower, SetHeight
-from rovr_interfaces.srv import Stop, Drive, MotorCommandGet
+from rovr_interfaces.srv import Stop, Drive, MotorCommandGet, ResetOdom
 
 # Import Python Modules
 import asyncio  # Allows the use of asynchronous methods!
@@ -46,21 +46,21 @@ class MainControlNode(Node):
         self.declare_parameter("max_drive_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("max_turn_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("skimmer_belt_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
-        self.declare_parameter("skimmer_height_manual_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
+        self.declare_parameter("skimmer_lift_manual_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
 
         # Assign the ROS Parameters to member variables below #
         self.autonomous_driving_power = self.get_parameter("autonomous_driving_power").value
         self.max_drive_power = self.get_parameter("max_drive_power").value
         self.max_turn_power = self.get_parameter("max_turn_power").value
         self.skimmer_belt_power = self.get_parameter("skimmer_belt_power").value
-        self.skimmer_height_manual_power = self.get_parameter("skimmer_height_manual_power").value
+        self.skimmer_lift_manual_power = self.get_parameter("skimmer_lift_manual_power").value
 
         # Print the ROS Parameters to the terminal below #
         self.get_logger().info("autonomous_driving_power has been set to: " + str(self.autonomous_driving_power))
         self.get_logger().info("max_drive_power has been set to: " + str(self.max_drive_power))
         self.get_logger().info("max_turn_power has been set to: " + str(self.max_turn_power))
         self.get_logger().info("skimmer_belt_power has been set to: " + str(self.skimmer_belt_power))
-        self.get_logger().info("skimmer_height_manual_power has been set to: " + str(self.skimmer_height_manual_power))
+        self.get_logger().info("skimmer_lift_manual_power has been set to: " + str(self.skimmer_lift_manual_power))
 
         # Define some initial states here
         self.state = states["Teleop"]
@@ -73,6 +73,7 @@ class MainControlNode(Node):
 
         # This is a hard-coded physical constant (how far off-center the apriltag camera is)
         self.apriltag_camera_offset = 0.1905  # Measured in Meters
+        self.apriltag_timer = self.create_timer(.1, self.publish_odom_callback)
 
         # These variables store the most recent Apriltag pose
         self.apriltagX = 0.0
@@ -87,8 +88,9 @@ class MainControlNode(Node):
         self.cli_drivetrain_stop = self.create_client(Stop, "drivetrain/stop")
         self.cli_drivetrain_drive = self.create_client(Drive, "drivetrain/drive")
         self.cli_motor_get = self.create_client(MotorCommandGet, "motor/get")
-        self.cli_pulley_stop = self.create_client(Stop, "pulley/stop")
-        self.cli_pulley_set_power = self.create_client(SetPower, "pulley/setPower")
+        self.cli_lift_stop = self.create_client(Stop, "lift/stop")
+        self.cli_lift_set_power = self.create_client(SetPower, "lift/setPower")
+        self.cli_set_apriltag_odometry = self.create_client(ResetOdom, "resetOdom")
 
         # Define publishers and subscribers here
         self.drive_power_publisher = self.create_publisher(Twist, "cmd_vel", 10)
@@ -97,11 +99,21 @@ class MainControlNode(Node):
         self.apriltags_subscription = self.create_subscription(TFMessage, "tf", self.apriltags_callback, 10)
         self.skimmer_goal_subscription = self.create_subscription(Bool, "/skimmer/goal_reached", self.skimmer_goal_callback, 10)
 
+    def publish_odom_callback(self) -> None:
+        """This method publishes the odometry of the robot."""
+        future = self.cli_set_apriltag_odometry.call_async(ResetOdom.Request())
+        future.add_done_callback(self.future_odom_callback)
+
+    def future_odom_callback(self, future) -> None:
+        if future.result().success:
+            self.get_logger().info("Apriltag Odometry Published")
+            self.apriltag_timer.cancel()
+
     def stop_all_subsystems(self) -> None:
         """This method stops all subsystems on the robot."""
         self.cli_skimmer_stop.call_async(Stop.Request())  # Stop the skimmer belt
         self.cli_drivetrain_stop.call_async(Stop.Request())  # Stop the drivetrain
-        self.cli_pulley_stop.call_async(Stop.Request())  # Stop the skimmer pulley (height adjust)
+        self.cli_lift_stop.call_async(Stop.Request())  # Stop the skimmer lift
 
     def end_autonomous(self) -> None:
         """This method returns to teleop control."""
@@ -178,7 +190,7 @@ class MainControlNode(Node):
         self.apriltagZ = entry.transform.translation.z
         # Yaw Angle error to the tag's orientation (measured in radians)
         self.apriltagYaw = entry.transform.rotation.y
-        self.get_logger().debug('x:', self.apriltagX, 'z:', self.apriltagZ, 'yaw:', self.apriltagYaw)
+        self.get_logger().debug('x: ' + str(self.apriltagX) + ' z:' + str(self.apriltagZ) + ' yaw: ' + str(self.apriltagYaw))
 
     def skimmer_goal_callback(self, msg: Bool) -> None:
         """Update the member variable accordingly."""
@@ -204,13 +216,13 @@ class MainControlNode(Node):
 
             # Manually adjust the height of the skimmer with the left and right triggers
             if msg.buttons[RIGHT_TRIGGER] == 1 and buttons[RIGHT_TRIGGER] == 0:
-                self.cli_pulley_set_power.call_async(SetPower.Request(power=self.skimmer_height_manual_power))
+                self.cli_lift_set_power.call_async(SetPower.Request(power=self.skimmer_lift_manual_power))
             elif msg.buttons[RIGHT_TRIGGER] == 0 and buttons[RIGHT_TRIGGER] == 1:
-                self.cli_pulley_stop.call_async(Stop.Request())
+                self.cli_lift_stop.call_async(Stop.Request())
             elif msg.buttons[LEFT_TRIGGER] == 1 and buttons[LEFT_TRIGGER] == 0:
-                self.cli_pulley_set_power.call_async(SetPower.Request(power=-self.skimmer_height_manual_power))
+                self.cli_lift_set_power.call_async(SetPower.Request(power=-self.skimmer_lift_manual_power))
             elif msg.buttons[LEFT_TRIGGER] == 0 and buttons[LEFT_TRIGGER] == 1:
-                self.cli_pulley_stop.call_async(Stop.Request())
+                self.cli_lift_stop.call_async(Stop.Request())
 
         # THE CONTROLS BELOW ALWAYS WORK #
 

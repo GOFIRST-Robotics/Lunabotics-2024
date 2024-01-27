@@ -177,7 +177,7 @@ public:
     this->declare_parameter("FRONT_LEFT_TURN", 4);
     this->declare_parameter("BACK_RIGHT_TURN", 6);
     this->declare_parameter("FRONT_RIGHT_TURN", 8);
-    this->declare_parameter("HEIGHT_ADJUST_MOTOR", 10);
+    this->declare_parameter("SKIMMER_LIFT_MOTOR", 10);
 
     // Print the ROS Parameters to the terminal below #
     RCLCPP_INFO(this->get_logger(), "CAN_INTERFACE_TRANSMIT parameter set to: %s", this->get_parameter("CAN_INTERFACE_TRANSMIT").as_string().c_str());
@@ -186,7 +186,7 @@ public:
     RCLCPP_INFO(this->get_logger(), "FRONT_LEFT_TURN parameter set to: %ld", this->get_parameter("FRONT_LEFT_TURN").as_int());
     RCLCPP_INFO(this->get_logger(), "BACK_RIGHT_TURN parameter set to: %ld", this->get_parameter("BACK_RIGHT_TURN").as_int());
     RCLCPP_INFO(this->get_logger(), "FRONT_RIGHT_TURN parameter set to: %ld", this->get_parameter("FRONT_RIGHT_TURN").as_int());
-    RCLCPP_INFO(this->get_logger(), "HEIGHT_ADJUST_MOTOR parameter set to: %ld", this->get_parameter("HEIGHT_ADJUST_MOTOR").as_int());
+    RCLCPP_INFO(this->get_logger(), "SKIMMER_LIFT_MOTOR parameter set to: %ld", this->get_parameter("SKIMMER_LIFT_MOTOR").as_int());
 
     // Initialize services below //
     srv_motor_set = this->create_service<rovr_interfaces::srv::MotorCommandSet>(
@@ -199,7 +199,7 @@ public:
     this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
     this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
     this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
-    this->pid_controllers[this->get_parameter("HEIGHT_ADJUST_MOTOR").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
+    this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
 
     // Initialize timers below //
     timer = this->create_wall_timer(500ms, std::bind(&MotorControlNode::timer_callback, this));

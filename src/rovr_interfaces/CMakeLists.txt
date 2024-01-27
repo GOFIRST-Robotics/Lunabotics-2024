@@ -25,6 +25,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SetPower.srv"
   "srv/SetHeight.srv"
   "srv/Drive.srv"
+  "srv/ResetOdom.srv"
   "msg/AbsoluteEncoders.msg"
   "msg/LimitSwitches.msg"
 )

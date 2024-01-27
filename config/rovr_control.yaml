@@ -3,5 +3,5 @@ main_control_node:
     autonomous_driving_power: 0.25      # Measured in Duty Cycle (0.0-1.0)
     max_drive_power: 1.0                # Measured in Duty Cycle (0.0-1.0)
     max_turn_power: 1.0                 # Measured in Duty Cycle (0.0-1.0)
-    skimmer_belt_power: 0.35           # Measured in Duty Cycle (0.0-1.0)
-    skimmer_height_manual_power: 0.35  # Measured in Duty Cycle (0.0-1.0)
+    skimmer_belt_power: 0.35            # Measured in Duty Cycle (0.0-1.0)
+    skimmer_lift_manual_power: 0.35     # Measured in Duty Cycle (0.0-1.0)
