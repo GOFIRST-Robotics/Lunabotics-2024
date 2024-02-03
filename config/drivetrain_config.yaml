@@ -1,4 +1,5 @@
 drivetrain_node:
   ros__parameters:
-        WHEEL_BASE: 0.5  # HALF of the wheelbase length in meters # TODO: Change this value when we know the final measurement
-        TRACK_WIDTH: 0.5  # HALF of the trackwidth length in meters # TODO: Change this value when we know the final measurement
+        HALF_WHEEL_BASE: 0.7127  # HALF of the wheelbase in meters # TODO: Verify this on the final robot
+        HALF_TRACK_WIDTH: 0.36585  # HALF of the trackwidth in meters # TODO: Verify this on the final robot
+        STEERING_MOTOR_GEAR_RATIO: 20 # TODO: Ask mechanical what this value will be on the real robot
