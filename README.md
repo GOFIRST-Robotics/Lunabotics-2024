@@ -75,7 +75,7 @@ Make sure to `source install/setup.bash` in every new terminal.
 
 Run `rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys "nvblox"` to install package dependencies.
 
-Run `rm -r build install log` to clean your workspace.
+Run `rm -rf build install log` to clean your workspace.
 
 To normalize line endings in git, use the command:
 ```

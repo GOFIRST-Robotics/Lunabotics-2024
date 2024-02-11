@@ -1,23 +1,20 @@
 <?xml version="1.0"?>
 <!--
- TODO: get the actual measurements for the tags on the map.
- TODO: figure out the rotational orientation of the tags. 
- Coordinate system is in meters!
- (0,0) is the bottom left corner of the map, (5, 6.8) is the top right
+ THIS IS THE BOTTOM UCF FIELD 
+ Coordinate system is in meters
+ (0,0) is the bottom right corner of the map, (4.57, 8.14) is the top left.
 -->
 
 
 <root>
     <!--
 Tags in the starting zone.
-This assumes that we are placing 1 tag on each wall, each
-1 meter from the bottom left corner of the map.
-TODO: These numbers need to be updated, because they are estimates.
+This assumes that we are placing 2 tags on the wall.
 -->
     <link name="base_tag_1">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="0 1 0" rpy="0 0 90"/>
+            <origin xyz="0 3.57 0" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -30,7 +27,7 @@ TODO: These numbers need to be updated, because they are estimates.
     <link name="base_tag_2">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="1 0 0" rpy="0 0 0"/>
+            <origin xyz="0 3.3541 0" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -44,12 +41,12 @@ TODO: These numbers need to be updated, because they are estimates.
 
     <!--
 Tags in the berm area.
-TODO: These numbers need to be updated, because they are estimates.
+Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
 -->
     <link name="berm_tag_3">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="6.5 1.1 0" rpy="0 0 270"/>
+            <origin xyz="7.59 1.45 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -62,7 +59,7 @@ TODO: These numbers need to be updated, because they are estimates.
     <link name="berm_tag_4">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="4.5 1.1 0" rpy="0 0 270"/>
+            <origin xyz="6.09 1.45 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -75,7 +72,7 @@ TODO: These numbers need to be updated, because they are estimates.
     <link name="berm_tag_5">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="4.5 .2 0" rpy="0 0 270"/>
+            <origin xyz="7.59 0.55 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -88,7 +85,7 @@ TODO: These numbers need to be updated, because they are estimates.
     <link name="berm_tag_6">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="6.5 .2 0" rpy="0 0 270"/>
+            <origin xyz="6.09 0.55 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>

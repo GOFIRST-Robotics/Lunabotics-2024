@@ -18,7 +18,8 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	"initializeCommand": "git config --global --add safe.directory /workspaces/Lunabotics-2024 && git reset --soft && git submodule update --init --recursive && git config --global submodule.recurse true && git pull",
-	"postStartCommand": "echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc && sudo apt-get update && rosdep update && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys 'nvblox'",
+	"postCreateCommand": "echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc",
+	"postStartCommand": "sudo apt-get update && rosdep update && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys 'nvblox'",
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {

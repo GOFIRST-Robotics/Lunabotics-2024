@@ -1,22 +1,20 @@
 <?xml version="1.0"?>
 <!--
- TODO: get the actual measurements for the tags on the map.
- TODO: figure out the rotational orientation of the tags. 
+ THIS IS THE TOP UCF FIELD
  Coordinate system is in meters
- (0,0) is the bottom left corner of the map, (5, 6.8) is the top right
+ (0,0) is the bottom right corner of the map, (4.57, 8.14) is the top left.
 -->
 
 
 <root>
     <!--
-Tags in base area
-This assumes that we are placing 1 tag on each wall, each
-1 meter from the bottom left corner of the map
+Tags in the starting zone.
+This assumes that we are placing 2 tags on the wall.
 -->
     <link name="base_tag_1">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="0 1 0" rpy="0 0 90"/>
+            <origin xyz="0 1 0" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -29,11 +27,11 @@ This assumes that we are placing 1 tag on each wall, each
     <link name="base_tag_2">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="1 0 0" rpy="0 0 0"/>
+            <origin xyz="0 1.2159 0" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
-            <material name="red">
+            <material name="amred">
                 <color rgba="1 0 0 1"/>
             </material>
         </visual>
@@ -42,14 +40,13 @@ This assumes that we are placing 1 tag on each wall, each
 
 
     <!--
-Tags in berm area
-Numbers need to be updated, because they are estimates
-Realistically, overkill to have 4 tags. should simplify to 1 or 2
+Tags in the berm area.
+Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
 -->
     <link name="berm_tag_3">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="8.9 4.3 0" rpy="0 0 270"/>
+            <origin xyz="7.59 4.02 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -62,7 +59,7 @@ Realistically, overkill to have 4 tags. should simplify to 1 or 2
     <link name="berm_tag_4">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="8.9 4.5 0" rpy="0 0 270"/>
+            <origin xyz="6.09 4.02 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -75,7 +72,7 @@ Realistically, overkill to have 4 tags. should simplify to 1 or 2
     <link name="berm_tag_5">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="8 4.3 0" rpy="0 0 270"/>
+            <origin xyz="7.59 3.12 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -88,7 +85,7 @@ Realistically, overkill to have 4 tags. should simplify to 1 or 2
     <link name="berm_tag_6">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="8 4.5 0" rpy="0 0 270"/>
+            <origin xyz="6.09 3.12 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
