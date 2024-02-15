@@ -4,7 +4,7 @@
 # config/common_yaml
 # Common parameters to Stereolabs ZED and ZED mini cameras
 #
-# Note: the parameter svo_file is passed as exe argumet
+# Note: the parameter svo_file is passed as exe argument
 ---
 /**:
     ros__parameters:
@@ -69,7 +69,7 @@
             odometry_frame: "odom"
             area_memory_db_path: ""
             area_memory: true # Enable to detect loop closure
-            depth_min_range: 0.0 # Set this value for removing fixed zones of the robot in the FoV of the camerafrom the visual odometry evaluation
+            depth_min_range: 0.0 # Set this value for removing fixed zones of the robot in the FoV of the camera from the visual odometry evaluation
             set_as_static: false # If 'true' the camera will be static and not move in the environment
             set_gravity_as_origin: true # If 'true' align the positional tracking world to imu gravity measurement. Keep the yaw from the user initial pose.
             floor_alignment: false # Enable to automatically calculate camera/floor offset
@@ -88,7 +88,7 @@
         gnss_fusion:
             gnss_fusion_enabled: false # fuse 'sensor_msg/NavSatFix' message information into pose data
             gnss_fix_topic: "/gps/fix" # Name of the GNSS topic of type NavSatFix to subscribe [Default: "/gps/fix"]
-            gnss_init_distance: 5.0 # The minimum distance traveled by the robot required to initilize the GNSS fusion [SDK <= v4.0.5]
+            gnss_init_distance: 5.0 # The minimum distance traveled by the robot required to initialize the GNSS fusion [SDK <= v4.0.5]
             gnss_zero_altitude: false # Set to `true` to ignore GNSS altitude information
             gnss_frame: "gnss_link" # [usually overwritten by launch file] The TF frame of the GNSS sensor
             publish_utm_tf: true # Publish `utm` -> `map` TF
@@ -101,7 +101,7 @@
             target_yaw_uncertainty: 0.1 # defines the target yaw uncertainty at which the calibration process between GNSS and VIO concludes. The unit of this parameter is in radian. By default, the threshold is set at 0.1 radians.
 
         mapping:
-            mapping_enabled: false # True to enable mapping and fused point cloud pubblication
+            mapping_enabled: false # True to enable mapping and fused point cloud publication
             resolution: 0.05 # maps resolution in meters [min: 0.01f - max: 0.2f]
             max_mapping_range: 5.0 # maximum depth range while mapping in meters (-1 for automatic calculation) [2.0, 20.0]
             fused_pointcloud_freq: 1.0 # frequency of the publishing of the fused colored point cloud

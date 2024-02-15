@@ -58,8 +58,8 @@ docker push umnrobotics/isaac_ros:arm64.ros2_humble.user.umn
 
 Then, run the following command with the devcontainer cli installed:
 ```
-docker pull umnrobotics/isaac_ros:x86_64.ros2_humble.user.zed.realsense.umn
-docker pull umnrobotics/isaac_ros:arm64.ros2_humble.user.zed.realsense.umn --platform "arm64"
+docker pull umnrobotics/isaac_ros:x86_64.ros2_humble.user.umn
+docker pull umnrobotics/isaac_ros:arm64.ros2_humble.user.umn --platform "arm64"
 
 docker manifest rm umnrobotics/isaac_ros:latest
 docker manifest create umnrobotics/isaac_ros:latest --amend umnrobotics/isaac_ros:arm64.ros2_humble.user.umn --amend umnrobotics/isaac_ros:x86_64.ros2_humble.user.umn
