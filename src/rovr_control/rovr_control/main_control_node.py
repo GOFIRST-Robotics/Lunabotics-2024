@@ -207,7 +207,7 @@ class MainControlNode(Node):
             horizontal_power = msg.axes[RIGHT_JOYSTICK_HORIZONTAL_AXIS] * self.max_drive_power  # Horizontal power
             turn_power = msg.axes[LEFT_JOYSTICK_HORIZONTAL_AXIS] * self.max_turn_power  # Turning power
             self.drive_power_publisher.publish(
-                Twist(linear=Vector3(x=horizontal_power, y=forward_power), angular=Vector3(z=turn_power))
+                Twist(linear=Vector3(x=forward_power, y=horizontal_power), angular=Vector3(z=turn_power))
             )
 
             # Check if the skimmer button is pressed #

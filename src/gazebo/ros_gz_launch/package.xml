@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>ros_gz_launch</name>
+  <version>0.0.0</version>
+  <description>Contains launch files for the gazebo simulation</description>
+  <maintainer email="mars2140@umn.edu">Peter Marshall</maintainer>
+  <license>Apache 2.0</license>
+  <author>Michael Carroll</author>
+  <author>Dharini Dutia</author>
+  <author>Peter Marshall</author>
+
+  <depend>ros_gz</depend>
+  <depend>sdformat_urdf</depend>
+  <depend>joint_state_publisher_gui</depend>
+  <depend>ros_gz_description</depend>
+  <depend>gazebo_files</depend>
+
+  <exec_depend>drivetrain</exec_depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
