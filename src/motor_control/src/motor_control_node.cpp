@@ -29,6 +29,23 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+// Calculates the modulus of an input value within a given range.
+// If the input is above the maximum input, it wraps around to the minimum input.
+// If the input is below the minimum input, it wraps around to the maximum input.
+double inputModulus(double input, double minimumInput, double maximumInput) {
+  double modulus = maximumInput - minimumInput;
+
+  // Wrap input if it's above the maximum input
+  int numMax = (int) ((input - minimumInput) / modulus);
+  input -= numMax * modulus;
+
+  // Wrap input if it's below the minimum input
+  int numMin = (int) ((input - maximumInput) / modulus);
+  input -= numMin * modulus;
+
+  return input;
+}
+
 // Define a struct to store motor data
 struct MotorData {
   float dutyCycle;
@@ -39,11 +56,14 @@ struct MotorData {
 
 class PIDController {
 private:
-  const int DEAD_BAND = 1;
-  int COUNTS_PER_REVOLUTION; // Steps for one 360 degree rotation
+  int DEAD_BAND = 1;
+  int COUNTS_PER_REVOLUTION; // How many encoder counts for one 360 degree rotation
+
+  bool continuous; // Does the input range wrap around (e.g. absolute encoder)
+  int minimumTachInput, maximumTachInput; // For continuous input, what is the range?
 
   float kp, ki, kd;
-  float gravComp;
+  float gravComp; // Gravity compensation constant (if needed)
 
   int32_t targTach, totalError;
 
@@ -59,6 +79,7 @@ public:
     this->ki = ki;
     this->kd = kd;
     this->gravComp = gravComp;
+    this->continuous = false;
 
     this->totalError = 0;
     this->isActive = false;
@@ -66,8 +87,19 @@ public:
   }
 
   float update(int32_t currTach) {
-    float currError = (this->targTach - currTach); // Whats the error
-    if (abs(currError) <= DEAD_BAND) { return 0; } // If the error is inside the band, return 0
+    // Calculate the current error
+    float currError;
+    if (this->continuous) {
+      double errorBound = (this->maximumTachInput - this->minimumTachInput) / 2.0;
+      currError = inputModulus(this->targTach - currTach, -errorBound, errorBound);
+    } else {
+      currError = (this->targTach - currTach);
+    }
+
+    // If the error is within the dead band, return early
+    if (abs(currError) <= DEAD_BAND) {
+      return 0;
+    }
   
     this->totalError += currError;
   
@@ -92,6 +124,19 @@ public:
 
   int getCountsPerRevolution() {
     return this->COUNTS_PER_REVOLUTION;
+  }
+
+  // Methods for continuous input
+  void enableContinuousInput(int minDegrees, int maxDegrees) {
+    this->continuous = true;
+    this->minimumTachInput = static_cast<int32_t>((minDegrees / 360.0) * this->COUNTS_PER_REVOLUTION);
+    this->maximumTachInput = static_cast<int32_t>((maxDegrees / 360.0) * this->COUNTS_PER_REVOLUTION);
+  }
+  void disableContinuousInput() {
+    this->continuous = false;
+  }
+  bool isContinuousInputEnabled() {
+    return this->continuous;
   }
 };
 
@@ -201,6 +246,12 @@ public:
     this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
     this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
 
+    // Enable continuous input for the swerve module PID controllers
+    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()]->enableContinuousInput(0, 360);
+    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()]->enableContinuousInput(0, 360);
+    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()]->enableContinuousInput(0, 360);
+    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()]->enableContinuousInput(0, 360);
+
     // Initialize timers below //
     timer = this->create_wall_timer(500ms, std::bind(&MotorControlNode::timer_callback, this));
 
@@ -247,7 +298,7 @@ private:
       tachometer = static_cast<int32_t>((can_msg->data[0] << 24) + (can_msg->data[1] << 16) + (can_msg->data[2] << 8) + can_msg->data[3]);
 
       // Runs the PID controller for this motor if its active
-      if (this->pid_controllers[motorId]->isActive) {
+      if (this->pid_controllers[motorId] && this->pid_controllers[motorId]->isActive) {
         float PIDResult = this->pid_controllers[motorId]->update(tachometer);
 
         int32_t data = PIDResult * 100000; // Convert from percent power to a signed 32-bit integer

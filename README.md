@@ -78,7 +78,7 @@ devcontainer build --push true --workspace-folder . --platform="linux/amd64,linu
 
 Make sure to `source install/setup.bash` in every new terminal.
 
-Run `rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys "nvblox"` to install package dependencies.
+Run `rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys "nvblox negotiated"` to install package dependencies.
 
 Run `rm -rf build install log` to clean your workspace.
 
