@@ -110,7 +110,7 @@ To run the Gazebo simulation:
 ```
 colcon build --symlink-install --packages-up-to ros_gz_launch
 source install/setup.bash
-ros2 launch ros_gz_launch master_ASM.launch.py
+ros2 launch ros_gz_launch competition_field.launch.py
 ```
 
 Then to control the robot, you will need to run:
@@ -229,6 +229,10 @@ gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, encoding-name=H264, payload
 
 (Change the /dev/video device to add more webcams, and the port number to stream multiple webcams at once)
 </details>
+
+## Set static serial ports on the Jetson
+
+Follow [these](https://msadowski.github.io/linux-static-port/) instructions.
 
 ## Jetson External HDD Commands
 
