@@ -476,8 +476,8 @@
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>swerve1_joint</joint_name>
         <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>10</cmd_max>
-        <cmd_min>-10</cmd_min>
+        <cmd_max>15</cmd_max>
+        <cmd_min>-15</cmd_min>
       </plugin>
       </gazebo>
 
@@ -487,8 +487,8 @@
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>swerve2_joint</joint_name>
         <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>10</cmd_max>
-        <cmd_min>-10</cmd_min>
+        <cmd_max>15</cmd_max>
+        <cmd_min>-15</cmd_min>
       </plugin>
       </gazebo>
 
@@ -498,8 +498,8 @@
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>swerve3_joint</joint_name>
         <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>10</cmd_max>
-        <cmd_min>-10</cmd_min>
+        <cmd_max>15</cmd_max>
+        <cmd_min>-15</cmd_min>
       </plugin>
       </gazebo>
 
@@ -509,8 +509,8 @@
         name="ignition::gazebo::systems::JointPositionController">
         <joint_name>swerve4_joint</joint_name>
         <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>10</cmd_max>
-        <cmd_min>-10</cmd_min>
+        <cmd_max>15</cmd_max>
+        <cmd_min>-15</cmd_min>
       </plugin>
       </gazebo>      
 
