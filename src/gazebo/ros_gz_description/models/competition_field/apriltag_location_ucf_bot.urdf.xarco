@@ -1,56 +1,32 @@
-<?xml version="1.0" ?>
-<sdf version='1.7'>
-  <model name='competition_field'>
-    <static>true</static>
-    <pose>0 0 0 0 0 0</pose>
-      <link name='field'>
-        <collision name="collision">
-          <geometry>
-            <mesh>
-              <uri>meshes/basic_collision.stl</uri>
-              <!-- <scale>0.1 0.1 0.1</scale> -->
-            </mesh>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <mesh>
-              <!-- <uri>meshes/basic_collision.stl</uri> -->
-              <uri>meshes/competition_field.dae</uri>
-              <!-- <scale>0.1 0.1 0.1</scale> -->
-            </mesh>
-          </geometry>
-        </visual>
-      </link>
+<?xml version="1.0"?>
+<!--
+ THIS IS THE BOTTOM UCF FIELD 
+ Coordinate system is in meters
+ (0,0) is the bottom right corner of the map, (4.57, 8.14) is the top left.
+-->
 
-      <!-- orintation like rule book, bottom field plus x, plus y from bottom left-->
-      <!--
+
+<root>
+    <!--
 Tags in the starting zone.
 This assumes that we are placing 2 tags on the wall.
 -->
-      <!-- <link name="base_tag_1">
-        <parent link="field"/> -->
-        <include>
-          <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000</uri>
-          <pose>0 3.57 0.4 0 1.57 0</pose>
-        </include>
-        
-        <!-- <visual name="visual1">
-            <pose>0 3.57 0 0 0 180</pose>
+    <link name="base_tag_1">
+        <parent link="base_link"/>
+        <visual>
+            <origin xyz="0 3.57 0" rpy="0 0 180"/>
             <geometry>
-              <box>
-                <size>0.1 0.1 0.1</size>
-              </box>
+                <box size="0.1 0.1 0.1"/>
             </geometry>
-            <material>
+            <material name="blue">
                 <color rgba="0 0 1 1"/>
             </material>
-        </visual> -->
-    <!-- </link> -->
+        </visual>
+    </link>
 
-    <!-- <link name="base_tag_2">
-        <parent link="field"/>
-        <visual name="visual2">
+    <link name="base_tag_2">
+        <parent link="base_link"/>
+        <visual>
             <origin xyz="0 3.3541 0" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
@@ -59,7 +35,7 @@ This assumes that we are placing 2 tags on the wall.
                 <color rgba="1 0 0 1"/>
             </material>
         </visual>
-    </link> -->
+    </link>
 
 
 
@@ -67,9 +43,9 @@ This assumes that we are placing 2 tags on the wall.
 Tags in the berm area.
 Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
 -->
-    <!-- <link name="berm_tag_3">
-        <parent link="field"/>
-        <visual name="visual3">
+    <link name="berm_tag_3">
+        <parent link="base_link"/>
+        <visual>
             <origin xyz="7.59 1.45 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
@@ -81,8 +57,8 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     </link>
 
     <link name="berm_tag_4">
-        <parent link="field"/>
-        <visual name="visual4">
+        <parent link="base_link"/>
+        <visual>
             <origin xyz="6.09 1.45 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
@@ -94,8 +70,8 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     </link>
 
     <link name="berm_tag_5">
-        <parent link="field"/>
-        <visual name="visual5">
+        <parent link="base_link"/>
+        <visual>
             <origin xyz="7.59 0.55 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
@@ -107,8 +83,8 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     </link>
 
     <link name="berm_tag_6">
-        <parent link="field"/>
-        <visual name="visual6">
+        <parent link="base_link"/>
+        <visual>
             <origin xyz="6.09 0.55 0" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
@@ -117,7 +93,5 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
                 <color rgba="1 1 1 1"/>
             </material>
         </visual>
-    </link> -->
-
-  </model>
-</sdf>
+    </link>
+</root>

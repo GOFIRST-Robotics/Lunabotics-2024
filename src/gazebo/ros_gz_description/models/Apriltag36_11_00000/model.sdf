@@ -9,10 +9,10 @@
           <size>0.17 0.17 0.01</size>
           </box>
         </geometry>
-           <material>
+        <material>
           <script>
-            <uri>model://Apriltag36_11_00000/materials/scripts</uri>
-            <uri>model://Apriltag36_11_00000/materials/textures</uri>
+            <!-- <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000/materials/scripts</uri> -->
+            <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000/materials/textures</uri>
             <name>Apriltag36_11_00000</name>
           </script>
         </material>
