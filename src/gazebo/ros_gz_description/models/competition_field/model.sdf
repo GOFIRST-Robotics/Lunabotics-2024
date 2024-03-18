@@ -8,116 +8,55 @@
           <geometry>
             <mesh>
               <uri>meshes/basic_collision.stl</uri>
-              <!-- <scale>0.1 0.1 0.1</scale> -->
             </mesh>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <mesh>
-              <!-- <uri>meshes/basic_collision.stl</uri> -->
               <uri>meshes/competition_field.dae</uri>
-              <!-- <scale>0.1 0.1 0.1</scale> -->
             </mesh>
           </geometry>
         </visual>
       </link>
 
-      <!-- orintation like rule book, bottom field plus x, plus y from bottom left-->
+      <!-- orintation like rule book, bottom field. plus x, plus y from bottom left-->
       <!--
-Tags in the starting zone.
-This assumes that we are placing 2 tags on the wall.
--->
-      <!-- <link name="base_tag_1">
-        <parent link="field"/> -->
-        <include>
-          <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000</uri>
-          <pose>0 3.57 0.4 0 1.57 0</pose>
-        </include>
-        
-        <!-- <visual name="visual1">
-            <pose>0 3.57 0 0 0 180</pose>
-            <geometry>
-              <box>
-                <size>0.1 0.1 0.1</size>
-              </box>
-            </geometry>
-            <material>
-                <color rgba="0 0 1 1"/>
-            </material>
-        </visual> -->
-    <!-- </link> -->
+      Tags in the starting zone.
+      This assumes that we are placing 2 tags on the wall.
+      -->
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000</uri>
+        <pose>0 3.57 0.4 1.57 0 -1.57</pose>
+      </include>
 
-    <!-- <link name="base_tag_2">
-        <parent link="field"/>
-        <visual name="visual2">
-            <origin xyz="0 3.3541 0" rpy="0 0 180"/>
-            <geometry>
-                <box size="0.1 0.1 0.1"/>
-            </geometry>
-            <material name="red">
-                <color rgba="1 0 0 1"/>
-            </material>
-        </visual>
-    </link> -->
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
+        <pose>0 3.3541 0.4 1.57 0 -1.57</pose>
+      </include>
 
+      <!--
+      Tags in the berm area.
+      Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
+      -->
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
+        <pose>7.59 1.45 0.4 1.57 0 -1.57</pose>
+      </include>
+      
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00003</uri>
+        <pose>6.09 1.45 0.4 1.57 0 -1.57</pose>
+      </include>
 
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00004</uri>
+        <pose>7.59 0.55 0.4 1.57 0 -1.57</pose>
+      </include>
 
-    <!--
-Tags in the berm area.
-Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
--->
-    <!-- <link name="berm_tag_3">
-        <parent link="field"/>
-        <visual name="visual3">
-            <origin xyz="7.59 1.45 0" rpy="0 0 0"/>
-            <geometry>
-                <box size="0.1 0.1 0.1"/>
-            </geometry>
-            <material name="green">
-                <color rgba="0 1 0 1"/>
-            </material>
-        </visual>
-    </link>
-
-    <link name="berm_tag_4">
-        <parent link="field"/>
-        <visual name="visual4">
-            <origin xyz="6.09 1.45 0" rpy="0 0 0"/>
-            <geometry>
-                <box size="0.1 0.1 0.1"/>
-            </geometry>
-            <material name="yellow">
-                <color rgba="1 1 0 1"/>
-            </material>
-        </visual>
-    </link>
-
-    <link name="berm_tag_5">
-        <parent link="field"/>
-        <visual name="visual5">
-            <origin xyz="7.59 0.55 0" rpy="0 0 0"/>
-            <geometry>
-                <box size="0.1 0.1 0.1"/>
-            </geometry>
-            <material name="purple">
-                <color rgba="1 0 1 1"/>
-            </material>
-        </visual>
-    </link>
-
-    <link name="berm_tag_6">
-        <parent link="field"/>
-        <visual name="visual6">
-            <origin xyz="6.09 0.55 0" rpy="0 0 0"/>
-            <geometry>
-                <box size="0.1 0.1 0.1"/>
-            </geometry>
-            <material name="white">
-                <color rgba="1 1 1 1"/>
-            </material>
-        </visual>
-    </link> -->
-
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00005</uri>
+        <pose>6.09 0.55 0.4 1.57 0 -1.57</pose>
+      </include>            
   </model>
 </sdf>

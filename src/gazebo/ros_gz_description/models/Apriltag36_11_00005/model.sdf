@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='Apriltag36_11_00001'>
+  <model name='Apriltag36_11_00005'>
     <link name='main'>
     <pose frame=''>0 0 0 0 0 0</pose>
       <visual name='main_Visual'>
