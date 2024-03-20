@@ -72,13 +72,13 @@
   gz_type_name: "ignition.msgs.Double"
   direction: ROS_TO_GZ
 
-# - ros_topic_name: "/camera"
-#   gz_topic_name: "/model/Master_ASM/base_link/camera"
+# - ros_topic_name: "/Master_ASM/base_link/camera"
+#   gz_topic_name: "/camera"
 #   ros_type_name: "sensor_msgs/msg/Image"
 #   gz_type_name: "ignition.msgs.Image"
 #   direction: BIDIRECTIONAL
-# - ros_topic_name: "/camera_info"
-#   gz_topic_name: "/model/Master_ASM/base_link/camera_info"
+# - ros_topic_name: "/Master_ASM/base_link/camera_info"
+#   gz_topic_name: "/camera_info"
 #   ros_type_name: "sensor_msgs/msg/CameraInfo"
 #   gz_type_name: "ignition.msgs.CameraInfo"
 #   direction: BIDIRECTIONAL
