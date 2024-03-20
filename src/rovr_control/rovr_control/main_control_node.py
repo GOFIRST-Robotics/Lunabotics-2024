@@ -9,7 +9,7 @@ from rclpy.node import Node
 from rclpy.executors import SingleThreadedExecutor  # This is needed to run multiple callbacks in a single thread
 
 # Import ROS 2 formatted message types
-from geometry_msgs.msg import Twist, Vector3, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist, Vector3
 from sensor_msgs.msg import Joy
 from tf2_msgs.msg import TFMessage
 from std_msgs.msg import Bool
@@ -71,14 +71,8 @@ class MainControlNode(Node):
         self.autonomous_offload_process = None
         self.skimmer_goal_reached = True
 
-        # This is a hard-coded physical constant (how far off-center the apriltag camera is)
-        self.apriltag_camera_offset = 0.1905  # Measured in Meters
-        self.apriltag_timer = self.create_timer(.1, self.publish_odom_callback)
-
-        # These variables store the most recent Apriltag pose
-        self.apriltagX = 0.0
-        self.apriltagZ = 0.0
-        self.apriltagYaw = 0.0
+        # Define timers here
+        self.apriltag_timer = self.create_timer(0.1, self.publish_odom_callback)
 
         # Define service clients here
         self.cli_skimmer_toggle = self.create_client(SetPower, "skimmer/toggle")
@@ -94,9 +88,7 @@ class MainControlNode(Node):
 
         # Define publishers and subscribers here
         self.drive_power_publisher = self.create_publisher(Twist, "cmd_vel", 10)
-        self.apriltag_pose_publisher = self.create_publisher(PoseWithCovarianceStamped, "apriltag_pose", 10)
         self.joy_subscription = self.create_subscription(Joy, "joy", self.joystick_callback, 10)
-        self.apriltags_subscription = self.create_subscription(TFMessage, "tf", self.apriltags_callback, 10)
         self.skimmer_goal_subscription = self.create_subscription(Bool, "/skimmer/goal_reached", self.skimmer_goal_callback, 10)
 
     def publish_odom_callback(self) -> None:
@@ -156,41 +148,13 @@ class MainControlNode(Node):
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             self.get_logger().info("Commence Offloading!")
             await self.cli_skimmer_setPower.call_async(SetPower.Request(power=self.skimmer_belt_power))
-            await asyncio.sleep(10)  # How long to offload for
+            await asyncio.sleep(10)  # How long to offload for # TODO: Use the RealSense check_load node instead?
             await self.cli_skimmer_stop.call_async(Stop.Request())  # Stop the skimmer belt
             self.get_logger().info("Autonomous Offload Procedure Complete!\n")
             self.end_autonomous()  # Return to Teleop mode
         except asyncio.CancelledError:  # Put termination code here
             self.get_logger().info("Autonomous Offload Procedure Terminated\n")
             self.end_autonomous()  # Return to Teleop mode
-
-    def apriltags_callback(self, msg: TFMessage) -> None:
-        """Process the Apriltag detections."""
-        array = msg.transforms
-        entry = array.pop()
-
-        # Create a PoseWithCovarianceStamped object from the Apriltag detection
-        pose_object = PoseWithCovarianceStamped()
-        pose_object.header = entry.header
-        pose_object.pose.pose.position.x = entry.transform.translation.x + self.apriltag_camera_offset
-        pose_object.pose.pose.position.y = entry.transform.translation.y
-        pose_object.pose.pose.position.z = entry.transform.translation.z
-        pose_object.pose.pose.orientation.x = entry.transform.rotation.x
-        pose_object.pose.pose.orientation.y = entry.transform.rotation.y
-        pose_object.pose.pose.orientation.z = entry.transform.rotation.z
-        pose_object.pose.pose.orientation.w = entry.transform.rotation.w
-        pose_object.pose.covariance = [0.0] * 36
-        self.apriltag_pose_publisher.publish(pose_object)
-
-        ## Set the value of these variables used for docking with an Apriltag ##
-
-        # Left-Right Distance to the tag (measured in meters)
-        self.apriltagX = entry.transform.translation.x + self.apriltag_camera_offset
-        # Forward-Backward Distance to the tag (measured in meters)
-        self.apriltagZ = entry.transform.translation.z
-        # Yaw Angle error to the tag's orientation (measured in radians)
-        self.apriltagYaw = entry.transform.rotation.y
-        self.get_logger().debug('x: ' + str(self.apriltagX) + ' z:' + str(self.apriltagZ) + ' yaw: ' + str(self.apriltagYaw))
 
     def skimmer_goal_callback(self, msg: Bool) -> None:
         """Update the member variable accordingly."""
@@ -290,7 +254,7 @@ def main(args=None) -> None:
     node = MainControlNode()  # Instantiate the node
     executor = SingleThreadedExecutor()  # Create an executor
     executor.add_node(node)  # Add the node to the executor
-    
+
     node.get_logger().info("Hello from the rovr_control package!")
 
     loop = asyncio.get_event_loop()  # Get the event loop
