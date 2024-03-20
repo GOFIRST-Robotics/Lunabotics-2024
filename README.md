@@ -32,12 +32,12 @@ colcon build --symlink-install --packages-up-to rovr_control motor_control ros2s
 1a.) First, do the following before running run_dev.sh:
 
 ```
-printf "CONFIG_IMAGE_KEY=ros2_humble.user.zed.zed_modules.realsense.umn \n" > ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/scripts/.isaac_ros_common-config
+printf "CONFIG_IMAGE_KEY=ros2_humble.user.realsense.zed.zed_modules.umn \n" > ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/scripts/.isaac_ros_common-config 
 ``` 
-1b.) Optionally, to use Gazebo in the ISAAC ROS container, do this instead:
+1b.) To use Gazebo in the ISAAC ROS container, do this instead:
 
 ```
-printf "CONFIG_IMAGE_KEY=ros2_humble.user.zed.zed_modules.realsense.gazebo.umn  \n" > ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/scripts/.isaac_ros_common-config
+printf "CONFIG_IMAGE_KEY=ros2_humble.user.realsense.gazebo.zed.zed_modules.umn \n" > ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/scripts/.isaac_ros_common-config 
 ``` 
 2.) Then run this command:
 
