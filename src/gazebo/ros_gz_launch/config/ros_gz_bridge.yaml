@@ -1,9 +1,4 @@
 ---
-# - ros_topic_name: "/cmd_vel"
-#   gz_topic_name: "/model/vehicle_blue/cmd_vel"
-#   ros_type_name: "geometry_msgs/msg/Twist"
-#   gz_type_name: "gz.msgs.Twist"
-#   direction: ROS_TO_GZ
 - ros_topic_name: "/clock"
   gz_topic_name: "/clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
@@ -76,3 +71,23 @@
   ros_type_name: "std_msgs/msg/Float64"
   gz_type_name: "ignition.msgs.Double"
   direction: ROS_TO_GZ
+
+# - ros_topic_name: "/camera"
+#   gz_topic_name: "/model/Master_ASM/base_link/camera"
+#   ros_type_name: "sensor_msgs/msg/Image"
+#   gz_type_name: "ignition.msgs.Image"
+#   direction: BIDIRECTIONAL
+# - ros_topic_name: "/camera_info"
+#   gz_topic_name: "/model/Master_ASM/base_link/camera_info"
+#   ros_type_name: "sensor_msgs/msg/CameraInfo"
+#   gz_type_name: "ignition.msgs.CameraInfo"
+#   direction: BIDIRECTIONAL
+
+- topic_name: "/camera"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "ignition.msgs.Image"
+  direction: BIDIRECTIONAL
+- topic_name: "/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "ignition.msgs.CameraInfo"
+  direction: BIDIRECTIONAL

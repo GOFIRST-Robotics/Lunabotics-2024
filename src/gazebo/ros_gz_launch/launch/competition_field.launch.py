@@ -36,9 +36,9 @@ def generate_launch_description():
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
 
     # Load the SDF file from "description" package
-    # sdf_file  =  os.path.join(pkg_project_description, 'models', 'mecanum_drive', 'model.sdf')
-    # with open(sdf_file, 'r') as infp:
-    #     robot_desc = infp.read()
+    urdf_file  =  os.path.join(pkg_project_description, 'models', 'master_ASM', 'urdf', 'master_ASM.urdf')
+    with open(urdf_file, 'r') as infp:
+        robot_desc = infp.read()
 
     # Setup to launch the simulator and Gazebo world
     gz_sim = IncludeLaunchDescription(
@@ -52,24 +52,24 @@ def generate_launch_description():
     )
 
     # Takes the description and joint angles as inputs and publishes the 3D poses of the robot links
-    # robot_state_publisher = Node(
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     name='robot_state_publisher',
-    #     output='both',
-    #     parameters=[
-    #         {'use_sim_time': True},
-    #         {'robot_description': robot_desc},
-    #     ]
-    # )
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='both',
+        parameters=[
+            {'use_sim_time': True},
+            {'robot_description': robot_desc},
+        ]
+    )
 
     # Visualize in RViz
-    # rviz = Node(
-    #    package='rviz2',
-    #    executable='rviz2',
-    #    arguments=['-d', os.path.join(pkg_project_bringup, 'config', 'mecanum_drive.rviz')],
-    #    condition=IfCondition(LaunchConfiguration('rviz'))
-    # )
+    rviz = Node(
+       package='rviz2',
+       executable='rviz2',
+       arguments= ['-d', os.path.join(pkg_project_bringup, 'config', 'camera.rviz')],
+       condition=IfCondition(LaunchConfiguration('rviz'))
+    )
 
     # Bridge ROS topics and Gazebo messages for establishing communication
     bridge = Node(
@@ -94,9 +94,9 @@ def generate_launch_description():
 
     return LaunchDescription([
         gz_sim,
-        # DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),
+        DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),
         bridge,
-        drivetrain
-        # robot_state_publisher,
-        # rviz
+        drivetrain,
+        robot_state_publisher,
+        rviz
     ])

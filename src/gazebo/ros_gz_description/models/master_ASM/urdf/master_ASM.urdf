@@ -44,6 +44,44 @@
     </collision>
   </link>
 
+  <!-- <link name="camera_link">
+    <visual>
+      <origin
+        xyz="0 0 0.5"
+        rpy="1.57 0 1.57" />
+      <geometry>
+        <box size="0.1 0.1 0.1" />
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="camera_link"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint> -->
+
+  <gazebo reference="base_link"> <!-- camera_link -->
+    <sensor name="camera" type="camera">
+      <pose>0 0 0 0 0 0</pose>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>320</width>
+          <height>240</height>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+      </camera>
+      <always_on>1</always_on>
+      <update_rate>15</update_rate>
+      <visualize>true</visualize>
+      <topic>camera</topic>
+    </sensor>
+  </gazebo>
+
 
   <link
     name="swerve1_Link">
@@ -432,39 +470,33 @@
 
   <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-controller-system"
-        name="ignition::gazebo::systems::JointController">
-        <joint_name>wheel1_joint</joint_name>
-        <initial_velocity>0.0</initial_velocity>
-      </plugin>
-      </gazebo>
+    filename="ignition-gazebo-joint-controller-system"
+    name="ignition::gazebo::systems::JointController">
+    <joint_name>wheel1_joint</joint_name>
+    <initial_velocity>0.0</initial_velocity>
+  </plugin>
 
-  <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-controller-system"
-        name="ignition::gazebo::systems::JointController">
-        <joint_name>wheel2_joint</joint_name>
-        <initial_velocity>0.0</initial_velocity>
-      </plugin>
-      </gazebo>
+    filename="ignition-gazebo-joint-controller-system"
+    name="ignition::gazebo::systems::JointController">
+    <joint_name>wheel2_joint</joint_name>
+    <initial_velocity>0.0</initial_velocity>
+  </plugin>
 
-  <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-controller-system"
-        name="ignition::gazebo::systems::JointController">
-        <joint_name>wheel3_joint</joint_name>
-        <initial_velocity>0.0</initial_velocity>
-      </plugin>
-      </gazebo>
+    filename="ignition-gazebo-joint-controller-system"
+    name="ignition::gazebo::systems::JointController">
+    <joint_name>wheel3_joint</joint_name>
+    <initial_velocity>0.0</initial_velocity>
+  </plugin>
 
-  <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-controller-system"
-        name="ignition::gazebo::systems::JointController">
-        <joint_name>wheel4_joint</joint_name>
-        <initial_velocity>0.0</initial_velocity>
-      </plugin>
-      </gazebo>
+    filename="ignition-gazebo-joint-controller-system"
+    name="ignition::gazebo::systems::JointController">
+    <joint_name>wheel4_joint</joint_name>
+    <initial_velocity>0.0</initial_velocity>
+  </plugin>
+  </gazebo>
 
   <!-- model/Master_ASM/joint/{jointName}/cmd_vel -->
   <!--  ignition::msgs::Double -->
@@ -472,46 +504,40 @@
 
   <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>swerve1_joint</joint_name>
-        <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>15</cmd_max>
-        <cmd_min>-15</cmd_min>
-      </plugin>
-      </gazebo>
+    filename="ignition-gazebo-joint-position-controller-system"
+    name="ignition::gazebo::systems::JointPositionController">
+    <joint_name>swerve1_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <cmd_max>15</cmd_max>
+    <cmd_min>-15</cmd_min>
+  </plugin>
 
-  <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>swerve2_joint</joint_name>
-        <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>15</cmd_max>
-        <cmd_min>-15</cmd_min>
-      </plugin>
-      </gazebo>
+    filename="ignition-gazebo-joint-position-controller-system"
+    name="ignition::gazebo::systems::JointPositionController">
+    <joint_name>swerve2_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <cmd_max>15</cmd_max>
+    <cmd_min>-15</cmd_min>
+  </plugin>
 
-  <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>swerve3_joint</joint_name>
-        <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>15</cmd_max>
-        <cmd_min>-15</cmd_min>
-      </plugin>
-      </gazebo>
+    filename="ignition-gazebo-joint-position-controller-system"
+    name="ignition::gazebo::systems::JointPositionController">
+    <joint_name>swerve3_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <cmd_max>15</cmd_max>
+    <cmd_min>-15</cmd_min>
+  </plugin>
 
-  <gazebo>
   <plugin
-        filename="ignition-gazebo-joint-position-controller-system"
-        name="ignition::gazebo::systems::JointPositionController">
-        <joint_name>swerve4_joint</joint_name>
-        <use_velocity_commands>true</use_velocity_commands>
-        <cmd_max>15</cmd_max>
-        <cmd_min>-15</cmd_min>
-      </plugin>
-      </gazebo>      
+    filename="ignition-gazebo-joint-position-controller-system"
+    name="ignition::gazebo::systems::JointPositionController">
+    <joint_name>swerve4_joint</joint_name>
+    <use_velocity_commands>true</use_velocity_commands>
+    <cmd_max>15</cmd_max>
+    <cmd_min>-15</cmd_min>
+  </plugin>
+  </gazebo>
 
 </robot>
