@@ -91,3 +91,17 @@
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "ignition.msgs.CameraInfo"
   direction: BIDIRECTIONAL
+
+# - topic_name: "/depth"
+#   ros_type_name: "sensor_msgs/msg/Image"
+#   gz_type_name: "ignition.msgs.Image"
+#   direction: BIDIRECTIONAL
+# - topic_name: "/depth_info"
+#   ros_type_name: "sensor_msgs/msg/Image"
+#   gz_type_name: "ignition.msgs.Image"
+#   direction: BIDIRECTIONAL
+
+- topic_name: "/depth/points"
+  ros_type_name: "sensor_msgs/msg/PointCloud2"
+  gz_type_name: "ignition.msgs.PointCloudPacked"
+  direction: BIDIRECTIONAL
