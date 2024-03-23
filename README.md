@@ -210,7 +210,7 @@ Start Gstreamer AV1 Decoding (On Ubuntu Laptop w/ Docker runtime need nvcr login
 
 ```
 xhost +
-docker run -it --rm --net=host --gpus all -e DISPLAY=$DISPLAY --device /dev/snd -v /tmp/.X11-unix/:/tmp/.X11-unix nvcr.io/nvidia/deepstream:6.3-triton-multiarch 
+docker run -it --rm --net=host --gpus all -e DISPLAY=$DISPLAY --device /dev/snd -v /tmp/.X11-unix/:/tmp/.X11-unix -v $(pwd):/opt/nvidia/deepstream/deepstream-6.4/workspace nvcr.io/nvidia/deepstream:6.4-triton-multiarch 
 gst-launch-1.0 udpsrc port=5000 ! "video/x-av1,width=640,height=480,framerate=15/1" ! queue ! nvv4l2decoder ! nveglglessink
 ```
 
@@ -219,8 +219,8 @@ Start Gstreamer H.264 Encoding (On Nvidia Jetson Orin Nano):
 ```
 gst-launch-1.0 v4l2src device=/dev/video0 ! "video/x-raw,width=640,height=480,framerate=15/1" ! nvvidconv ! "video/x-raw,format=I420" ! x264enc bitrate=300 tune=zerolatency speed-preset=ultrafast ! "video/x-h264,stream-format=byte-stream" ! h264parse ! rtph264pay ! udpsink host=127.0.0.1 port=5000
 ```
-
 Start Gstreamer H.264 Decoding (On Nvidia Jetson Orin Nano): 
+gst-launch-1.0 v4l2src device=/dev/video0 ! nvvideoconvert ! nvv4l2h265enc ! h265parse !  queue ! h265parse ! nvv4l2decoder ! nveglglessink
 
 ```
 gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp,payload=96" ! rtph264depay ! h264parse ! avdec_h264 ! nvvidconv ! xvimagesink
@@ -232,6 +232,10 @@ Start Gstreamer H.264 Decoding (On Ubuntu Laptop):
 gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, encoding-name=H264, payload=96 ! rtph264depay ! h264parse ! nvh264dec ! videoflip method=vertical-flip ! xvimagesink sync=false
 ```
 
+```
+gst-launch-1.0 videotestsrc ! 'video/x-raw, width=(int)1920, height=(int)1080, format=(string)NV12, framerate=(fraction)30/1' ! \
+nvvideoconvert ! nvv4l2h265enc ! h265parse ! queue ! h265parse ! nvv4l2decoder ! nveglglessink
+```
 (Change the /dev/video device to add more webcams, and the port number to stream multiple webcams at once)
 </details>
 
@@ -246,4 +250,14 @@ sudo service docker stop
 sudo mv /var/lib/docker /hd/docker
 sudo ln -s /hd/docker /var/lib/docker # Create a symbolic link
 sudo service docker start
-```
+``` 
+
+xhost +
+docker run -it --rm --net=host --gpus all -e DISPLAY=$DISPLAY \
+-v /tmp/.X11-unix/:/tmp/.X11-unix \
+--mount type=bind,source="$(pwd)"/ssh/,target=/root/.ssh,readonly \
+--mount type=bind,source="$(pwd)"/src/gstreamer,target=/opt/nvidia/deepstream/deepstream-6.4/workspace \
+nvcr.io/nvidia/deepstream:6.4-triton-multiarch
+
+gst-launch-1.0 videotestsrc ! 'video/x-raw, width=(int)1920, height=(int)1080, format=(string)NV12, framerate=(fraction)30/1' ! \
+nvvideoconvert ! nvv4l2h265enc ! h265parse ! queue ! h265parse ! nvv4l2decoder ! nveglglessink
