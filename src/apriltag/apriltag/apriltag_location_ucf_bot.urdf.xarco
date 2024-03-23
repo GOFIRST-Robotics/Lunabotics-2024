@@ -14,7 +14,7 @@ This assumes that we are placing 2 tags on the wall.
     <link name="base_tag_1">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="0 3.57 0" rpy="0 0 180"/>
+            <origin xyz="0 3.57 0.4" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -27,7 +27,7 @@ This assumes that we are placing 2 tags on the wall.
     <link name="base_tag_2">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="0 3.3541 0" rpy="0 0 180"/>
+            <origin xyz="0 3.3541 0.4" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -46,7 +46,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_3">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="7.59 1.45 0" rpy="0 0 0"/>
+            <origin xyz="7.59 1.45 0.4" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -59,7 +59,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_4">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="6.09 1.45 0" rpy="0 0 0"/>
+            <origin xyz="6.09 1.45 0.4" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -72,7 +72,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_5">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="7.59 0.55 0" rpy="0 0 0"/>
+            <origin xyz="7.59 0.55 0.4" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -85,7 +85,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_6">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="6.09 0.55 0" rpy="0 0 0"/>
+            <origin xyz="6.09 0.55 0.4" rpy="0 0 0"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
