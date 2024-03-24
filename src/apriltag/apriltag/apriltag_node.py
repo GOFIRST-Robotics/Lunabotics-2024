@@ -18,8 +18,8 @@ class ApriltagNode(Node):
         current_dir = os.getcwd()
 
         """Change this based on the field."""
-        relative_path = "src/apriltag/apriltag/apriltag_location_nasa.urdf.xarco"
-        # relative_path = "src/apriltag/apriltag/apriltag_location_ucf_top.urdf.xarco"
+        # relative_path = "src/apriltag/apriltag/apriltag_location_nasa.urdf.xarco"
+        relative_path = "src/apriltag/apriltag/apriltag_location_ucf_top.urdf.xarco"
         # relative_path = "src/apriltag/apriltag/apriltag_location_ucf_bot.urdf.xarco"
 
         self.file_path = os.path.join(current_dir, relative_path)
@@ -70,7 +70,7 @@ class ApriltagNode(Node):
             tree = ET.parse(self.file_path)
             root = tree.getroot()
 
-            link = root[id - 1]  # assumes tag 1 = home 1, tag 2 = home 2, 3 = berm 1 etc.
+            link = root[id]  # assumes tag 1 = home 1, tag 2 = home 2, 3 = berm 1 etc.
 
             xyz_elements = link.findall(".//origin[@xyz]")
             xyz_values = [element.attrib["xyz"] for element in xyz_elements]

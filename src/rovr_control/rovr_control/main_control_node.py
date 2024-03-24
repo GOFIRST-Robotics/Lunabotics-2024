@@ -11,7 +11,6 @@ from rclpy.executors import SingleThreadedExecutor  # This is needed to run mult
 # Import ROS 2 formatted message types
 from geometry_msgs.msg import Twist, Vector3
 from sensor_msgs.msg import Joy
-from tf2_msgs.msg import TFMessage
 from std_msgs.msg import Bool
 
 # Import custom ROS 2 interfaces

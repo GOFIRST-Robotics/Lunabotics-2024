@@ -30,73 +30,67 @@ def generate_launch_description():
     # Configure ROS nodes for launch
 
     # Setup project paths
-    pkg_project_bringup = get_package_share_directory('ros_gz_launch')
-    pkg_project_gazebo = get_package_share_directory('gazebo_files')
-    pkg_project_description = get_package_share_directory('ros_gz_description')
-    pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
+    pkg_project_bringup = get_package_share_directory("ros_gz_launch")
+    pkg_project_gazebo = get_package_share_directory("gazebo_files")
+    pkg_project_description = get_package_share_directory("ros_gz_description")
+    pkg_ros_gz_sim = get_package_share_directory("ros_gz_sim")
 
     # Load the SDF file from "description" package
-    # sdf_file  =  os.path.join(pkg_project_description, 'models', 'mecanum_drive', 'model.sdf')
-    # with open(sdf_file, 'r') as infp:
-    #     robot_desc = infp.read()
+    urdf_file = os.path.join(pkg_project_description, "models", "master_ASM", "urdf", "master_ASM.urdf")
+    with open(urdf_file, "r") as infp:
+        robot_desc = infp.read()
 
     # Setup to launch the simulator and Gazebo world
     gz_sim = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')),
-        launch_arguments={'gz_args': PathJoinSubstitution([
-            pkg_project_gazebo,
-            'worlds',
-            'competition_field.sdf'
-        ])}.items(),
+        PythonLaunchDescriptionSource(os.path.join(pkg_ros_gz_sim, "launch", "gz_sim.launch.py")),
+        launch_arguments={
+            "gz_args": PathJoinSubstitution([pkg_project_gazebo, "worlds", "competition_field.sdf"])
+        }.items(),
     )
 
     # Takes the description and joint angles as inputs and publishes the 3D poses of the robot links
-    # robot_state_publisher = Node(
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     name='robot_state_publisher',
-    #     output='both',
-    #     parameters=[
-    #         {'use_sim_time': True},
-    #         {'robot_description': robot_desc},
-    #     ]
-    # )
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="both",
+        parameters=[
+            {"use_sim_time": True},
+            {"robot_description": robot_desc},
+        ],
+    )
+
+    # Launch Arguments
+    run_rviz_arg = DeclareLaunchArgument("run_rviz", default_value="True", description="Whether to start RVIZ")
 
     # Visualize in RViz
-    # rviz = Node(
-    #    package='rviz2',
-    #    executable='rviz2',
-    #    arguments=['-d', os.path.join(pkg_project_bringup, 'config', 'mecanum_drive.rviz')],
-    #    condition=IfCondition(LaunchConfiguration('rviz'))
-    # )
+    rviz = Node(
+        package="rviz2",
+        executable="rviz2",
+        arguments=["-d", os.path.join(pkg_project_bringup, "config", "camera.rviz")],
+        condition=IfCondition(LaunchConfiguration("run_rviz")),
+    )
 
     # Bridge ROS topics and Gazebo messages for establishing communication
     bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        parameters=[{
-            'config_file': os.path.join(pkg_project_bringup, 'config', 'ros_gz_bridge.yaml'),
-            'qos_overrides./tf_static.publisher.durability': 'transient_local',
-        }],
-        output='screen'
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        parameters=[
+            {
+                "config_file": os.path.join(pkg_project_bringup, "config", "ros_gz_bridge.yaml"),
+                "qos_overrides./tf_static.publisher.durability": "transient_local",
+            }
+        ],
+        output="screen",
     )
 
     drivetrain = Node(
         package="drivetrain",
         executable="drivetrain_node",
         name="drivetrain_node",
-        parameters=["config/drivetrain_config.yaml", "config/motor_control.yaml",
-                    {"GAZEBO_SIMULATION": True}],
+        parameters=["config/drivetrain_config.yaml", "config/motor_control.yaml", {"GAZEBO_SIMULATION": True}],
         output="screen",
         emulate_tty=True,
     )
 
-    return LaunchDescription([
-        gz_sim,
-        # DeclareLaunchArgument('rviz', default_value='true', description='Open RViz.'),
-        bridge,
-        drivetrain
-        # robot_state_publisher,
-        # rviz
-    ])
+    return LaunchDescription([run_rviz_arg, gz_sim, bridge, drivetrain, robot_state_publisher, rviz])
