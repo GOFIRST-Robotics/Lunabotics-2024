@@ -44,7 +44,6 @@
     </collision>
   </link>
 
-  
   <joint name="camera_joint" type="fixed">
         <parent link="base_link"/>
         <child link="camera_link"/>
@@ -60,7 +59,6 @@
         </visual>
     </link>
  
- 
     <!-- <joint name="camera_optical_joint" type="fixed">
         <parent link="camera_link"/>
         <child link="camera_link_optical"/>
@@ -69,49 +67,45 @@
  
     <link name="camera_link_optical"></link> -->
  
- 
- 
     <gazebo reference="camera_link">
- 
-        <sensor name="camera" type="camera">
-            <pose> 0 0 0 0 0 0 </pose>
-            <!-- <visualize>true</visualize> -->
-            <update_rate>30</update_rate>
-            <camera>
-                <horizontal_fov>1.91986</horizontal_fov>
-                <image>
-                    <format>R8G8B8</format>
-                    <width>1280</width>
-                    <height>720</height>
-                </image>
-                <clip>
-                    <near>0.05</near>
-                    <far>8.0</far>
-                </clip>
-            </camera>
-            <topic>camera</topic>
-        </sensor>
+      <sensor name="camera" type="camera">
+          <pose> 0 0 0 0 0 0 </pose>
+          <!-- <visualize>true</visualize> -->
+          <update_rate>30</update_rate>
+          <camera>
+              <horizontal_fov>1.91986</horizontal_fov>
+              <image>
+                  <format>R8G8B8</format>
+                  <width>1280</width>
+                  <height>720</height>
+              </image>
+              <clip>
+                  <near>0.05</near>
+                  <far>8.0</far>
+              </clip>
+          </camera>
+          <topic>camera</topic>
+      </sensor>
 
-        <sensor name="depthcamera" type="depth">
-            <pose> 0 0 0 0 0 0 </pose>
-            <!-- <visualize>true</visualize> -->
-            <update_rate>30</update_rate>
-            <camera>
-                <horizontal_fov>1.91986</horizontal_fov>
-                <image>
-                    <format>R8G8B8</format>
-                    <width>1280</width>
-                    <height>720</height>
-                </image>
-                <clip>
-                    <near>0.05</near>
-                    <far>100.0</far>
-                </clip>
-            </camera>
-            <topic>depth</topic>
-        </sensor>
-    </gazebo>
-
+      <sensor name="depthcamera" type="depth">
+          <pose> 0 0 0 0 0 0 </pose>
+          <!-- <visualize>true</visualize> -->
+          <update_rate>30</update_rate>
+          <camera>
+              <horizontal_fov>1.91986</horizontal_fov>
+              <image>
+                  <format>R8G8B8</format>
+                  <width>1280</width>
+                  <height>720</height>
+              </image>
+              <clip>
+                  <near>0.05</near>
+                  <far>100.0</far>
+              </clip>
+          </camera>
+          <topic>depth</topic>
+      </sensor>
+  </gazebo>
 
   <link
     name="swerve1_Link">
