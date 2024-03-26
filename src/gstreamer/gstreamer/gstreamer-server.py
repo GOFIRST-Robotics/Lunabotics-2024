@@ -30,7 +30,7 @@ pipeline = Gst.Pipeline()
 
 input_selector = Gst.ElementFactory.make("input-selector", "input-selector")
 
-src_mounts = ['videotestsrc','videotestsrc']
+src_mounts = ['/dev/video8']
 input_selector_sink_pads = []
 # Init pads
 for i in range(len(src_mounts)):
@@ -41,8 +41,8 @@ pipeline.add(input_selector)
 
 # Init src
 for i,mount in enumerate(src_mounts):
-    currentsrc = Gst.ElementFactory.make("videotestsrc", f"videosrc{i}")
-    currentsrc.set_property("pattern", i)
+    currentsrc = Gst.ElementFactory.make("v4l2src", f"videosrc{i}")
+    currentsrc.set_property("device", mount)
     currentpad = currentsrc.get_static_pad("src")
     pipeline.add(currentsrc)
     currentpad.link(input_selector_sink_pads[i])
