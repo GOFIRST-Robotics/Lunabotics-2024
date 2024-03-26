@@ -35,11 +35,6 @@
     </include>
 
     <include>
-      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%205</uri>
-      <pose>2 2.5 1 0 0 0</pose>
-    </include>
-
-    <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%204</uri>
       <pose>0 2 1 0 0 0</pose>
       <name>Rock 1</name>
@@ -60,24 +55,7 @@
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%205</uri>
       <pose>2 2.5 1 0 0 0</pose>
-    </include>
-
-    <include>
-      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%204</uri>
-      <pose>0 2 1 0 0 0</pose>
-      <name>Rock 1</name>
-    </include>
-
-    <include>
-      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%204</uri>
-      <pose>-2 2 1 0 0 0</pose>
-      <name>Rock 2</name>
-    </include>
-
-    <include>
-      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%204</uri>
-      <pose>2 1.25 1 0 0 0</pose>
-      <name>Rock 3</name>
+      <name>Rock 4</name>
     </include>
 
   </world>
