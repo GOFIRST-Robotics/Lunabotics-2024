@@ -10,6 +10,7 @@ Panels:
         - /Nvblox1
         - /Sensors1
         - /Plan1
+        - /RobotModel1
       Splitter Ratio: 0.5896806120872498
     Tree Height: 793
   - Class: rviz_common/Selection
@@ -32,25 +33,27 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
+        base_link:
+          Value: true
         map:
           Value: true
         odom:
           Value: true
         zed2i_camera_center:
-          Value: true
+          Value: false
         zed2i_camera_link:
-          Value: true
+          Value: false
         zed2i_imu_link:
-          Value: true
+          Value: false
         zed2i_left_camera_frame:
-          Value: true
+          Value: false
         zed2i_left_camera_optical_frame:
-          Value: true
+          Value: false
         zed2i_right_camera_frame:
-          Value: true
+          Value: false
         zed2i_right_camera_optical_frame:
-          Value: true
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -60,6 +63,8 @@ Visualization Manager:
         map:
           odom:
             zed2i_camera_link:
+              base_link:
+                {}
               zed2i_camera_center:
                 zed2i_left_camera_frame:
                   zed2i_imu_link:
@@ -352,6 +357,62 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /goal_pose
       Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /zed2i/robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        zed2i_camera_center:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        zed2i_camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        zed2i_left_camera_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        zed2i_left_camera_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        zed2i_right_camera_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        zed2i_right_camera_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 212; 212; 212
