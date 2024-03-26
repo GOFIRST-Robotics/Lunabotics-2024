@@ -45,9 +45,9 @@
   </link>
 
   <joint name="camera_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="camera_link"/>
-    <origin xyz="0.35 0 0.05" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="camera_link"/>
+      <origin xyz="0.35 0 0.05" rpy="0 0 0"/>
   </joint>
 
   <link name="camera_link">
@@ -73,7 +73,7 @@
   </joint>
 
   <link name="camera_link_optical"></link> -->
-
+ 
   <gazebo reference="camera_link">
       <sensor name="camera" type="camera">
           <pose> 0 0 0 0 0 0 </pose>
