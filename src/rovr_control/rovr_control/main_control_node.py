@@ -7,9 +7,10 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import SingleThreadedExecutor  # This is needed to run multiple callbacks in a single thread
+from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult  # Provides a “navigation as a library” capability
 
 # Import ROS 2 formatted message types
-from geometry_msgs.msg import Twist, Vector3
+from geometry_msgs.msg import Twist, Vector3, PoseStamped
 from sensor_msgs.msg import Joy
 from std_msgs.msg import Bool
 
@@ -32,7 +33,7 @@ from .gamepad_constants import *
 # GLOBAL VARIABLES #
 buttons = [0] * 11  # This is to help with button press detection
 # Define the possible states of our robot
-states = {"Teleop": 0, "Auto_Dig": 1, "Auto_Offload": 2}
+states = {"Teleop": 0, "Autonomous": 1}
 
 
 class MainControlNode(Node):
@@ -68,6 +69,7 @@ class MainControlNode(Node):
         self.back_camera = None
         self.autonomous_digging_process = None
         self.autonomous_offload_process = None
+        self.autonomous_cycle_process = None
         self.skimmer_goal_reached = True
 
         # Define timers here
@@ -89,6 +91,10 @@ class MainControlNode(Node):
         self.drive_power_publisher = self.create_publisher(Twist, "cmd_vel", 10)
         self.joy_subscription = self.create_subscription(Joy, "joy", self.joystick_callback, 10)
         self.skimmer_goal_subscription = self.create_subscription(Bool, "/skimmer/goal_reached", self.skimmer_goal_callback, 10)
+
+        self.nav2 = BasicNavigator()  # Instantiate the BasicNavigator class
+        # self.nav2 .setInitialPose(initial_pose)  # TODO: Is this line needed or no?
+        self.nav2.waitUntilNav2Active()  # Wait for the nav2 stack to become active
 
     def publish_odom_callback(self) -> None:
         """This method publishes the odometry of the robot."""
@@ -155,6 +161,38 @@ class MainControlNode(Node):
             self.get_logger().info("Autonomous Offload Procedure Terminated\n")
             self.end_autonomous()  # Return to Teleop mode
 
+    # TODO: This autonomous routine has not been tested yet!
+    async def auto_cycle_procedure(self, dig_location: PoseStamped) -> None:
+        """This method lays out the procedure for doing a complete autonomous cycle!"""
+        self.get_logger().info("\nStarting an Autonomous Cycle!")
+        try:  # Wrap the autonomous procedure in a try-except
+            ## Navigate to the dig_location, run the dig procedure, then navigate to the berm zone and run the offload procedure ##
+            self.nav2.goToPose(dig_location)  # Navigate to the dig location
+            while not self.nav2.isTaskComplete():  # Wait for the dig location to be reached
+                await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
+            if self.nav2.getResult() == TaskResult.FAILED:
+                self.get_logger().error("Failed to reach the dig location!")
+                self.end_autonomous()  # Return to Teleop mode
+            self.autonomous_digging_process = asyncio.ensure_future(self.auto_dig_procedure())  # Start the auto dig process
+            # TODO: This autonomous_digging_process will set the state to teleop when done but we don't want that
+            while not self.autonomous_digging_process.done():  # Wait for the dig process to complete
+                await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
+            self.nav2.goToPose(_____)  # Navigate to the berm zone # TODO: Enter the correct pose here for dumping into the berm zone
+            while not self.nav2.isTaskComplete():  # Wait for the berm zone to be reached
+                await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
+            if self.nav2.getResult() == TaskResult.FAILED:
+                self.get_logger().error("Failed to reach the berm zone!")
+                self.end_autonomous()  # Return to Teleop mode
+            self.autonomous_offload_process = asyncio.ensure_future(self.auto_offload_procedure())  # Start the auto offload process
+            # TODO: This autonomous_offload_process will set the state to teleop when done but we don't want that
+            while not self.autonomous_offload_process.done():  # Wait for the offload process to complete
+                await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
+            self.get_logger().info("Completed an Autonomous Cycle!\n")
+            self.end_autonomous()  # Return to Teleop mode
+        except asyncio.CancelledError:  # Put termination code here
+            self.get_logger().info("Autonomous Cycle Terminated\n")
+            self.end_autonomous()  # Return to Teleop mode
+
     def skimmer_goal_callback(self, msg: Bool) -> None:
         """Update the member variable accordingly."""
         self.skimmer_goal_reached = msg.data
@@ -193,23 +231,31 @@ class MainControlNode(Node):
         if msg.buttons[BACK_BUTTON] == 1 and buttons[BACK_BUTTON] == 0:
             if self.state == states["Teleop"]:
                 self.stop_all_subsystems()  # Stop all subsystems
-                self.state = states["Auto_Dig"]
-                self.autonomous_digging_process = asyncio.ensure_future(
-                    self.auto_dig_procedure()
-                )  # Start the auto dig process
-            elif self.state == states["Auto_Dig"]:
+                self.state = states["Autonomous"]
+                self.autonomous_digging_process = asyncio.ensure_future(self.Autonomous_Dig_procedure())  # Start the auto dig process
+            elif self.state == states["Autonomous"]:
                 self.autonomous_digging_process.cancel()  # Terminate the auto dig process
+                self.autonomous_digging_process = None
 
         # Check if the autonomous offload button is pressed
         if msg.buttons[LEFT_BUMPER] == 1 and buttons[LEFT_BUMPER] == 0:
             if self.state == states["Teleop"]:
                 self.stop_all_subsystems()  # Stop all subsystems
-                self.state = states["Auto_Offload"]
-                self.autonomous_offload_process = asyncio.ensure_future(
-                    self.auto_offload_procedure()
-                )  # Start the auto dig process
-            elif self.state == states["Auto_Offload"]:
+                self.state = states["Autonomous"]
+                self.autonomous_offload_process = asyncio.ensure_future(self.Autonomous_Offload_procedure())  # Start the auto dig process
+            elif self.state == states["Autonomous"]:
                 self.autonomous_offload_process.cancel()  # Terminate the auto offload process
+                self.autonomous_offload_process = None
+
+        # Check if the autonomous cycle button is pressed
+        if msg.buttons[RIGHT_BUMPER] == 1 and buttons[RIGHT_BUMPER] == 0:
+            if self.state == states["Teleop"]:
+                self.stop_all_subsystems()  # Stop all subsystems
+                self.state = states["Autonomous"]
+                self.autonomous_cycle_process = asyncio.ensure_future(self.auto_cycle_procedure())  # Start the autonomous cycle!
+            elif self.state == states["Autonomous"]:
+                self.autonomous_cycle_process.cancel()  # Terminate the autonomous cycle process
+                self.autonomous_cycle_process = None
 
         # Check if the camera toggle button is pressed
         if msg.buttons[START_BUTTON] == 1 and buttons[START_BUTTON] == 0:
@@ -260,6 +306,7 @@ def main(args=None) -> None:
     loop.run_until_complete(spin(executor))  # Run the spin function in the event loop
 
     # Clean up and shutdown
+    node.nav2.lifecycleShutdown()
     node.destroy_node()
     rclpy.shutdown()
 
