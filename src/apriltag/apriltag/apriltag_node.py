@@ -18,8 +18,8 @@ class ApriltagNode(Node):
         current_dir = os.getcwd()
 
         """Change this based on the field."""
-        relative_path = "src/apriltag/apriltag/apriltag_location_nasa.urdf.xarco"
-        # relative_path = "src/apriltag/apriltag/apriltag_location_ucf_top.urdf.xarco"
+        # relative_path = "src/apriltag/apriltag/apriltag_location_nasa.urdf.xarco"
+        relative_path = "src/apriltag/apriltag/apriltag_location_ucf_top.urdf.xarco"
         # relative_path = "src/apriltag/apriltag/apriltag_location_ucf_bot.urdf.xarco"
 
         self.file_path = os.path.join(current_dir, relative_path)

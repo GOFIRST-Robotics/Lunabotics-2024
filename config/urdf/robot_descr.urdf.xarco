@@ -1,0 +1,24 @@
+<robot name="UMN" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:arg name="camera_name" default="zed" />
+    <xacro:arg name="camera_model" default="zed" />
+
+    <xacro:include filename="$(find zed_wrapper)/urdf/zed_macro.urdf.xacro" />
+    <xacro:zed_camera name="$(arg camera_name)" model="$(arg camera_model)">
+    </xacro:zed_camera>
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="0.7317 1.4254 0.6435" />
+            </geometry>
+            <material name="robot_mat">
+                <color rgba="0.79216 0.81961 0.93333 1" />
+            </material>
+        </visual>
+        <origin xyz="0 0 0.5" />
+    </link>
+    <joint name="base_to_camera" type="fixed">
+        <parent link="$(arg camera_name)_camera_link" />
+        <child link="base_link" />
+        <origin xyz="-0.33 0 -0.33" rpy="0.0 0.0 0.0" />
+    </joint>
+</robot>
