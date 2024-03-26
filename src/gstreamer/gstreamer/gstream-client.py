@@ -1,12 +1,11 @@
 import gi
-gi.require_version('Gst', '1.0')
 from gi.repository import GLib, Gst, GObject
 
 from threading import Thread, Event
 import paramiko
 from pyroute2 import IPRoute
-import keyboard
-import sys 
+import os
+gi.require_version('Gst', '1.0')
 # Initialize GStreamer
 Gst.init(None)
 print("Creating Pipeline \n ")
@@ -48,18 +47,22 @@ change_source_thread = Thread()
 change_source_thread.start()
 
 server = paramiko.SSHClient()
-key = paramiko.RSAKey.from_private_key_file("/root/.ssh/id_orin")
+key = paramiko.RSAKey.from_private_key_file(os.path.expanduser("/workspaces/isaac_ros-dev/ssh/id_orin"))
 server.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 remote = "10.133.240.45" #need to make this dynamic
 user="blixt"
 # get current program ip
 with IPRoute() as ipr:
     client = ipr.route('get', dst=remote)[0].get_attr('RTA_PREFSRC')
-
+print(client)
 server.connect(hostname=remote,username=user,pkey=key)
+if not server.get_transport().is_active():
+    print("Connection failed")
+    exit(1)
 server.get_transport().set_keepalive(1)
 cmd = f'python3 Lunabotics-2024/src/gstreamer/gstreamer-server.py {client}'
 print(cmd)
+server.exec_command("cat test>tmp.txt",get_pty=True)
 stdin, stdout, stderr = server.exec_command(cmd,get_pty=True)
 server.get_transport().set_keepalive(1)
 def line_buffered(f):
@@ -86,6 +89,7 @@ while True:
         break
 print("Exiting")
 stop_event.set()
+print(stdout.readlines())
 pipeline.set_state(Gst.State.NULL)
 server.close()
 print("Exited")
