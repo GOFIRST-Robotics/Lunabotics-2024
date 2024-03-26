@@ -1,13 +1,9 @@
-import os
-
-from ament_index_python.packages import get_package_share_directory
-
-import launch
-from launch.substitutions import Command
-from launch_ros.actions import ComposableNodeContainer, Node
+from launch import LaunchDescription
 from launch_ros.descriptions import ComposableNode
+from launch_ros.actions import ComposableNodeContainer
 
 def generate_launch_description():
+    ld = LaunchDescription()
 
     apriltag_node = ComposableNode(
         package='isaac_ros_apriltag',
@@ -43,3 +39,9 @@ def generate_launch_description():
         ],
         output='screen'
     )
+    
+    # Add the action to the launch description
+    ld.add_action(apriltag_container)
+
+    # Return the launch description
+    return ld
