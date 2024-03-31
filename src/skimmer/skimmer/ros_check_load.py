@@ -5,6 +5,7 @@ from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge
 import math
+
 # import time
 
 # TODO: NEED TO UPDATE SKIMMER SIZE, DISTANCE, DISTANCE THRESHOLD
@@ -17,12 +18,12 @@ SKIMMERTOCAM = 0.3  # distance from camera to top of skimmer in meters.
 DISTANCETHRESH = 200  # how small should the distance between top and skimmer be before offload (in meters)?
 POLLRATE = 0.2  # Wait time between each distance check (in seconds)
 CONSECUTIVECYCLES = 4  # Make sure the reading is consistent
-skimmer_height_topic = "/skimmer/height"  # should be meters, as a displacement from the skimmers starting position, if not, convert
+skimmer_height_topic = "/skimmer/height"  # should be meters (displacement from the skimmer starting position)
 
 
 class ros_check_load(Node):
     def __init__(self):
-        self.skimmer_height = .5
+        self.skimmer_height = 0.5
         self.img_height = 640
         self.errorCount = 0
         self.img_width = 848
@@ -36,7 +37,6 @@ class ros_check_load(Node):
         self.subscriber = self.create_subscription(Image, depth_image_topic, self.depth_image_callback, 10)
         self.timer = self.create_timer(POLLRATE, self.publish_distance)
         self.depth_image = None
-        
 
     def setHeight(self, msg):
         """Sets the height of the skimmer belt to a variable."""
@@ -58,34 +58,36 @@ class ros_check_load(Node):
         Called every POLLRATE seconds.
         Will kill the node after 5 seconds of not receiving a depth image / throwing consecutive errors."""
         if self.depth_image is None:
-            self.get_logger().fatal(f"Camera not working")
+            self.get_logger().fatal("Camera not working")
             self.get_logger().fatal("Killing check_load node")
             self.destroy_node()
             return
-        
+
         """Cropping the image"""
         depth = self.depth_image
 
         # find the degrees of vision occupied by the skimmer belt
-        perceptionChangeX = (
-            (2 * (math.atan((0.5 * SKIMMERSIZEX) / (self.skimmer_height + SKIMMERTOCAM)))) * (180 / math.pi)
+        perceptionChangeX = (2 * (math.atan((0.5 * SKIMMERSIZEX) / (self.skimmer_height + SKIMMERTOCAM)))) * (
+            180 / math.pi
         )
-        perceptionChangeY = (
-            (2 * (math.atan((0.5 * SKIMMERSIZEY) / (self.skimmer_height + SKIMMERTOCAM)))) * (180 / math.pi)
+        perceptionChangeY = (2 * (math.atan((0.5 * SKIMMERSIZEY) / (self.skimmer_height + SKIMMERTOCAM)))) * (
+            180 / math.pi
         )
 
         percentFOVx = min(perceptionChangeX / 86, 1)
         # compare the degrees of vision it would occupy to the FOV of the realsense
         percentFOVy = min(perceptionChangeY / 57, 1)
 
-        change_x = (
-            int(self.img_width * percentFOVx / 2)
-        )   # get the number of pixels that it's occupying. divide by 2 so it's a +- situation
+        change_x = int(
+            self.img_width * percentFOVx / 2
+        )  # get the number of pixels that it's occupying. divide by 2 so it's a +- situation
         change_y = int((self.img_height * percentFOVy) / 2)
 
         center_x, center_y = self.img_width // 2, self.img_height // 2
         denoised_image = cv2.GaussianBlur(depth, (5, 5), 0)
-        resized_img = denoised_image[center_y - change_y : center_y + change_y, center_x - change_x : center_x + change_x]
+        resized_img = denoised_image[
+            center_y - change_y : center_y + change_y, center_x - change_x : center_x + change_x
+        ]
 
         """Analyzing image, posting to topic"""
         if resized_img.mean() <= DISTANCETHRESH + self.skimmer_height:
@@ -108,7 +110,7 @@ class ros_check_load(Node):
 def main(args=None):
     """The main function."""
     rclpy.init(args=args)
-    
+
     node = ros_check_load()
     node.get_logger().info("Starting the depth camera for check_load")
     rclpy.spin(node)

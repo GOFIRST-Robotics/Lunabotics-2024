@@ -72,11 +72,11 @@ class SkimmerNode(Node):
         # CONSTANTS DEFINED BELOW #
         # ----------------------------------------------------------------
         # Circumference of the pulley used by the lift system
-        self.PULLEY_CIRCUMFERENCE = 0.1  # TODO: Ask mechanical team for this value on the final robot (measured in meters)
+        self.PULLEY_CIRCUMFERENCE = 0.1  # TODO: Ask mechanical team for this value (measured in meters)
         # Gear ratio of the lift motor
-        self.LIFT_GEAR_RATIO = 1 / 1  # TODO: Ask mechanical team for this value on the final robot (gear ratio)
+        self.LIFT_GEAR_RATIO = 1 / 1  # TODO: Ask mechanical team for this value (gear ratio)
         # Maximum value of the lift motor encoder (bottom of the lift system) in degrees
-        self.MAX_ENCODER_VALUE = 36000  # TODO: Determine this value on the final robot (measured in degrees)
+        self.MAX_ENCODER_VALUE = 36000  # TODO: Determine this value (measured in degrees)
         # ----------------------------------------------------------------
 
     # Define subsystem methods here

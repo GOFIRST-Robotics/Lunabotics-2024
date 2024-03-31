@@ -123,20 +123,20 @@ controller_server:
       # Primary controller params (DWBLocalPlanner)
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
-      min_vel_x: -2.0  # TODO: adjust this with the robot's speed in m/s
-      min_vel_y: -2.0  # TODO: adjust this with the robot's speed in m/s
-      max_vel_x: 2.0  # TODO: adjust this with the robot's speed in m/s
-      max_vel_y: 2.0  # TODO: adjust this with the robot's speed in m/s
-      max_vel_theta: 1.0  # TODO: adjust this with the robot's speed in m/s
-      min_speed_xy: -2.0  # TODO: adjust this with the robot's speed in m/s
-      max_speed_xy: 2.0  # TODO: adjust this with the robot's speed in m/s
-      min_speed_theta: -1.0  # TODO: adjust this with the robot's speed in m/s
-      acc_lim_x: 1.0  # TODO: adjust this with the robot's accel in m/s^2
-      acc_lim_y: 1.0  # TODO: adjust this with the robot's accel in m/s^2
-      acc_lim_theta: 1.0  # TODO: adjust this with the robot's accel in m/s^2
-      decel_lim_x: -1.0  # TODO: adjust this with the robot's accel in m/s^2
-      decel_lim_y: -1.0  # TODO: adjust this with the robot's accel in m/s^2
-      decel_lim_theta: -1.0  # TODO: adjust this with the robot's accel in m/s^2
+      min_vel_x: -0.5  # TODO: adjust this if needed (m/s)
+      min_vel_y: -0.5  # TODO: adjust this if needed (m/s)
+      max_vel_x: 0.5  # TODO: adjust this if needed (m/s)
+      max_vel_y: 0.5  # TODO: adjust this if needed (m/s)
+      max_vel_theta: 0.5  # TODO: adjust this if needed (m/s)
+      min_speed_xy: -0.5  # TODO: adjust this if needed (m/s)
+      max_speed_xy: 0.5  # TODO: adjust this if needed (m/s)
+      min_speed_theta: -0.5  # TODO: adjust this if needed (m/s)
+      acc_lim_x: 1.0  # TODO: adjust this if needed (m/s^2)
+      acc_lim_y: 1.0  # TODO: adjust this if needed (m/s^2)
+      acc_lim_theta: 1.0  # TODO: adjust this if needed (m/s^2)
+      decel_lim_x: -1.0  # TODO: adjust this if needed (m/s^2)
+      decel_lim_y: -1.0  # TODO: adjust this if needed (m/s^2)
+      decel_lim_theta: -1.0  # TODO: adjust this if needed (m/s^2)
       vx_samples: 30
       vy_samples: 30
       vtheta_samples: 20
@@ -152,13 +152,13 @@ controller_server:
         [
           "RotateToGoal",
           "Oscillation",
-          "BaseObstacle",
+          "ObstacleFootprint",
           "GoalAlign",
           "PathAlign",
           "PathDist",
           "GoalDist",
         ]
-      BaseObstacle.scale: 0.02
+      ObstacleFootprint.scale: 0.02
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
       GoalAlign.scale: 24.0
@@ -201,7 +201,7 @@ local_costmap:
       width: 10
       height: 10
       resolution: 0.05
-      robot_radius: 0.4  # TODO: Adjust this based on the size of our robot
+      footprint: '[ [0.36585, 0.7127], [0.36585, -0.7127], [-0.36585, -0.7127], [-0.36585, 0.7127] ]'
       plugins: ["nvblox_base_layer"]
       nvblox_base_layer:
         plugin: "nvblox::nav2::NvbloxCostmapLayer"
@@ -228,7 +228,7 @@ global_costmap:
       rolling_window: True
       width: 200
       height: 200
-      robot_radius: 0.4  # TODO: Adjust this based on the size of our robot
+      footprint: '[ [0.36585, 0.7127], [0.36585, -0.7127], [-0.36585, -0.7127], [-0.36585, 0.7127] ]'
       resolution: 0.1
       origin_x: -100.0
       origin_y: -100.0
