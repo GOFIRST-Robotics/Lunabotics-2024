@@ -33,13 +33,17 @@ class SwerveModule:
         self.prev_angle = 0.0
 
     def set_power(self, power: float) -> None:
-        self.cli_motor_set.call_async(MotorCommandSet.Request(type="duty_cycle", value=power))
+        self.cli_motor_set.call_async(MotorCommandSet.Request(can_id=self.drive_motor_can_id, type="duty_cycle", value=power))
 
     def set_angle(self, angle: float) -> None:
-        self.cli_motor_set.call_async(MotorCommandSet.Request(type="position", value=(angle - self.encoder_offset) * self.steering_motor_gear_ratio))
+        self.cli_motor_set.call_async(
+            MotorCommandSet.Request(
+                can_id=self.turning_motor_can_id, type="position", value=(angle - self.encoder_offset) * self.steering_motor_gear_ratio
+            )
+        )
 
     def reset(self, current_relative_angle) -> None:
-        self.encoder_offset = self.current_absolute_angle - current_relative_angle 
+        self.encoder_offset = self.current_absolute_angle - current_relative_angle
         print("Absolute Encoder angle offset set to:", self.encoder_offset)
         self.set_angle(0)  # Rotate the module to the 0 degree position
 
@@ -60,9 +64,8 @@ class SwerveModule:
         rad = angle * math.pi / 180
 
         speed = power * 5
-        self.gazebo_wheel.publish(Float64(data = speed))
-        self.gazebo_swerve.publish(Float64(data = rad))
-
+        self.gazebo_wheel.publish(Float64(data=speed))
+        self.gazebo_swerve.publish(Float64(data=rad))
 
 
 # This class represents the drivetrain as a whole (4 swerve modules)
@@ -72,21 +75,22 @@ class DrivetrainNode(Node):
         super().__init__("drivetrain")
 
         # Define default values for our ROS parameters below #
-        self.declare_parameter("FRONT_LEFT_DRIVE", 3)
+        self.declare_parameter("FRONT_LEFT_DRIVE", 10)
         self.declare_parameter("FRONT_LEFT_TURN", 4)
-        self.declare_parameter("FRONT_RIGHT_DRIVE", 7)
-        self.declare_parameter("FRONT_RIGHT_TURN", 8)
-        self.declare_parameter("BACK_LEFT_DRIVE", 1)
-        self.declare_parameter("BACK_LEFT_TURN", 2)
-        self.declare_parameter("BACK_RIGHT_DRIVE", 5)
-        self.declare_parameter("BACK_RIGHT_TURN", 6)
+        self.declare_parameter("FRONT_RIGHT_DRIVE", 9)
+        self.declare_parameter("FRONT_RIGHT_TURN", 3)
+        self.declare_parameter("BACK_LEFT_DRIVE", 7)
+        self.declare_parameter("BACK_LEFT_TURN", 6)
+        self.declare_parameter("BACK_RIGHT_DRIVE", 8)
+        self.declare_parameter("BACK_RIGHT_TURN", 4)
         self.declare_parameter("HALF_WHEEL_BASE", 0.5)
         self.declare_parameter("HALF_TRACK_WIDTH", 0.5)
-        self.declare_parameter("STEERING_MOTOR_GEAR_RATIO", 20)
-        self.declare_parameter("FRONT_LEFT_MAGNET_OFFSET", 0)
-        self.declare_parameter("FRONT_RIGHT_MAGNET_OFFSET", 0)
-        self.declare_parameter("BACK_LEFT_MAGNET_OFFSET", 0)
-        self.declare_parameter("BACK_RIGHT_MAGNET_OFFSET", 0)
+        self.declare_parameter("STEERING_MOTOR_GEAR_RATIO", 40)
+        self.declare_parameter("FRONT_LEFT_MAGNET_OFFSET", 1022)
+        self.declare_parameter("FRONT_RIGHT_MAGNET_OFFSET", 944)
+        self.declare_parameter("BACK_LEFT_MAGNET_OFFSET", 314)
+        self.declare_parameter("BACK_RIGHT_MAGNET_OFFSET", 1015)
+        self.declare_parameter("ABSOLUTE_ENCODER_COUNTS", 1023)
         self.declare_parameter("GAZEBO_SIMULATION", False)
 
         # Assign the ROS Parameters to member variables below #
@@ -105,11 +109,14 @@ class DrivetrainNode(Node):
         self.FRONT_RIGHT_MAGNET_OFFSET = self.get_parameter("FRONT_RIGHT_MAGNET_OFFSET").value
         self.BACK_LEFT_MAGNET_OFFSET = self.get_parameter("BACK_LEFT_MAGNET_OFFSET").value
         self.BACK_RIGHT_MAGNET_OFFSET = self.get_parameter("BACK_RIGHT_MAGNET_OFFSET").value
+        self.ABSOLUTE_ENCODER_COUNTS = self.get_parameter("ABSOLUTE_ENCODER_COUNTS").value
         self.GAZEBO_SIMULATION = self.get_parameter("GAZEBO_SIMULATION").value
 
         # Define publishers and subscribers here
         self.cmd_vel_sub = self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
-        self.absolute_encoders_sub = self.create_subscription(AbsoluteEncoders, "absoluteEncoders", self.absolute_encoders_callback, 10)
+        self.absolute_encoders_sub = self.create_subscription(
+            AbsoluteEncoders, "absoluteEncoders", self.absolute_encoders_callback, 10
+        )
 
         if self.GAZEBO_SIMULATION:
             self.gazebo_wheel1_pub = self.create_publisher(Float64, "wheel1/cmd_vel", 10)
@@ -119,7 +126,7 @@ class DrivetrainNode(Node):
             self.gazebo_swerve1_pub = self.create_publisher(Float64, "swerve1/cmd_pos", 10)
             self.gazebo_swerve2_pub = self.create_publisher(Float64, "swerve2/cmd_pos", 10)
             self.gazebo_swerve3_pub = self.create_publisher(Float64, "swerve3/cmd_pos", 10)
-            self.gazebo_swerve4_pub = self.create_publisher(Float64, "swerve4/cmd_pos", 10)         
+            self.gazebo_swerve4_pub = self.create_publisher(Float64, "swerve4/cmd_pos", 10)
 
         # Define service clients here
         self.cli_motor_set = self.create_client(MotorCommandSet, "motor/set")
@@ -147,6 +154,7 @@ class DrivetrainNode(Node):
         self.get_logger().info("FRONT_RIGHT_MAGNET_OFFSET has been set to: " + str(self.FRONT_RIGHT_MAGNET_OFFSET))
         self.get_logger().info("BACK_LEFT_MAGNET_OFFSET has been set to: " + str(self.BACK_LEFT_MAGNET_OFFSET))
         self.get_logger().info("BACK_RIGHT_MAGNET_OFFSET has been set to: " + str(self.BACK_RIGHT_MAGNET_OFFSET))
+        self.get_logger().info("ABSOLUTE_ENCODER_COUNTS has been set to: " + str(self.ABSOLUTE_ENCODER_COUNTS))
         self.get_logger().info("GAZEBO_SIMULATION has been set to: " + str(self.GAZEBO_SIMULATION))
 
         # Create each swerve module using
@@ -167,7 +175,7 @@ class DrivetrainNode(Node):
             print("Absolute Encoder angles reset")
             self.front_left.reset(0)
             self.front_right.reset(0)
-            self.back_left.reset(0) 
+            self.back_left.reset(0)
             self.back_right.reset(0)
             self.absolute_angle_timer.cancel()
 
@@ -201,7 +209,9 @@ class DrivetrainNode(Node):
         back_right_vector = [math.sqrt(A**2 + C**2), ((math.atan2(A, C) * 180 / math.pi) + 360) % 360]
 
         # Normalize wheel speeds if necessary
-        largest_power = max([abs(front_left_vector[0]), abs(front_right_vector[0]), abs(back_left_vector[0]), abs(back_right_vector[0])])
+        largest_power = max(
+            [abs(front_left_vector[0]), abs(front_right_vector[0]), abs(back_left_vector[0]), abs(back_right_vector[0])]
+        )
         if largest_power > 1.0:
             front_left_vector[0] = front_left_vector[0] / largest_power
             front_right_vector[0] = front_right_vector[0] / largest_power
@@ -209,19 +219,31 @@ class DrivetrainNode(Node):
             back_right_vector[0] = back_right_vector[0] / largest_power
 
         # Note: no module should ever have to rotate more than 90 degrees from its current angle
-        if abs(front_left_vector[1] - self.front_left.prev_angle) > 90 and abs(front_left_vector[1] - self.front_left.prev_angle) < 270:
+        if (
+            abs(front_left_vector[1] - self.front_left.prev_angle) > 90
+            and abs(front_left_vector[1] - self.front_left.prev_angle) < 270
+        ):
             front_left_vector[1] = (front_left_vector[1] + 180) % 360
             # reverse speed of the module
             front_left_vector[0] = front_left_vector[0] * -1
-        if abs(front_right_vector[1] - self.front_right.prev_angle) > 90 and abs(front_right_vector[1] - self.front_right.prev_angle) < 270:
+        if (
+            abs(front_right_vector[1] - self.front_right.prev_angle) > 90
+            and abs(front_right_vector[1] - self.front_right.prev_angle) < 270
+        ):
             front_right_vector[1] = (front_right_vector[1] + 180) % 360
             # reverse speed of the module
             front_right_vector[0] = front_right_vector[0] * -1
-        if abs(back_left_vector[1] - self.back_left.prev_angle) > 90 and abs(back_left_vector[1] - self.back_left.prev_angle) < 270:
+        if (
+            abs(back_left_vector[1] - self.back_left.prev_angle) > 90
+            and abs(back_left_vector[1] - self.back_left.prev_angle) < 270
+        ):
             back_left_vector[1] = (back_left_vector[1] + 180) % 360
             # reverse speed of the module
             back_left_vector[0] = back_left_vector[0] * -1
-        if abs(back_right_vector[1] - self.back_right.prev_angle) > 90 and abs(back_right_vector[1] - self.back_right.prev_angle) < 270:
+        if (
+            abs(back_right_vector[1] - self.back_right.prev_angle) > 90
+            and abs(back_right_vector[1] - self.back_right.prev_angle) < 270
+        ):
             back_right_vector[1] = (back_right_vector[1] + 180) % 360
             # reverse speed of the module
             back_right_vector[0] = back_right_vector[0] * -1
@@ -260,13 +282,17 @@ class DrivetrainNode(Node):
     def cmd_vel_callback(self, msg: Twist) -> None:
         """This method is called whenever a message is received on the cmd_vel topic."""
         self.drive(msg.linear.y, msg.linear.x, msg.angular.z)
-        
+
     def absolute_encoders_callback(self, msg: AbsoluteEncoders) -> None:
         """This method is called whenever a message is received on the absoluteEncoders topic."""
-        self.front_left.current_absolute_angle = (360 * msg.front_left_encoder / 1023) - self.FRONT_LEFT_MAGNET_OFFSET
-        self.front_right.current_absolute_angle = (360 * msg.front_right_encoder / 1023) - self.FRONT_RIGHT_MAGNET_OFFSET
-        self.back_left.current_absolute_angle = (360 * msg.back_left_encoder / 1023) - self.BACK_LEFT_MAGNET_OFFSET
-        self.back_right.current_absolute_angle = (360 * msg.back_right_encoder / 1023) - self.BACK_RIGHT_MAGNET_OFFSET
+        front_left_adjusted = (msg.front_left_encoder - self.FRONT_LEFT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
+        front_right_adjusted = (msg.front_left_encoder - self.FRONT_RIGHT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
+        back_left_adjusted = (msg.front_left_encoder - self.BACK_LEFT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
+        back_right_adjusted = (msg.front_left_encoder - self.BACK_RIGHT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
+        self.front_left.current_absolute_angle = 360 * front_left_adjusted / self.ABSOLUTE_ENCODER_COUNTS
+        self.front_right.current_absolute_angle = 360 * front_right_adjusted / self.ABSOLUTE_ENCODER_COUNTS
+        self.back_left.current_absolute_angle = 360 * back_left_adjusted / self.ABSOLUTE_ENCODER_COUNTS
+        self.back_right.current_absolute_angle = 360 * back_right_adjusted / self.ABSOLUTE_ENCODER_COUNTS
 
 
 def main(args=None):

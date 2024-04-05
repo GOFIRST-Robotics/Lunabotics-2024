@@ -15,7 +15,7 @@ class read_serial(Node):
         self.absoluteEncodersPub = self.create_publisher(AbsoluteEncoders, "absoluteEncoders", 10)
 
         try:
-            self.arduino = serial.Serial("/dev/Arduino", 9600)  # This should be a static serial port on the Jetson!
+            self.arduino = serial.Serial("/dev/ttyACM0", 9600)
             time.sleep(1)  # https://stackoverflow.com/questions/7266558/pyserial-buffer-wont-flush
             self.arduino.read_all()
         except Exception as e:

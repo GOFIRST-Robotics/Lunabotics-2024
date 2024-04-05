@@ -56,8 +56,9 @@ struct MotorData {
 
 class PIDController {
 private:
-  int DEAD_BAND = 1;
   int COUNTS_PER_REVOLUTION; // How many encoder counts for one 360 degree rotation
+  int DEAD_BAND; // How close to the target position is close enough
+  float MAX_POWER; // Cap the power output to the motor (this should be between 0 and 1)
 
   bool continuous; // Does the input range wrap around (e.g. absolute encoder)
   int minimumTachInput, maximumTachInput; // For continuous input, what is the range?
@@ -72,8 +73,10 @@ private:
 public:
   bool isActive;
 
-  PIDController(int CountsPerRevolution, float kp, float ki = 0, float kd = 0, float gravComp = 0) {
+  PIDController(int CountsPerRevolution, float kp, float ki, float kd, float gravComp, int deadband, float maxPower) {
     this->COUNTS_PER_REVOLUTION = CountsPerRevolution;
+    this->DEAD_BAND = deadband;
+    this->MAX_POWER = maxPower;
 
     this->kp = kp;
     this->ki = ki;
@@ -105,7 +108,7 @@ public:
   
     float PIDResult = (currError * this->kp) + (this->totalError * this->ki) + (this->prevError.has_value() ? currError - this->prevError.value() : 0) * this->kd;
 
-    PIDResult = std::clamp(PIDResult, (float)(-1), (float)(1)); // Clamp the PIDResult between -1 and 1
+    PIDResult = std::clamp(PIDResult, (float)(-this->MAX_POWER), (float)(this->MAX_POWER)); // Clamp the PIDResult to the maximum power
 
     // Uncomment the line below for debug values:
     // std::cout << "Target Tachometer: " << targTach << ", Current Tachometer: " << currTach << ", Current Error: " << currError << ", PIDResult: " << PIDResult << ", Total Error: " << totalError << ", D: " << (this->prevError.has_value() ? currError - this->prevError.value() : 0) << std::endl;
@@ -163,7 +166,9 @@ class MotorControlNode : public rclcpp::Node {
   // Set the percent power of the motor between -1.0 and 1.0
   void vesc_set_duty_cycle(uint32_t id, float percentPower) {
     // Do not allow setting more than 100% power in either direction
-    this->pid_controllers[id]->isActive = false;
+    if (this->pid_controllers[id]) {
+      this->pid_controllers[id]->isActive = false;
+    }
     percentPower = std::clamp(percentPower, (float)(-1), (float)(1));
     int32_t data = percentPower * 100000; // Convert from percent power to a signed 32-bit integer
 
@@ -174,7 +179,9 @@ class MotorControlNode : public rclcpp::Node {
 
   // Set the velocity of the motor in RPM (Rotations Per Minute)
   void vesc_set_velocity(uint32_t id, int rpm) {
-    this->pid_controllers[id]->isActive = false;
+    if (this->pid_controllers[id]) {
+      this->pid_controllers[id]->isActive = false;
+    }
     int32_t data = rpm;
 
     send_can(id + 0x00000300, data); // ID must be modified to signify this is a RPM command
@@ -184,7 +191,9 @@ class MotorControlNode : public rclcpp::Node {
 
   // Set the position of the motor in degrees
   void vesc_set_position(uint32_t id, int position) {
-    this->pid_controllers[id]->setRotation(position);
+    if (this->pid_controllers[id]) {
+      this->pid_controllers[id]->setRotation(position);
+    }
     RCLCPP_DEBUG(this->get_logger(), "Setting the position of CAN ID: %u to %d degrees", id, position); // Print Statement
   }
 
@@ -218,11 +227,12 @@ public:
     // Define default values for our ROS parameters below #
     this->declare_parameter("CAN_INTERFACE_TRANSMIT", "can0");
     this->declare_parameter("CAN_INTERFACE_RECEIVE", "can0");
-    this->declare_parameter("BACK_LEFT_TURN", 2);
-    this->declare_parameter("FRONT_LEFT_TURN", 4);
+    this->declare_parameter("BACK_LEFT_TURN", 4);
+    this->declare_parameter("FRONT_LEFT_TURN", 3);
     this->declare_parameter("BACK_RIGHT_TURN", 6);
-    this->declare_parameter("FRONT_RIGHT_TURN", 8);
-    this->declare_parameter("SKIMMER_LIFT_MOTOR", 10);
+    this->declare_parameter("FRONT_RIGHT_TURN", 5);
+    this->declare_parameter("SKIMMER_LIFT_MOTOR", 2); // TODO: Set this
+    this->declare_parameter("STEERING_MOTOR_GEAR_RATIO", 40);
 
     // Print the ROS Parameters to the terminal below #
     RCLCPP_INFO(this->get_logger(), "CAN_INTERFACE_TRANSMIT parameter set to: %s", this->get_parameter("CAN_INTERFACE_TRANSMIT").as_string().c_str());
@@ -232,6 +242,7 @@ public:
     RCLCPP_INFO(this->get_logger(), "BACK_RIGHT_TURN parameter set to: %ld", this->get_parameter("BACK_RIGHT_TURN").as_int());
     RCLCPP_INFO(this->get_logger(), "FRONT_RIGHT_TURN parameter set to: %ld", this->get_parameter("FRONT_RIGHT_TURN").as_int());
     RCLCPP_INFO(this->get_logger(), "SKIMMER_LIFT_MOTOR parameter set to: %ld", this->get_parameter("SKIMMER_LIFT_MOTOR").as_int());
+    RCLCPP_INFO(this->get_logger(), "STEERING_MOTOR_GEAR_RATIO parameter set to: %ld", this->get_parameter("STEERING_MOTOR_GEAR_RATIO").as_int());
 
     // Initialize services below //
     srv_motor_set = this->create_service<rovr_interfaces::srv::MotorCommandSet>(
@@ -240,17 +251,17 @@ public:
         "motor/get", std::bind(&MotorControlNode::get_callback, this, _1, _2));
 
     // Instantiate all of our PIDControllers here
-    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
-    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
-    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
-    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
-    this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.01); // TODO: kp will need to be tuned on the real robot
+    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
+    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
+    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
+    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
+    this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.8);
 
     // Enable continuous input for the swerve module PID controllers
-    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()]->enableContinuousInput(0, 360);
-    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()]->enableContinuousInput(0, 360);
-    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()]->enableContinuousInput(0, 360);
-    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()]->enableContinuousInput(0, 360);
+    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()]->enableContinuousInput(0, 360 * this->get_parameter("STEERING_MOTOR_GEAR_RATIO").as_int());
+    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()]->enableContinuousInput(0, 360 * this->get_parameter("STEERING_MOTOR_GEAR_RATIO").as_int());
+    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()]->enableContinuousInput(0, 360 * this->get_parameter("STEERING_MOTOR_GEAR_RATIO").as_int());
+    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()]->enableContinuousInput(0, 360 * this->get_parameter("STEERING_MOTOR_GEAR_RATIO").as_int());
 
     // Initialize timers below //
     timer = this->create_wall_timer(500ms, std::bind(&MotorControlNode::timer_callback, this));
@@ -269,7 +280,7 @@ private:
     for (auto pair : this->current_msg) {
       uint32_t motorId = pair.first;
       // If the motor controller has previously received a command, send the most recent command again
-      if (this->pid_controllers[motorId]->isActive == false) {
+      if (this->pid_controllers[motorId] && this->pid_controllers[motorId]->isActive == false) {
         send_can(std::get<0>(this->current_msg[motorId]), std::get<1>(this->current_msg[motorId]));
       }
     }
@@ -296,7 +307,7 @@ private:
       break;
     case 27: // Packet Status 27 (Tachometer)
       tachometer = static_cast<int32_t>((can_msg->data[0] << 24) + (can_msg->data[1] << 16) + (can_msg->data[2] << 8) + can_msg->data[3]);
-
+      
       // Runs the PID controller for this motor if its active
       if (this->pid_controllers[motorId] && this->pid_controllers[motorId]->isActive) {
         float PIDResult = this->pid_controllers[motorId]->update(tachometer);
@@ -328,15 +339,15 @@ private:
   void set_callback(const std::shared_ptr<rovr_interfaces::srv::MotorCommandSet::Request> request,
                     std::shared_ptr<rovr_interfaces::srv::MotorCommandSet::Response> response) {
 
-    if (request->type == "velocity") {
+    if (strcmp(request->type.c_str(), "velocity") == 0) {
       vesc_set_velocity(request->can_id, request->value);
-      response->success = 1; // indicates success
-    } else if (request->type == "duty_cycle") {
+      response->success = 0; // indicates success
+    } else if (strcmp(request->type.c_str(), "duty_cycle") == 0) {
       vesc_set_duty_cycle(request->can_id, request->value);
-      response->success = 1; // indicates success
-    } else if (request->type == "position") {
+      response->success = 0; // indicates success
+    } else if (strcmp(request->type.c_str(), "position") == 0) {
       vesc_set_position(request->can_id, request->value);
-      response->success = 1; // indicates success
+      response->success = 0; // indicates success
     } else {
       RCLCPP_ERROR(this->get_logger(), "Unknown motor SET command type: '%s'", request->type.c_str());
       response->success = 1; // indicates failure
@@ -348,11 +359,11 @@ private:
                     std::shared_ptr<rovr_interfaces::srv::MotorCommandGet::Response> response) {
     std::optional<float> data = std::nullopt;
 
-    if (request->type == "velocity") {
+    if (strcmp(request->type.c_str(), "velocity") == 0) {
       data = vesc_get_velocity(request->can_id);
-    } else if (request->type == "duty_cycle") {
+    } else if (strcmp(request->type.c_str(), "duty_cycle") == 0) {
       data = vesc_get_duty_cycle(request->can_id);
-    } else if (request->type == "position") {
+    } else if (strcmp(request->type.c_str(), "position") == 0) {
       data = vesc_get_position(request->can_id);
     } else {
       RCLCPP_ERROR(this->get_logger(), "Unknown motor GET command type: '%s'", request->type.c_str());

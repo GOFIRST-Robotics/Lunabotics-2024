@@ -24,7 +24,7 @@ def generate_launch_description():
         package="motor_control",
         executable="motor_control_node",
         name="motor_control_node",
-        parameters=["config/motor_control.yaml"],
+        parameters=["config/drivetrain_config.yaml", "config/motor_control.yaml"],
         output="screen",
         emulate_tty=True,
     )
@@ -45,11 +45,23 @@ def generate_launch_description():
         output="screen",
         emulate_tty=True,
     )
+    read_serial = Node(
+        package="rovr_control",
+        executable="read_serial",
+        name="read_serial",
+    )
+    can_bus = Node(
+        package="ros2socketcan_bridge",
+        executable="ros2socketcan",
+        name="ros2socketcan",
+    )
 
     ld.add_action(rovr_control)
     ld.add_action(motor_control)
     ld.add_action(joystick_node)
     ld.add_action(drivetrain)
     ld.add_action(skimmer)
+    ld.add_action(read_serial)
+    ld.add_action(can_bus)
 
     return ld

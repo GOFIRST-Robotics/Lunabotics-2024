@@ -45,8 +45,8 @@ class SkimmerNode(Node):
         self.timer = self.create_timer(0.1, self.timer_callback)
 
         # Define default values for our ROS parameters below #
-        self.declare_parameter("SKIMMER_BELT_MOTOR", 9)
-        self.declare_parameter("SKIMMER_LIFT_MOTOR", 10)
+        self.declare_parameter("SKIMMER_BELT_MOTOR", 1)
+        self.declare_parameter("SKIMMER_LIFT_MOTOR", 2)
 
         # Assign the ROS Parameters to member variables below #
         self.SKIMMER_BELT_MOTOR = self.get_parameter("SKIMMER_BELT_MOTOR").value
