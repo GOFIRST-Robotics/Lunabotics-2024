@@ -38,7 +38,7 @@ class SwerveModule:
     def set_angle(self, angle: float) -> None:
         self.cli_motor_set.call_async(
             MotorCommandSet.Request(
-                can_id=self.turning_motor_can_id, type="position", value=(angle - self.encoder_offset) * self.steering_motor_gear_ratio
+                can_id=self.turning_motor_can_id, type="position", value=(angle + self.encoder_offset) * self.steering_motor_gear_ratio
             )
         )
 
@@ -86,10 +86,10 @@ class DrivetrainNode(Node):
         self.declare_parameter("HALF_WHEEL_BASE", 0.5)
         self.declare_parameter("HALF_TRACK_WIDTH", 0.5)
         self.declare_parameter("STEERING_MOTOR_GEAR_RATIO", 40)
-        self.declare_parameter("FRONT_LEFT_MAGNET_OFFSET", 1022)
-        self.declare_parameter("FRONT_RIGHT_MAGNET_OFFSET", 944)
-        self.declare_parameter("BACK_LEFT_MAGNET_OFFSET", 314)
-        self.declare_parameter("BACK_RIGHT_MAGNET_OFFSET", 1015)
+        self.declare_parameter("FRONT_LEFT_MAGNET_OFFSET", 380)
+        self.declare_parameter("FRONT_RIGHT_MAGNET_OFFSET", 333)
+        self.declare_parameter("BACK_LEFT_MAGNET_OFFSET", 519)
+        self.declare_parameter("BACK_RIGHT_MAGNET_OFFSET", 949)
         self.declare_parameter("ABSOLUTE_ENCODER_COUNTS", 1023)
         self.declare_parameter("GAZEBO_SIMULATION", False)
 
@@ -286,9 +286,9 @@ class DrivetrainNode(Node):
     def absolute_encoders_callback(self, msg: AbsoluteEncoders) -> None:
         """This method is called whenever a message is received on the absoluteEncoders topic."""
         front_left_adjusted = (msg.front_left_encoder - self.FRONT_LEFT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
-        front_right_adjusted = (msg.front_left_encoder - self.FRONT_RIGHT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
-        back_left_adjusted = (msg.front_left_encoder - self.BACK_LEFT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
-        back_right_adjusted = (msg.front_left_encoder - self.BACK_RIGHT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
+        front_right_adjusted = (msg.front_right_encoder - self.FRONT_RIGHT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
+        back_left_adjusted = (msg.back_left_encoder - self.BACK_LEFT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
+        back_right_adjusted = (msg.back_right_encoder - self.BACK_RIGHT_MAGNET_OFFSET) % self.ABSOLUTE_ENCODER_COUNTS
         self.front_left.current_absolute_angle = 360 * front_left_adjusted / self.ABSOLUTE_ENCODER_COUNTS
         self.front_right.current_absolute_angle = 360 * front_right_adjusted / self.ABSOLUTE_ENCODER_COUNTS
         self.back_left.current_absolute_angle = 360 * back_left_adjusted / self.ABSOLUTE_ENCODER_COUNTS

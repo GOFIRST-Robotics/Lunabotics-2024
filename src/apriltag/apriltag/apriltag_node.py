@@ -1,11 +1,13 @@
-from geometry_msgs.msg import TransformStamped
+import os
 import rclpy
 from rclpy.node import Node
 from tf2_ros import TransformBroadcaster
-from isaac_ros_apriltag_interfaces.msg import AprilTagDetectionArray
-import xml.etree.ElementTree as ET
-import os
+
 from rovr_interfaces.srv import ResetOdom
+from geometry_msgs.msg import TransformStamped
+from isaac_ros_apriltag_interfaces.msg import AprilTagDetectionArray
+
+import xml.etree.ElementTree as ET
 
 """Make sure to turn on the camera using 
 ros2 launch isaac_ros_apriltag isaac_ros_apriltag_usb_cam.launch.py
@@ -40,19 +42,10 @@ class ApriltagNode(Node):
 
     def postTransform(self, tag):
         if tag and (self.get_clock().now().to_msg().sec == self.averagedTag.header.stamp.sec):
-            # self.get_logger().info(str(self.averagedTag.header.stamp.sec - self.get_clock().now().to_msg().sec))
             self.get_logger().info(str("Resetting the odom"))
             self.tf_broadcaster.sendTransform(tag)
             return True
         return False
-
-    def printTransforms(self, msg):
-        if len(msg.detections) == 0:
-            return
-        home = msg.detections[0]
-        print(home.pose.pose.pose.position.x)
-        print(home.pose.pose.pose.position.y)
-        print(home.pose.pose.pose.position.z)
 
     def tagDetectionSub(self, msg):
         if len(msg.detections) == 0:
@@ -94,12 +87,10 @@ class ApriltagNode(Node):
         self.averagedTag.header.frame_id = "map"
         self.averagedTag.header.stamp = self.get_clock().now().to_msg()
         self.averagedTag = self.averageTransforms(transforms, self.averagedTag)
-        # self.tf_broadcaster.tagDetectionSub(self.averageTransforms(transforms, t))
-
-    """Averages the transforms of the tags to get a more accurate transform"""
 
     # TODO: Consider using an EKF instead of just averaging
     def averageTransforms(self, transforms, t):
+        """Averages the transforms of the tags to get a more accurate transform"""
         x = 0
         y = 0
         z = 0
