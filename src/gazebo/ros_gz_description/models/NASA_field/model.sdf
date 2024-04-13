@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<sdf version='1.7'>
+  <model name='NASA_field'>
+    <static>true</static>
+    <pose>0 0 0 0 0 0</pose>
+      <link name='field'>
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <uri>meshes/NASA_basic.stl</uri>
+            </mesh>
+          </geometry>
+          <pose>0 0 0 0 0 0</pose>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>meshes/NASA_field.dae</uri>
+            </mesh>
+          </geometry>
+          <pose>0 0 0 0 0 0</pose>
+        </visual>
+      </link>
+
+      <!-- orintation like rule book, bottom field. plus x, plus y from bottom right-->
+
+      <frame name="bottom_right">
+        <pose>3.44 -2.5 0 0 0 0</pose>
+      </frame>
+
+      <!--
+      Tags in the starting zone.
+      This assumes that we are placing 2 tags on the wall.
+      -->
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000</uri>
+        <pose relative_to='bottom_right'>-6.87 1 0.4 1.57 0 -1.57</pose>
+        <name>AprilTag_1</name>
+      </include> 
+
+      
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
+        <pose relative_to='bottom_right'>-6.87 1.2159 0.4 1.57 0 -1.57</pose>
+        <name>AprilTag_2</name>
+      </include>
+
+      <!--
+      Tags in the berm area.
+      Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
+      -->
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
+        <pose relative_to='bottom_right'>-2.4 1 0.4 1.57 0 -1.57</pose>
+        <name>AprilTag_3</name>
+      </include>
+      
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00003</uri>
+        <pose relative_to='bottom_right'>-0.2 1 0.4 1.57 0 -1.57</pose>
+        <name>AprilTag_4</name>
+      </include>
+
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00004</uri>
+        <pose relative_to='bottom_right'>-2.4 0.1 0.4 1.57 0 -1.57</pose>
+        <name>AprilTag_5</name>
+      </include>
+
+      <include>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00005</uri>
+        <pose relative_to='bottom_right'>-0.2 0.1 0.4 1.57 0 -1.57</pose>
+        <name>AprilTag_6</name>
+      </include>
+
+  </model>
+</sdf>

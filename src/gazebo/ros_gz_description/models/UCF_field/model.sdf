@@ -1,20 +1,20 @@
 <?xml version="1.0" ?>
 <sdf version='1.7'>
-  <model name='competition_field'>
+  <model name='UCF_field'>
     <static>true</static>
     <pose>0 0 0 0 0 0</pose>
       <link name='field'>
         <collision name="collision">
           <geometry>
             <mesh>
-              <uri>meshes/basic_collision.stl</uri>
+              <uri>meshes/UCF_basic.stl</uri>
             </mesh>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <mesh>
-              <uri>meshes/competition_field.dae</uri>
+              <uri>meshes/UCF_field.dae</uri>
             </mesh>
           </geometry>
         </visual>

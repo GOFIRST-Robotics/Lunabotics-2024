@@ -29,8 +29,8 @@ def generate_launch_description():
     # Setup project paths
     pkg_project_bringup = get_package_share_directory("ros_gz_launch")
 
-    competition_field = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_project_bringup, "launch", "competition_field.launch.py"))
+    UCF_field = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(pkg_project_bringup, "launch", "UCF_field.launch.py"))
     )
 
     rovr_control = Node(
@@ -51,4 +51,4 @@ def generate_launch_description():
         emulate_tty=True,
     )
 
-    return LaunchDescription([competition_field, rovr_control, joy])
+    return LaunchDescription([UCF_field, rovr_control, joy])

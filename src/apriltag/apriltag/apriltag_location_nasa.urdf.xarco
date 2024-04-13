@@ -47,7 +47,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_3">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="2.45 1 0.4" rpy="0 0 180"/>
+            <origin xyz="2.4 1 0.4" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -60,7 +60,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_4">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="0.25 1 0.4" rpy="0 0 180"/>
+            <origin xyz="0.2 1 0.4" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -73,7 +73,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_5">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="2.45 .2 0.4" rpy="0 0 180"/>
+            <origin xyz="2.4 0.1 0.4" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>
@@ -86,7 +86,7 @@ Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
     <link name="berm_tag_6">
         <parent link="base_link"/>
         <visual>
-            <origin xyz="0.25 .2 0.4" rpy="0 0 180"/>
+            <origin xyz="0.2 0.1 0.4" rpy="0 0 180"/>
             <geometry>
                 <box size="0.1 0.1 0.1"/>
             </geometry>

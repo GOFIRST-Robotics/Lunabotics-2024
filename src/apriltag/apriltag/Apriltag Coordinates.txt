@@ -29,10 +29,10 @@ Meters to cm
 (0,0 in bottom right corner)
 
 4 corners in berm zone (in meters)
-Bottom right berm: .25, .2
-Top right berm: .25, 1
-Top left berm: 2.45, 1
-Bottom left berm: 2.45, .2
+Bottom right berm: .2, .1
+Top right berm: .2, 1
+Top left berm: 2.4, 1
+Bottom left berm: 2.4, .1
 
 starting zone (in meters)
 Near base tag1 6.88, 1

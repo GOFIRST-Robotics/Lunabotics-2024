@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+<world name="UCF_field">
+
+    <plugin
+      filename="ignition-gazebo-physics-system"
+      name="ignition::gazebo::systems::Physics">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-sensors-system"
+      name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-scene-broadcaster-system"
+      name="ignition::gazebo::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-user-commands-system"
+      name="ignition::gazebo::systems::UserCommands">
+    </plugin>
+
+    <include>
+      <uri>package://ros_gz_description/models/sun</uri>
+    </include>
+    
+    <include>
+      <uri>package://ros_gz_description/models/UCF_field</uri>
+      <static>true</static>
+    </include>
+
+    <include>
+      <uri>package://ros_gz_description/models/master_ASM</uri>
+      <pose>3 1 1 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%204</uri>
+      <pose>0 2 1 0 0 0</pose>
+      <name>Rock 1</name>
+    </include>
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%204</uri>
+      <pose>-2 2 1 0 0 0</pose>
+      <name>Rock 2</name>
+    </include>
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%204</uri>
+      <pose>2 1.25 1 0 0 0</pose>
+      <name>Rock 3</name>
+    </include>
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Falling%20Rock%205</uri>
+      <pose>2 2.5 1 0 0 0</pose>
+      <name>Rock 4</name>
+    </include>
+
+  </world>
+</sdf>

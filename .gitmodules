@@ -12,7 +12,7 @@
 	branch = main
 [submodule "src/isaac_ros/isaac_ros_nvblox"]
 	path = src/isaac_ros/isaac_ros_nvblox
-	url = https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nvblox.git
+	url = https://github.com/GOFIRST-Robotics/isaac_ros_nvblox.git
 	branch = main
 [submodule "src/isaac_ros/isaac_ros_apriltag"]
 	path = src/isaac_ros/isaac_ros_apriltag

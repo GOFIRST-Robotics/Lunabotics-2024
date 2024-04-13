@@ -115,7 +115,7 @@ To run the Gazebo simulation:
 ```
 colcon build --symlink-install --packages-up-to ros_gz_launch
 source install/setup.bash
-ros2 launch ros_gz_launch competition_field.launch.py
+ros2 launch ros_gz_launch UCF_field.launch.py
 ```
 
 Then to control the robot, you will need to run:

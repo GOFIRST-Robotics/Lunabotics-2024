@@ -165,7 +165,7 @@ Visualization Manager:
             Filter size: 10
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /nvblox_node/static_esdf_pointcloud
+            Value: /combined_esdf_pointcloud
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
