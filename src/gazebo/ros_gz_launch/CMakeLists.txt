@@ -5,6 +5,7 @@ project(ros_gz_launch)
 find_package(ament_cmake REQUIRED)
 find_package(ros_gz_description REQUIRED)
 find_package(gazebo_files REQUIRED)
+find_package(robot_description REQUIRED)
 
 # Install project launch files
 install(

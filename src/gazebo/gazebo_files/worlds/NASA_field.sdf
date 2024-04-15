@@ -31,8 +31,8 @@
     </include>
 
     <include>
-      <uri>package://ros_gz_description/models/master_ASM</uri>
-      <pose>-2.44 -1.5 1 0 0 0</pose>
+      <uri>package://robot_description/models/master_ASM</uri>
+      <pose>-1.8 -1.5 1 0 0.52359878 0</pose>
     </include>
 
   </world>

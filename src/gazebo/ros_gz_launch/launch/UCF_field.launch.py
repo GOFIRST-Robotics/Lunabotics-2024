@@ -32,13 +32,8 @@ def generate_launch_description():
     # Setup project paths
     pkg_project_bringup = get_package_share_directory("ros_gz_launch")
     pkg_project_gazebo = get_package_share_directory("gazebo_files")
-    pkg_project_description = get_package_share_directory("ros_gz_description")
     pkg_ros_gz_sim = get_package_share_directory("ros_gz_sim")
-
-    # Load the SDF file from "description" package
-    urdf_file = os.path.join(pkg_project_description, "models", "master_ASM", "urdf", "master_ASM.urdf")
-    with open(urdf_file, "r") as infp:
-        robot_desc = infp.read()
+    pkg_robot_description = get_package_share_directory("robot_description")
 
     # Setup to launch the simulator and Gazebo world
     gz_sim = IncludeLaunchDescription(
@@ -49,15 +44,8 @@ def generate_launch_description():
     )
 
     # Takes the description and joint angles as inputs and publishes the 3D poses of the robot links
-    robot_state_publisher = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        name="robot_state_publisher",
-        output="both",
-        parameters=[
-            {"use_sim_time": True},
-            {"robot_description": robot_desc},
-        ],
+    robot_state_publisher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(pkg_robot_description, "launch", "robot_description.launch.py"))
     )
 
     # Launch Arguments

@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Status1
+        - /TF1
         - /TF1/Frames1
         - /TF1/Tree1
         - /Nvblox1
@@ -43,7 +44,7 @@ Visualization Manager:
         zed2i_camera_center:
           Value: false
         zed2i_camera_link:
-          Value: false
+          Value: true
         zed2i_imu_link:
           Value: false
         zed2i_left_camera_frame:
@@ -367,10 +368,10 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /zed2i/robot_description
+        Value: /robot_description
       Enabled: true
       Links:
-        All Links Enabled: true
+        All Links Enabled: false
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
@@ -380,6 +381,46 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        swerve1_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
+        swerve2_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
+        swerve3_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
+        swerve4_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
+        wheel1_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
+        wheel2_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
+        wheel3_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
+        wheel4_Link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: false
         zed2i_camera_center:
           Alpha: 1
           Show Axes: false

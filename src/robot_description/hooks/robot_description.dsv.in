@@ -1,0 +1,2 @@
+prepend-non-duplicate;IGN_GAZEBO_RESOURCE_PATH;share;@CMAKE_INSTALL_PREFIX@/share
+prepend-non-duplicate;IGN_GAZEBO_RESOURCE_PATH;share;/workspaces/isaac_ros-dev/install/zed_interfaces/share/

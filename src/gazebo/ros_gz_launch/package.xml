@@ -15,6 +15,7 @@
   <depend>joint_state_publisher_gui</depend>
   <depend>ros_gz_description</depend>
   <depend>gazebo_files</depend>
+  <depend>robot_description</depend>
 
   <exec_depend>drivetrain</exec_depend>
 

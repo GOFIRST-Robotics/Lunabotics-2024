@@ -18,11 +18,14 @@
 import os
 
 from launch import LaunchDescription
-from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import LoadComposableNodes, Node
 from launch_ros.descriptions import ComposableNode
 from launch.conditions import UnlessCondition
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     bringup_dir = os.path.join("config", "sensors")
@@ -32,8 +35,8 @@ def generate_launch_description():
 
     config_file_common = os.path.join(bringup_dir, "zed_common.yaml")
 
-    # URDF/xacro file to be loaded by the Robot State Publisher node
-    xacro_path = os.path.join("config", "urdf", "robot_descr.urdf.xarco")
+    pkg_robot_description = get_package_share_directory("robot_description")
+
 
     # Option to attach the nodes to a shared component container for speed ups through intra process communication.
     # Make sure to set the 'component_container_name' to the name of the component container you want to attach to.
@@ -52,30 +55,8 @@ def generate_launch_description():
     )
 
     # Robot State Publisher node (publishing static tfs for the camera)
-    rsp_node = Node(
-        package="robot_state_publisher",
-        namespace="zed2i",
-        executable="robot_state_publisher",
-        name="zed_state_publisher",
-        output="screen",
-        parameters=[
-            {
-                "robot_description": Command(
-                    [
-                        "xacro",
-                        " ",
-                        xacro_path,
-                        " ",
-                        "camera_name:=",
-                        "zed2i",
-                        " ",
-                        "camera_model:=",
-                        "zed2i",
-                        " ",
-                    ]
-                )
-            }
-        ],
+    robot_state_publisher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(pkg_robot_description, "launch", "robot_description.launch.py"))
     )
 
     load_composable_nodes = LoadComposableNodes(
@@ -98,7 +79,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            rsp_node,
+            robot_state_publisher,
             zed2_container,
             load_composable_nodes,
         ]

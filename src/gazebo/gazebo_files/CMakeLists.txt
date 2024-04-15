@@ -9,6 +9,7 @@ project(gazebo_files)
 # Such variables can be used lateron in the CMakeLists.txt file.
 find_package(ament_cmake REQUIRED)
 find_package(ros_gz_description REQUIRED)
+find_package(robot_description REQUIRED)
 
 find_package(ignition-cmake2 REQUIRED)
 find_package(ignition-plugin1 REQUIRED COMPONENTS register)

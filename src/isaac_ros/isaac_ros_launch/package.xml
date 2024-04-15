@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>isaac_ros_launch</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <version>0.0.1</version>
+  <description>Package for ISAAC_ROS launch files</description>
   <maintainer email="jmblixt3@gmail.com">blixt</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT License</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
@@ -13,10 +13,13 @@
   <test_depend>python3-pytest</test_depend>
 
   <exec_depend>isaac_ros_nvblox</exec_depend>
+  <exec_depend>isaac_ros_apriltag</exec_depend>
   <exec_depend>zed_wrapper</exec_depend>
   <exec_depend>nvblox_rviz_plugin</exec_depend>
   <exec_depend>nvblox_examples_bringup</exec_depend>
   <exec_depend>nvblox_nav2</exec_depend>
+  <exec_depend>combine_esdf</exec_depend>
+  <exec_depend>robot_description</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>
