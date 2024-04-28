@@ -51,7 +51,7 @@ Stephen Brawner (brawner@gmail.com)
   <joint name="camera_joint" type="fixed">
     <parent link="base_link"/>
     <child link="zed2i_camera_link"/>
-    <origin xyz="0.343 -0.009 -0.1254" rpy="0 -0.52359878 0" />
+    <origin xyz="0.343 -0.009 -0.1254" rpy="0 0.52359878 0" />
   </joint>
 
   <gazebo reference="zed2i_camera_link">
