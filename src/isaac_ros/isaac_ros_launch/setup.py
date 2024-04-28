@@ -23,6 +23,9 @@ setup(
     description="Package for ISAAC_ROS launch files",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            "frame_id_renamer = isaac_ros_launch.frame_id_renamer:main",
+            "odom_publisher = isaac_ros_launch.odom_publisher:main",
+        ],
     },
 )

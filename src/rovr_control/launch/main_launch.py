@@ -37,14 +37,6 @@ def generate_launch_description():
         output="screen",
         emulate_tty=True,
     )
-    skimmer = Node(
-        package="skimmer",
-        executable="skimmer_node",
-        name="skimmer_node",
-        parameters=["config/motor_control.yaml"],
-        output="screen",
-        emulate_tty=True,
-    )
     read_serial = Node(
         package="rovr_control",
         executable="read_serial",
@@ -60,7 +52,6 @@ def generate_launch_description():
     ld.add_action(motor_control)
     ld.add_action(joystick_node)
     ld.add_action(drivetrain)
-    ld.add_action(skimmer)
     ld.add_action(read_serial)
     ld.add_action(can_bus)
 
