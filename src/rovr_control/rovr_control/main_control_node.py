@@ -23,6 +23,9 @@ import subprocess  # This is for the webcam stream subprocesses
 import signal  # Allows us to kill subprocesses
 import os  # Allows us to kill subprocesses
 
+# Provides a “navigation as a library” capability
+from nav2_simple_commander.robot_navigator import BasicNavigator
+
 # Import our logitech gamepad button mappings
 from .gamepad_constants import *
 
@@ -32,7 +35,7 @@ from .gamepad_constants import *
 # GLOBAL VARIABLES #
 buttons = [0] * 11  # This is to help with button press detection
 # Define the possible states of our robot
-states = {"Teleop": 0, "Auto_Dig": 1, "Auto_Offload": 2}
+states = {"Teleop": 0, "Auto_Dig": 1, "Auto_Offload": 2, "Calibrating": 3}
 
 
 class MainControlNode(Node):
@@ -71,7 +74,7 @@ class MainControlNode(Node):
         self.skimmer_goal_reached = True
 
         # Define timers here
-        self.apriltag_timer = self.create_timer(0.1, self.publish_odom_callback)
+        self.apriltag_timer = None
 
         # Define service clients here
         self.cli_skimmer_toggle = self.create_client(SetPower, "skimmer/toggle")
@@ -90,15 +93,20 @@ class MainControlNode(Node):
         self.joy_subscription = self.create_subscription(Joy, "joy", self.joystick_callback, 10)
         self.skimmer_goal_subscription = self.create_subscription(Bool, "/skimmer/goal_reached", self.skimmer_goal_callback, 10)
 
-    def publish_odom_callback(self) -> None:
+        self.started_calibration = False
+        self.field_calibrated = False
+        self.nav2 = BasicNavigator()  # Instantiate the BasicNavigator class
+
+    def start_calibration_callback(self) -> None:
         """This method publishes the odometry of the robot."""
-        future = self.cli_set_apriltag_odometry.call_async(ResetOdom.Request())
-        future.add_done_callback(self.future_odom_callback)
+        if not self.started_calibration:
+            asyncio.ensure_future(self.calibrate_field_coordinates())
+            self.started_calibration = True
 
     def future_odom_callback(self, future) -> None:
         if future.result().success:
-            self.get_logger().info("Apriltag Odometry Published")
-            self.apriltag_timer.cancel()
+            self.field_calibrated = True
+            self.get_logger().info("map -> odom TF published!")
 
     def stop_all_subsystems(self) -> None:
         """This method stops all subsystems on the robot."""
@@ -110,6 +118,23 @@ class MainControlNode(Node):
         """This method returns to teleop control."""
         self.stop_all_subsystems()  # Stop all subsystems
         self.state = states["Teleop"]  # Return to Teleop mode
+
+    async def calibrate_field_coordinates(self) -> None:
+        """This method rotates until we can see apriltag(s) and then sets the map -> odom tf."""
+        if not self.field_calibrated:
+            self.get_logger().info("Beginning search for apriltags")
+            while not self.cli_drivetrain_drive.wait_for_service():  # Wait for the drivetrain services to be available
+                self.get_logger().warn("Waiting for drivetrain services to become available...")
+                await asyncio.sleep(0.1)
+            await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=0.0, turning_power=0.15))
+        while not self.field_calibrated:
+            future = self.cli_set_apriltag_odometry.call_async(ResetOdom.Request())
+            future.add_done_callback(self.future_odom_callback)
+            await asyncio.sleep(0.05)  # Allows other async tasks to continue running (this is non-blocking)
+        self.get_logger().info("Field Coordinates Calibrated!")
+        await self.cli_drivetrain_stop.call_async(Stop.Request())
+        self.apriltag_timer.cancel()
+        self.end_autonomous()  # Return to Teleop mode
 
     # TODO: This autonomous routine has not been tested yet!
     async def auto_dig_procedure(self) -> None:
@@ -186,6 +211,17 @@ class MainControlNode(Node):
                 self.cli_lift_set_power.call_async(SetPower.Request(power=-self.skimmer_lift_manual_power))
             elif msg.buttons[LEFT_TRIGGER] == 0 and buttons[LEFT_TRIGGER] == 1:
                 self.cli_lift_stop.call_async(Stop.Request())
+
+            # Check if the Apriltag calibration button is pressed
+            if msg.buttons[A_BUTTON] == 1 and buttons[A_BUTTON] == 0:
+                # Start the field calibration process
+                self.started_calibration = False
+                self.field_calibrated = False
+                self.state = states["Calibrating"]  # Exit Teleop mode
+                if not self.apriltag_timer:
+                    self.apriltag_timer = self.create_timer(0.1, self.start_calibration_callback)
+                else:
+                    self.apriltag_timer.reset()
 
         # THE CONTROLS BELOW ALWAYS WORK #
 
