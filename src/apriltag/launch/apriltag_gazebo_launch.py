@@ -17,7 +17,7 @@ def generate_launch_description():
         plugin="nvidia::isaac_ros::apriltag::AprilTagNode",
         name="isaac_ros_apriltag",
         namespace="",
-        remappings=[("image", "color_camera_image"), ("camera_info", "color_camera_info")],
+        remappings=[("image", "color/image"), ("camera_info", "color/camera_info")],
     )
 
     apriltag_container = ComposableNodeContainer(

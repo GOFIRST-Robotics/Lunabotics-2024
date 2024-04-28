@@ -31,6 +31,11 @@ def generate_launch_description():
         default_value="False",
         description="Whether to run in gazebo",
     )
+    use_nvblox_arg = DeclareLaunchArgument(
+        "use_nvblox",
+        default_value="True",
+        description="Whether to run nvblox",
+    )
 
     global_frame = LaunchConfiguration("global_frame", default="odom")
 
@@ -42,6 +47,7 @@ def generate_launch_description():
         package="rclcpp_components",
         executable="component_container_mt",
         output="screen",
+        condition=IfCondition(LaunchConfiguration("use_nvblox")),
     )
 
     # ZED
@@ -84,6 +90,7 @@ def generate_launch_description():
             "attach_to_shared_component_container": "True",
             "component_container_name": shared_container_name,
         }.items(),
+        condition=IfCondition(LaunchConfiguration("use_nvblox")),
     )
 
     # Rviz
@@ -132,6 +139,7 @@ def generate_launch_description():
             run_rviz_arg,
             setup_for_zed_arg,
             setup_for_gazebo_arg,
+            use_nvblox_arg,
             shared_container,
             nvblox_launch,
             nav2_launch,
