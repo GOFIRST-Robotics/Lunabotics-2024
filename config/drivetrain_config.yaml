@@ -3,9 +3,9 @@
     HALF_WHEEL_BASE: 0.55959375 # HALF of the wheelbase in meters
     HALF_TRACK_WIDTH: 0.2746375 # HALF of the trackwidth in meters
     STEERING_MOTOR_GEAR_RATIO: 40 # Gear ratio of the steering motor (40:1)
-    FRONT_LEFT_MAGNET_OFFSET: 380 # (in encoder counts)
-    FRONT_RIGHT_MAGNET_OFFSET: 333 # (in encoder counts)
-    BACK_LEFT_MAGNET_OFFSET: 519 # (in encoder counts)
-    BACK_RIGHT_MAGNET_OFFSET: 949 # (in encoder counts)
-    ABSOLUTE_ENCODER_COUNTS: 1023 # (in encoder counts)
+    FRONT_LEFT_MAGNET_OFFSET: 828 # (in encoder counts)
+    FRONT_RIGHT_MAGNET_OFFSET: 355 # (in encoder counts)
+    BACK_LEFT_MAGNET_OFFSET: 332 # (in encoder counts)
+    BACK_RIGHT_MAGNET_OFFSET: 388 # (in encoder counts)
+    ABSOLUTE_ENCODER_COUNTS: 1024 # (in encoder counts)
     GAZEBO_SIMULATION: False # Set to true if running in Gazebo

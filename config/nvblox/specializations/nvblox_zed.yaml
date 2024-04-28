@@ -1,9 +1,6 @@
 /**:
   ros__parameters:
     # esdf settings
-    esdf_slice_height: -0.3
-    esdf_2d_min_height: 0.0
-    esdf_2d_max_height: 0.1
     # Lidar settings
     use_lidar: false
     # QoS settings

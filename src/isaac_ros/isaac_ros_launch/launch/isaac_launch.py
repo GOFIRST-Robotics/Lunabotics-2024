@@ -1,20 +1,3 @@
-# SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-# Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -35,12 +18,20 @@ def generate_launch_description():
     nav2_bringup_dir = get_package_share_directory("nav2_bringup")
 
     # Launch Arguments
-    run_rviz_arg = DeclareLaunchArgument("run_rviz", default_value="True", description="Whether to start RVIZ")
-    from_bag_arg = DeclareLaunchArgument(
-        "from_bag",
-        default_value="False",
-        description="Whether to run from a bag or live zed data",
+    run_rviz_arg = DeclareLaunchArgument(
+        "run_rviz", default_value="True", description="Whether to start RVIZ"
     )
+    setup_for_zed_arg = DeclareLaunchArgument(
+        "setup_for_zed",
+        default_value="True",
+        description="Whether to run from live zed data",
+    )
+    setup_for_gazebo_arg = DeclareLaunchArgument(
+        "setup_for_gazebo",
+        default_value="False",
+        description="Whether to run in gazebo",
+    )
+
     global_frame = LaunchConfiguration("global_frame", default="odom")
 
     # Create a shared container to hold composable nodes
@@ -54,14 +45,33 @@ def generate_launch_description():
     )
 
     # ZED
-    # Note(remos): This was only tested with a ZED2 camera so far.
     zed_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(bringup_dir, "zed2i.launch.py")]),
         launch_arguments={
             "attach_to_shared_component_container": "True",
             "component_container_name": shared_container_name,
-            "from_bag": LaunchConfiguration("from_bag"),
         }.items(),
+        condition=IfCondition(LaunchConfiguration("setup_for_zed")),
+    )
+    # Gazebo
+    gazebo_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [
+                os.path.join(
+                    get_package_share_directory("ros_gz_launch"),
+                    "launch",
+                    "UCF_field.launch.py",
+                )
+            ]
+        ),
+        condition=IfCondition(LaunchConfiguration("setup_for_gazebo")),
+    )
+
+    frame_id_renamer = Node(
+        package="isaac_ros_launch",
+        executable="frame_id_renamer",
+        name="frame_id_renamer",
+        condition=IfCondition(LaunchConfiguration("setup_for_gazebo")),
     )
 
     # Nvblox
@@ -69,7 +79,8 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([os.path.join(bringup_dir, "nvblox.launch.py")]),
         launch_arguments={
             "global_frame": global_frame,
-            "setup_for_zed": "True",
+            "setup_for_zed": LaunchConfiguration("setup_for_zed"),
+            "setup_for_gazebo": LaunchConfiguration("setup_for_gazebo"),
             "attach_to_shared_component_container": "True",
             "component_container_name": shared_container_name,
         }.items(),
@@ -91,18 +102,24 @@ def generate_launch_description():
         }.items(),
         condition=IfCondition(LaunchConfiguration("run_rviz")),
     )
-    # Nav2
+
+    # Nav2 params
     nav2_param_file = os.path.join("config", "nav2_isaac_sim.yaml")
-    param_substitutions = {"global_frame": LaunchConfiguration("global_frame", default="odom")}
+    param_substitutions = {
+        "global_frame": LaunchConfiguration("global_frame", default="odom")
+    }
     configured_params = RewrittenYaml(
         source_file=nav2_param_file,
         root_key="",
         param_rewrites=param_substitutions,
         convert_types=True,
     )
+
     # nav2 launch
     nav2_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(nav2_bringup_dir, "launch", "navigation_launch.py")),
+        PythonLaunchDescriptionSource(
+            os.path.join(nav2_bringup_dir, "launch", "navigation_launch.py")
+        ),
         launch_arguments={
             "use_sim_time": "False",
             "params_file": configured_params,
@@ -113,11 +130,14 @@ def generate_launch_description():
     return LaunchDescription(
         [
             run_rviz_arg,
-            from_bag_arg,
+            setup_for_zed_arg,
+            setup_for_gazebo_arg,
             shared_container,
-            zed_launch,
             nvblox_launch,
-            rviz_launch,
             nav2_launch,
+            zed_launch,
+            gazebo_launch,
+            frame_id_renamer,
+            rviz_launch,
         ]
     )

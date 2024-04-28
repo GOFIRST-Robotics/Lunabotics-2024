@@ -14,6 +14,7 @@ def generate_launch_description():
         package="apriltag",
         executable="apriltag_node",
         name="apriltag_node",
+        parameters=["config/rovr_control.yaml"],
     )
 
     apriltag_node = ComposableNode(
