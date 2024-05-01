@@ -3,7 +3,7 @@
   gz_topic_name: "/clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
-  direction: GZ_TO_ROS
+  direction: BIDIRECTIONAL
 
 - ros_topic_name: "/wheel1/cmd_vel"
   gz_topic_name: "/model/Master_ASM/joint/wheel1_joint/cmd_vel"
@@ -47,24 +47,20 @@
   gz_type_name: "ignition.msgs.Double"
   direction: ROS_TO_GZ
 
-- gz_topic_name: "/color/image"
-  ros_topic_name: "/gazebo/color/image"
+- topic_name: "/color/image"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "ignition.msgs.Image"
   direction: GZ_TO_ROS
-- gz_topic_name: "/color/camera_info"
-  ros_topic_name: "/gazebo/color/camera_info"
+- topic_name: "/color/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "ignition.msgs.CameraInfo"
   direction: GZ_TO_ROS
 
-- gz_topic_name: "/depth/image"
-  ros_topic_name: "/gazebo/depth/image"
+- topic_name: "/depth/image"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "ignition.msgs.Image"
   direction: GZ_TO_ROS
-- gz_topic_name: "/depth/camera_info"
-  ros_topic_name: "/gazebo/depth/camera_info"
+- topic_name: "/depth/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "ignition.msgs.CameraInfo"
   direction: GZ_TO_ROS

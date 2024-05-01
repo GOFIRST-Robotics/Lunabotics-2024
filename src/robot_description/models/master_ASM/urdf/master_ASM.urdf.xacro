@@ -90,6 +90,7 @@ Stephen Brawner (brawner@gmail.com)
       </camera>
       <topic>/color/image</topic>
       <info_topic>/color/camera_info</info_topic>
+      <gz_frame_id>zed2i_left_camera_optical_frame</gz_frame_id>
     </sensor>
 
     <sensor name="depthcamera" type="depth">
@@ -110,6 +111,7 @@ Stephen Brawner (brawner@gmail.com)
       </camera>
       <topic>/depth/image</topic>
       <info_topic>/depth/camera_info</info_topic>
+      <gz_frame_id>zed2i_left_camera_optical_frame</gz_frame_id>
     </sensor>
     
   </gazebo>
