@@ -45,8 +45,8 @@ class SkimmerNode(Node):
         self.timer = self.create_timer(0.1, self.timer_callback)
 
         # Define default values for our ROS parameters below #
-        self.declare_parameter("SKIMMER_BELT_MOTOR", 1)
-        self.declare_parameter("SKIMMER_LIFT_MOTOR", 2)
+        self.declare_parameter("SKIMMER_BELT_MOTOR", 2)
+        self.declare_parameter("SKIMMER_LIFT_MOTOR", 1)
 
         # Assign the ROS Parameters to member variables below #
         self.SKIMMER_BELT_MOTOR = self.get_parameter("SKIMMER_BELT_MOTOR").value
@@ -69,14 +69,18 @@ class SkimmerNode(Node):
         # Current state of the lift system
         self.lift_running = False
 
+        # Limit Switch States
+        self.top_limit_pressed = False
+        self.bottom_limit_pressed = False
+
         # CONSTANTS DEFINED BELOW #
         # ----------------------------------------------------------------
-        # Circumference of the pulley used by the lift system
-        self.PULLEY_CIRCUMFERENCE = 0.1  # TODO: Ask mechanical team for this value (measured in meters)
+        # Circumference of the pulley used by the lift system IN METERS
+        self.PULLEY_CIRCUMFERENCE = 0.2032  # TODO: Verify this (meters)
         # Gear ratio of the lift motor
-        self.LIFT_GEAR_RATIO = 1 / 1  # TODO: Ask mechanical team for this value (gear ratio)
-        # Maximum value of the lift motor encoder (bottom of the lift system) in degrees
-        self.MAX_ENCODER_VALUE = 36000  # TODO: Determine this value (measured in degrees)
+        self.LIFT_GEAR_RATIO = 100 / 1  # TODO: Verify this
+        # Maximum value of the lift motor encoder (bottom of the lift system) IN DEGREES
+        self.MAX_ENCODER_VALUE = -3600 * 360  # TODO: Verify this (multiple by 360 to get degrees)
         # ----------------------------------------------------------------
 
     # Define subsystem methods here
@@ -121,13 +125,22 @@ class SkimmerNode(Node):
     def lift_set_power(self, power: float) -> None:
         """This method sets power to the lift system."""
         self.lift_running = True
+        if power > 0 and self.top_limit_pressed:
+            self.get_logger().warn("WARNING: Top limit switch pressed!")
+            self.stop_lift()  # Stop the lift system
+            return
+        if power < 0 and self.bottom_limit_pressed:
+            self.get_logger().warn("WARNING: Bottom limit switch pressed!")
+            self.stop_lift()  # Stop the lift system
+            return
         self.cli_motor_set.call_async(
             MotorCommandSet.Request(type="duty_cycle", can_id=self.SKIMMER_LIFT_MOTOR, value=power)
         )
 
+    # TODO: Test this method before using it!
     def zero_lift(self) -> None:
         """This method zeros the lift system by slowly raising it until the top limit switch is pressed."""
-        self.lift_set_power(-0.15)  # TODO: Is this direction correct?
+        self.lift_set_power(0.05)
 
     # Define service callback methods here
     def set_power_callback(self, request, response):
@@ -192,13 +205,17 @@ class SkimmerNode(Node):
     # Define subscriber callback methods here
     def limit_switch_callback(self, limit_switches_msg):
         """This subscriber callback method is called whenever a message is received on the limitSwitches topic."""
-        if limit_switches_msg.top_limit_switch:  # If the top limit switch is pressed
+        if not self.top_limit_pressed and limit_switches_msg.top_limit_switch:
             self.stop_lift()  # Stop the lift system
+        if not self.bottom_limit_pressed and limit_switches_msg.bottom_limit_switch:
+            self.stop_lift()  # Stop the lift system
+        self.top_limit_pressed = limit_switches_msg.top_limit_switch
+        self.bottom_limit_pressed = limit_switches_msg.bottom_limit_switch
+        if self.top_limit_pressed:  # If the top limit switch is pressed
             self.height_encoder_offset = self.current_height_degrees
             print("Current height in degrees: " + str(self.current_height_degrees))
             print("New height encoder offset: " + str(self.height_encoder_offset))
-        elif limit_switches_msg.bottom_limit_switch:  # If the bottom limit switch is pressed
-            self.stop_lift()  # Stop the lift system
+        elif self.bottom_limit_pressed:  # If the bottom limit switch is pressed
             self.height_encoder_offset = self.current_height_degrees - self.MAX_ENCODER_VALUE
             print("Current height in degrees: " + str(self.current_height_degrees))
             print("New height encoder offset: " + str(self.height_encoder_offset))

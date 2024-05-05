@@ -47,8 +47,8 @@ class MainControlNode(Node):
         self.declare_parameter("autonomous_driving_power", 0.25)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("max_drive_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("max_turn_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
-        self.declare_parameter("skimmer_belt_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
-        self.declare_parameter("skimmer_lift_manual_power", 0.35)  # Measured in Duty Cycle (0.0-1.0)
+        self.declare_parameter("skimmer_belt_power", -0.2)  # Measured in Duty Cycle (0.0-1.0)
+        self.declare_parameter("skimmer_lift_manual_power", 0.05)  # Measured in Duty Cycle (0.0-1.0)
 
         # Assign the ROS Parameters to member variables below #
         self.autonomous_driving_power = self.get_parameter("autonomous_driving_power").value
@@ -202,6 +202,10 @@ class MainControlNode(Node):
             # Check if the skimmer button is pressed #
             if msg.buttons[X_BUTTON] == 1 and buttons[X_BUTTON] == 0:
                 self.cli_skimmer_toggle.call_async(SetPower.Request(power=self.skimmer_belt_power))
+
+            # Check if the reverse skimmer button is pressed #
+            if msg.buttons[Y_BUTTON] == 1 and buttons[Y_BUTTON] == 0:
+                self.cli_skimmer_setPower.call_async(SetPower.Request(power=-self.skimmer_belt_power))
 
             # Manually adjust the height of the skimmer with the left and right triggers
             if msg.buttons[RIGHT_TRIGGER] == 1 and buttons[RIGHT_TRIGGER] == 0:
