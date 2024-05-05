@@ -3,6 +3,6 @@
     autonomous_driving_power: 0.25 # Measured in Duty Cycle (0.0-1.0)
     max_drive_power: 1.0 # Measured in Duty Cycle (0.0-1.0)
     max_turn_power: 1.0 # Measured in Duty Cycle (0.0-1.0)
-    skimmer_belt_power: 0.35 # Measured in Duty Cycle (0.0-1.0)
-    skimmer_lift_manual_power: 0.35 # Measured in Duty Cycle (0.0-1.0)
+    skimmer_belt_power: -0.2 # Measured in Duty Cycle (0.0-1.0)
+    skimmer_lift_manual_power: 0.05 # Measured in Duty Cycle (0.0-1.0)
     autonomous_field_type: "top" # The type of field ("top", "bottom", "nasa")

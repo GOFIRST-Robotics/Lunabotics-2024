@@ -7,7 +7,7 @@ from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
 )
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from nav2_common.launch import RewrittenYaml
@@ -16,6 +16,7 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
     bringup_dir = get_package_share_directory("isaac_ros_launch")
     nav2_bringup_dir = get_package_share_directory("nav2_bringup")
+    apriltag_bringup_dir = get_package_share_directory("apriltag")
 
     # Launch Arguments
     run_rviz_arg = DeclareLaunchArgument("run_rviz", default_value="True", description="Whether to start RVIZ")
@@ -33,6 +34,11 @@ def generate_launch_description():
         "use_nvblox",
         default_value="True",
         description="Whether to run nvblox",
+    )
+    record_svo_arg = DeclareLaunchArgument(
+        "record_svo",
+        default_value="False",
+        description="Whether to record a ZED svo file",
     )
 
     global_frame = LaunchConfiguration("global_frame", default="odom")
@@ -54,6 +60,7 @@ def generate_launch_description():
         launch_arguments={
             "attach_to_shared_component_container": "True",
             "component_container_name": shared_container_name,
+            "record_svo": LaunchConfiguration("record_svo"),
         }.items(),
         condition=IfCondition(LaunchConfiguration("setup_for_zed")),
     )
@@ -121,11 +128,23 @@ def generate_launch_description():
         }.items(),
     )
 
+    # apriltag launch
+    apriltag_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(apriltag_bringup_dir, "apriltag_launch.py")]),
+        condition=UnlessCondition(LaunchConfiguration("setup_for_gazebo")),
+    )
+    # apriltag (gazebo) launch
+    apriltag_gazebo_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(apriltag_bringup_dir, "apriltag_gazebo_launch.py")]),
+        condition=IfCondition(LaunchConfiguration("setup_for_gazebo")),
+    )
+
     return LaunchDescription(
         [
             run_rviz_arg,
             setup_for_zed_arg,
             setup_for_gazebo_arg,
+            record_svo_arg,
             use_nvblox_arg,
             shared_container,
             nvblox_launch,
@@ -133,5 +152,7 @@ def generate_launch_description():
             zed_launch,
             gazebo_launch,
             rviz_launch,
+            apriltag_launch,
+            apriltag_gazebo_launch,
         ]
     )
