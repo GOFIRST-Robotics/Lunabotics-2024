@@ -1,0 +1,8 @@
+string srctype
+string device
+uint16 width 
+uint16 height
+uint16 framerate
+string format
+---
+int32 success

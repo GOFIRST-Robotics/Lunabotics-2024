@@ -33,23 +33,24 @@
       This assumes that we are placing 2 tags on the wall.
       -->
       <include>
-        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000</uri>
-        <pose relative_to='bottom_right'>-6.87 1 0.4 1.57 0 -1.57</pose>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
+        <pose relative_to='bottom_right'>-6.87 1 0.4 1.57 0 1.57</pose>
         <name>AprilTag_1</name>
       </include> 
 
       
       <include>
-        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
-        <pose relative_to='bottom_right'>-6.87 1.2159 0.4 1.57 0 -1.57</pose>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
+        <pose relative_to='bottom_right'>-6.87 1.2159 0.4 1.57 0 1.57</pose>
         <name>AprilTag_2</name>
       </include>
 
       <!--
       Tags in the berm area.
       Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
+      Unused
       -->
-      <include>
+      <!-- <include>
         <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
         <pose relative_to='bottom_right'>-2.4 1 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_3</name>
@@ -71,7 +72,7 @@
         <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00005</uri>
         <pose relative_to='bottom_right'>-0.2 0.1 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_6</name>
-      </include>
+      </include> -->
 
   </model>
 </sdf>

@@ -6,7 +6,7 @@ import cv2
 from cv_bridge import CvBridge
 import math
 
-# import time
+# NOTE: We decided not to use this node for 2024 as we didn't have the time to test it.
 
 # TODO: NEED TO UPDATE SKIMMER SIZE, DISTANCE, DISTANCE THRESHOLD
 # TODO: Should probably update pollrate/ consecutive cycles

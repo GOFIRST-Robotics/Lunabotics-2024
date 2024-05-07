@@ -31,13 +31,13 @@
       This assumes that we are placing 2 tags on the wall.
       -->
       <include>
-        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000</uri>
-        <pose relative_to='bottom_bottom_right'>0 3.67 0.4 1.57 0 -1.57</pose> <!-- 3.57 + beaconwidth/2 to center it -->
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
+        <pose relative_to='bottom_bottom_right'>0 3.57 0.4 1.57 0 -1.57</pose> <!-- 3.57 + beaconwidth/2 to center it -->
         <name>AprilTag_1_Bottom</name>
       </include>
 
       <include>
-        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
         <pose relative_to='bottom_bottom_right'>0 3.3541 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_2_Bottom</name>
       </include>
@@ -45,8 +45,10 @@
       <!--
       Tags in the berm area.
       Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
+      Unused
       -->
-      <include>
+      
+      <!-- <include>
         <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
         <pose relative_to='bottom_bottom_right'>-7.59 1.45 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_3_Bottom</name>
@@ -68,7 +70,7 @@
         <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00005</uri>
         <pose relative_to='bottom_bottom_right'>-6.09 0.55 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_6_Bottom</name>
-      </include>
+      </include> -->
 
       <!-- orintation like rule book, top field. plus x, plus y from bottom right-->
       
@@ -81,22 +83,23 @@
       This assumes that we are placing 2 tags on the wall.
       -->
       <include>
-        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00000</uri>
-        <pose relative_to='top_bottom_right'>0 1 0.4 1.57 0 -1.57</pose>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
+        <pose relative_to='top_bottom_right'>0 1.2159 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_1_Top</name>
       </include>
 
       <include>
-        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00001</uri>
-        <pose relative_to='top_bottom_right'>0 1.2159 0.4 1.57 0 -1.57</pose>
+        <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
+        <pose relative_to='top_bottom_right'>0 1 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_2_Top</name>
       </include>
 
       <!--
       Tags in the berm area.
       Goes Top left, Top right, Bottom left, Bottom right from tags 3-6
+      Unused
       -->
-      <include>
+      <!-- <include>
         <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00002</uri>
         <pose relative_to='top_bottom_right'>-7.59 4.02 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_3_Top</name>
@@ -118,6 +121,6 @@
         <uri>/src/gazebo/ros_gz_description/models/Apriltag36_11_00005</uri>
         <pose relative_to='top_bottom_right'>-6.09 3.12 0.4 1.57 0 -1.57</pose>
         <name>AprilTag_6_Top</name>
-      </include>
+      </include> -->
   </model>
 </sdf>

@@ -75,7 +75,7 @@ class ApriltagNode(Node):
             tree = ET.parse(self.file_path)
             root = tree.getroot()
 
-            link = root[id]  # assumes tag 1 = home 1, tag 2 = home 2, 3 = berm 1 etc.
+            link = root[id - 1]  # assumes tag 1 = home 1, tag 2 = home 2, 3 = berm 1 etc.
 
             xyz_elements = link.findall(".//origin[@xyz]")
             xyz_values = [element.attrib["xyz"] for element in xyz_elements]

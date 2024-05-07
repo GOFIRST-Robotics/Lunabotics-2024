@@ -165,10 +165,12 @@ class MotorControlNode : public rclcpp::Node {
 
   // Set the percent power of the motor between -1.0 and 1.0
   void vesc_set_duty_cycle(uint32_t id, float percentPower) {
-    // Do not allow setting more than 100% power in either direction
+    // Disable the PID controller for this motor if it's active
     if (this->pid_controllers[id]) {
       this->pid_controllers[id]->isActive = false;
     }
+
+    // Do not allow setting more than 100% power in either direction
     percentPower = std::clamp(percentPower, (float)(-1), (float)(1));
     int32_t data = percentPower * 100000; // Convert from percent power to a signed 32-bit integer
 
@@ -255,7 +257,7 @@ public:
     this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
     this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
     this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
-    this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.8);
+    this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.05);
 
     // Enable continuous input for the swerve module PID controllers
     this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()]->enableContinuousInput(0, 360 * this->get_parameter("STEERING_MOTOR_GEAR_RATIO").as_int());
@@ -374,7 +376,7 @@ private:
       response->success = 0; // indicates success
     } else {
       response->success = 1; // indicates failure
-      RCLCPP_ERROR(this->get_logger(), "GET command for CAN ID %u read stale data!", request->can_id);
+      RCLCPP_WARN(this->get_logger(), "GET command for CAN ID %u read stale data!", request->can_id);
     }
   }
 

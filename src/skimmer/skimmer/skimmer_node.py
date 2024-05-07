@@ -8,11 +8,11 @@ import rclpy
 from rclpy.node import Node
 
 # Import ROS 2 formatted message types
-from std_msgs.msg import Float32, Bool
+from std_msgs.msg import Bool
 
 # Import custom ROS 2 interfaces
 from rovr_interfaces.srv import MotorCommandSet, MotorCommandGet
-from rovr_interfaces.srv import SetPower, Stop, SetHeight
+from rovr_interfaces.srv import SetPower, Stop, SetPosition
 from rovr_interfaces.msg import LimitSwitches
 
 
@@ -29,13 +29,12 @@ class SkimmerNode(Node):
         self.srv_toggle = self.create_service(SetPower, "skimmer/toggle", self.toggle_callback)
         self.srv_stop = self.create_service(Stop, "skimmer/stop", self.stop_callback)
         self.srv_setPower = self.create_service(SetPower, "skimmer/setPower", self.set_power_callback)
-        self.srv_setHeight = self.create_service(SetHeight, "skimmer/setHeight", self.set_height_callback)
+        self.srv_setPosition = self.create_service(SetPosition, "lift/setPosition", self.set_position_callback)
         self.srv_lift_stop = self.create_service(Stop, "lift/stop", self.stop_lift_callback)
         self.srv_lift_set_power = self.create_service(SetPower, "lift/setPower", self.lift_set_power_callback)
         self.srv_zero_lift = self.create_service(Stop, "lift/zero", self.zero_lift_callback)
 
         # Define publishers here
-        self.publisher_height = self.create_publisher(Float32, "skimmer/height", 10)
         self.publisher_goal_reached = self.create_publisher(Bool, "skimmer/goal_reached", 10)
 
         # Define subscribers here
@@ -56,16 +55,16 @@ class SkimmerNode(Node):
         self.get_logger().info("SKIMMER_BELT_MOTOR has been set to: " + str(self.SKIMMER_BELT_MOTOR))
         self.get_logger().info("SKIMMER_LIFT_MOTOR has been set to: " + str(self.SKIMMER_LIFT_MOTOR))
 
-        self.height_encoder_offset = 0  # measured in degrees
+        self.lift_encoder_offset = 0  # measured in degrees
 
         # Current state of the skimmer belt
         self.running = False
-        # Current goal height
-        self.current_goal_height = 0
+        # Current goal position (in degrees)
+        self.current_goal_position = 0
         # Current position of the lift motor in degrees
-        self.current_height_degrees = 0  # relative encoders always initialize to 0
-        # Goal Threshold (if abs(self.current_goal_height - ACTUAL VALUE) <= self.goal_threshold then we should publish True to /skimmer/goal_reached)
-        self.goal_threshold = 0.1
+        self.current_position_degrees = 0  # Relative encoders always initialize to 0
+        # Goal Threshold (if abs(self.current_goal_position - ACTUAL VALUE) <= self.goal_threshold then we should publish True to /skimmer/goal_reached)
+        self.goal_threshold = 10  # in degrees # TODO: Tune this threshold if needed
         # Current state of the lift system
         self.lift_running = False
 
@@ -73,15 +72,10 @@ class SkimmerNode(Node):
         self.top_limit_pressed = False
         self.bottom_limit_pressed = False
 
-        # CONSTANTS DEFINED BELOW #
-        # ----------------------------------------------------------------
-        # Circumference of the pulley used by the lift system IN METERS
-        self.PULLEY_CIRCUMFERENCE = 0.2032  # TODO: Verify this (meters)
-        # Gear ratio of the lift motor
-        self.LIFT_GEAR_RATIO = 100 / 1  # TODO: Verify this
         # Maximum value of the lift motor encoder (bottom of the lift system) IN DEGREES
-        self.MAX_ENCODER_VALUE = -3600 * 360  # TODO: Verify this (multiple by 360 to get degrees)
-        # ----------------------------------------------------------------
+        self.MAX_ENCODER_DEGREES = (
+            -3600 * 360 / 42
+        )  # Multiply the max encoder count (-3600) by 360 and divide by 42 to get degrees
 
     # Define subsystem methods here
     def set_power(self, skimmer_power: float) -> None:
@@ -105,13 +99,14 @@ class SkimmerNode(Node):
         else:
             self.set_power(skimmer_belt_power)
 
-    def set_height(self, height: float) -> None:
-        """This method sets the height (in meters) of the skimmer."""
-        self.current_goal_height = height  # goal height should be in meters
-        height_degrees = self.LIFT_GEAR_RATIO * (height / self.PULLEY_CIRCUMFERENCE) * 360
+    def set_position(self, position: int) -> None:
+        """This method sets the position (in degrees) of the skimmer."""
+        self.current_goal_position = position  # goal position should be in degrees
         self.cli_motor_set.call_async(
             MotorCommandSet.Request(
-                type="position", can_id=self.SKIMMER_LIFT_MOTOR, value=height_degrees + self.height_encoder_offset
+                type="position",
+                can_id=self.SKIMMER_LIFT_MOTOR,
+                value=float(self.current_goal_position + self.lift_encoder_offset),
             )
         )
 
@@ -137,7 +132,6 @@ class SkimmerNode(Node):
             MotorCommandSet.Request(type="duty_cycle", can_id=self.SKIMMER_LIFT_MOTOR, value=power)
         )
 
-    # TODO: Test this method before using it!
     def zero_lift(self) -> None:
         """This method zeros the lift system by slowly raising it until the top limit switch is pressed."""
         self.lift_set_power(0.05)
@@ -161,9 +155,9 @@ class SkimmerNode(Node):
         response.success = 0  # indicates success
         return response
 
-    def set_height_callback(self, request, response):
-        """This service request sets the height of the skimmer."""
-        self.set_height(request.height)
+    def set_position_callback(self, request, response):
+        """This service request sets the position of the lift."""
+        self.set_position(request.position)
         response.success = 0  # indicates success
         return response
 
@@ -187,19 +181,17 @@ class SkimmerNode(Node):
 
     # Define timer callback methods here
     def timer_callback(self):
-        """Publishes the current height in meters and whether or not the goal height has been reached."""
+        """Publishes whether or not the current goal position has been reached."""
         # This MotorCommandGet service call will return a future object, that will eventually contain the position in degrees
         future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.SKIMMER_LIFT_MOTOR))
         future.add_done_callback(self.done_callback)
 
     def done_callback(self, future):
-        self.current_height_degrees = future.result().data
-        height_meters = (self.current_height_degrees * self.PULLEY_CIRCUMFERENCE) / (360 * self.LIFT_GEAR_RATIO)
+        self.current_position_degrees = future.result().data
 
-        height_msg = Float32(data=height_meters)
-        self.publisher_height.publish(height_msg)
-
-        goal_reached_msg = Bool(data=abs(self.current_goal_height - height_meters) <= self.goal_threshold)
+        goal_reached_msg = Bool(
+            data=abs(self.current_goal_position - self.current_position_degrees) <= self.goal_threshold
+        )
         self.publisher_goal_reached.publish(goal_reached_msg)
 
     # Define subscriber callback methods here
@@ -212,13 +204,13 @@ class SkimmerNode(Node):
         self.top_limit_pressed = limit_switches_msg.top_limit_switch
         self.bottom_limit_pressed = limit_switches_msg.bottom_limit_switch
         if self.top_limit_pressed:  # If the top limit switch is pressed
-            self.height_encoder_offset = self.current_height_degrees
-            print("Current height in degrees: " + str(self.current_height_degrees))
-            print("New height encoder offset: " + str(self.height_encoder_offset))
+            self.lift_encoder_offset = self.current_position_degrees
+            self.get_logger().info("Current position in degrees: " + str(self.current_position_degrees))
+            self.get_logger().info("New lift encoder offset: " + str(self.lift_encoder_offset))
         elif self.bottom_limit_pressed:  # If the bottom limit switch is pressed
-            self.height_encoder_offset = self.current_height_degrees - self.MAX_ENCODER_VALUE
-            print("Current height in degrees: " + str(self.current_height_degrees))
-            print("New height encoder offset: " + str(self.height_encoder_offset))
+            self.lift_encoder_offset = self.current_position_degrees - self.MAX_ENCODER_DEGREES
+            self.get_logger().info("Current position in degrees: " + str(self.current_position_degrees))
+            self.get_logger().info("New lift encoder offset: " + str(self.lift_encoder_offset))
 
 
 def main(args=None):
