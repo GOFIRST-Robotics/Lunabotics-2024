@@ -18,7 +18,7 @@
   <build_depend>python3-opencv</build_depend>
 
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>realsense2_camera</exec_depend>
+  <!-- <exec_depend>realsense2_camera</exec_depend> --> <!-- NOTE: We decided not to use ros_check_load this year -->
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>rovr_interfaces</exec_depend>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CameraControlWidget</class>
+ <widget class="QWidget" name="CameraControlWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>344</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Camera Control</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="camera1_push_button">
+       <property name="toolTip">
+        <string>Select camera 1</string>
+       </property>
+       <property name="text">
+        <string>Front Camera</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="camera2_push_button">
+       <property name="toolTip">
+        <string>Select camera 2</string>
+       </property>
+       <property name="text">
+        <string>Back Camera</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="camera3_push_button">
+       <property name="toolTip">
+        <string>Select camera 3</string>
+       </property>
+       <property name="text">
+        <string>Left Camera</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="camera4_push_button">
+       <property name="toolTip">
+        <string>Select camera 4</string>
+       </property>
+       <property name="text">
+        <string>Right Camera</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="camera5_push_button">
+       <property name="toolTip">
+        <string>Select camera 5</string>
+       </property>
+       <property name="text">
+        <string>Conveyor Camera</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QComboBox" name="encoding_dropdown"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="encoding_push_button">
+       <property name="text">
+        <string>Set Encoding</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QComboBox" name="network_dropdown">
+       <property name="toolTip">
+        <string>Choose network interface</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="ip_push_button">
+       <property name="toolTip">
+        <string>Set Client IP</string>
+       </property>
+       <property name="text">
+        <string>Set IP</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

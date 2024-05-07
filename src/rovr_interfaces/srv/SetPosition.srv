@@ -1,0 +1,4 @@
+# This service sets the position of a subsystem with 1 motor
+float32 position # position
+---
+int32 success

@@ -98,7 +98,7 @@ def generate_launch_description():
     # Format as a string
     timestamp_str = now.strftime("%m-%d-%Y_%H:%M:%S")
     # Add the timestamp to the svo filename
-    svo_filename = f"zed_recording_{timestamp_str}.svo"
+    svo_filename = f"/ssd/zed_recording_{timestamp_str}.svo"
 
     record_svo_srv = ExecuteProcess(
         cmd=[

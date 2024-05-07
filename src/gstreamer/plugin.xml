@@ -1,0 +1,15 @@
+<library path="src">
+    <class name="CameraClient" type="gstreamer.client.ClientPlugin" base_class_type="rqt_gui_py::Plugin">
+      <description>
+        A Python GUI plugin to create a great user interface for switching cameras
+      </description>
+      <qtgui>
+        <group>
+          <label>Visualization</label>
+        </group>
+        <label>Camera Control Python Plugin</label>
+      </qtgui>
+    </class>
+  </library>
+  
+  
