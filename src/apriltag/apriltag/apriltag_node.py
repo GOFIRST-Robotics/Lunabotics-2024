@@ -119,6 +119,7 @@ class ApriltagNode(Node):
             # Use the known map coordinates of the apriltag as an offset
             odom_to_tag_transform.transform.translation.x -= float(xyz[0])
             odom_to_tag_transform.transform.translation.y -= float(xyz[1])
+            odom_to_tag_transform.transform.translation.z = 0.0
 
             self.map_to_odom_tf = odom_to_tag_transform
 

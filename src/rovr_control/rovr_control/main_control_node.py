@@ -44,10 +44,10 @@ class MainControlNode(Node):
         self.declare_parameter("autonomous_driving_power", 0.25)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("max_drive_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("max_turn_power", 1.0)  # Measured in Duty Cycle (0.0-1.0)
-        self.declare_parameter("skimmer_belt_power", -0.2)  # Measured in Duty Cycle (0.0-1.0)
+        self.declare_parameter("skimmer_belt_power", -0.3)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("skimmer_lift_manual_power", 0.05)  # Measured in Duty Cycle (0.0-1.0)
-        self.declare_parameter("lift_dumping_position", -1500)  # Measured in encoder counts
-        self.declare_parameter("lift_digging_position", -3400)  # Measured in encoder counts
+        self.declare_parameter("lift_dumping_position", -1000)  # Measured in encoder counts
+        self.declare_parameter("lift_digging_position", -3050)  # Measured in encoder counts
 
         # Assign the ROS Parameters to member variables below #
         self.autonomous_driving_power = self.get_parameter("autonomous_driving_power").value
@@ -151,12 +151,15 @@ class MainControlNode(Node):
         """This method lays out the procedure for autonomously digging!"""
         self.get_logger().info("\nStarting Autonomous Digging Procedure!")
         try:  # Wrap the autonomous procedure in a try-except
+            await self.cli_skimmer_setPower.call_async(SetPower.Request(power=self.skimmer_belt_power))
             await self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_digging_position))  # Lower the skimmer into the ground
-            # Wait for the lift goal to be reached
+            # Wait for the goal height to be reached
             while not self.skimmer_goal_reached:
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
-            await self.cli_skimmer_setPower.call_async(SetPower.Request(power=self.skimmer_belt_power))
-            # TODO: Use nav2.driveOnHeading here to drive straight for a distance of X meters
+            # Drive forward while digging
+            self.nav2.driveOnHeading(dist=0.75, speed=0.1)  # TODO: Tune these values
+            while not self.nav2.isTaskComplete():  # Wait for the end of the driveOnHeading task
+                await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             await self.cli_drivetrain_stop.call_async(Stop.Request())
             await self.cli_skimmer_stop.call_async(Stop.Request())
             await self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_dumping_position))  # Raise the skimmer back up
@@ -164,7 +167,8 @@ class MainControlNode(Node):
             while not self.skimmer_goal_reached:
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             self.get_logger().info("Autonomous Digging Procedure Complete!\n")
-            self.end_autonomous()  # Return to Teleop mode
+            if self.autonomous_cycle_process is None:
+                self.end_autonomous()  # Return to Teleop mode
         except asyncio.CancelledError:  # Put termination code here
             self.get_logger().warn("Autonomous Digging Procedure Terminated\n")
             self.end_autonomous()  # Return to Teleop mode
