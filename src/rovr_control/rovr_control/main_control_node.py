@@ -47,7 +47,7 @@ class MainControlNode(Node):
         self.declare_parameter("skimmer_belt_power", -0.3)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("skimmer_lift_manual_power", 0.05)  # Measured in Duty Cycle (0.0-1.0)
         self.declare_parameter("lift_dumping_position", -1000)  # Measured in encoder counts
-        self.declare_parameter("lift_digging_position", -3050)  # Measured in encoder counts
+        self.declare_parameter("lift_digging_position", -3200)  # Measured in encoder counts
 
         # Assign the ROS Parameters to member variables below #
         self.autonomous_driving_power = self.get_parameter("autonomous_driving_power").value
@@ -129,6 +129,7 @@ class MainControlNode(Node):
         self.stop_all_subsystems()  # Stop all subsystems
         self.state = states["Teleop"]  # Return to Teleop mode
 
+    # This autonomous routine has been tested and works!
     async def calibrate_field_coordinates(self) -> None:
         """This method rotates until we can see apriltag(s) and then sets the map -> odom tf."""
         if not self.field_calibrated:
@@ -136,13 +137,16 @@ class MainControlNode(Node):
             while not self.cli_drivetrain_drive.wait_for_service():  # Wait for the drivetrain services to be available
                 self.get_logger().warn("Waiting for drivetrain services to become available...")
                 await asyncio.sleep(0.1)
-            await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=0.0, turning_power=0.15))
+            await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=0.0, turning_power=0.3))
         while not self.field_calibrated:
             future = self.cli_set_apriltag_odometry.call_async(ResetOdom.Request())
             future.add_done_callback(self.future_odom_callback)
             await asyncio.sleep(0.05)  # Allows other async tasks to continue running (this is non-blocking)
         self.get_logger().info("Field Coordinates Calibrated!")
         await self.cli_drivetrain_stop.call_async(Stop.Request())
+        self.nav2.spin(3.14)  # Turn around 180 degrees to face the rest of the field
+        while not self.nav2.isTaskComplete():
+            await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
         self.apriltag_timer.cancel()
         self.end_autonomous()  # Return to Teleop mode
 
@@ -151,40 +155,46 @@ class MainControlNode(Node):
         """This method lays out the procedure for autonomously digging!"""
         self.get_logger().info("\nStarting Autonomous Digging Procedure!")
         try:  # Wrap the autonomous procedure in a try-except
-            await self.cli_skimmer_setPower.call_async(SetPower.Request(power=self.skimmer_belt_power))
             await self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_digging_position))  # Lower the skimmer into the ground
+            self.skimmer_goal_reached = False
             # Wait for the goal height to be reached
             while not self.skimmer_goal_reached:
+                self.get_logger().info("Moving skimmer to the goal")
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
+            await self.cli_skimmer_setPower.call_async(SetPower.Request(power=self.skimmer_belt_power))
             # Drive forward while digging
             self.nav2.driveOnHeading(dist=0.75, speed=0.1)  # TODO: Tune these values
             while not self.nav2.isTaskComplete():  # Wait for the end of the driveOnHeading task
+                self.get_logger().info("Auto Driving")
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             await self.cli_drivetrain_stop.call_async(Stop.Request())
             await self.cli_skimmer_stop.call_async(Stop.Request())
             await self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_dumping_position))  # Raise the skimmer back up
+            self.skimmer_goal_reached = False
             # Wait for the lift goal to be reached
             while not self.skimmer_goal_reached:
+                self.get_logger().info("Moving skimmer to the goal")
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             self.get_logger().info("Autonomous Digging Procedure Complete!\n")
-            if self.autonomous_cycle_process is None:
-                self.end_autonomous()  # Return to Teleop mode
+            self.end_autonomous()  # Return to Teleop mode
         except asyncio.CancelledError:  # Put termination code here
             self.get_logger().warn("Autonomous Digging Procedure Terminated\n")
             self.end_autonomous()  # Return to Teleop mode
 
-    # TODO: This autonomous routine has not been tested yet!
+    # This autonomous routine has been tested and works!
     async def auto_offload_procedure(self) -> None:
         """This method lays out the procedure for autonomously offloading!"""
         self.get_logger().info("\nStarting Autonomous Offload Procedure!")
         try:  # Wrap the autonomous procedure in a try-except
             await self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_dumping_position))  # Raise up the skimmer in preparation for dumping
+            self.skimmer_goal_reached = False
             # Wait for the lift goal to be reached
             while not self.skimmer_goal_reached:
+                self.get_logger().info("Moving skimmer to the goal")
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             self.get_logger().info("Commence Offloading!")
             await self.cli_skimmer_setPower.call_async(SetPower.Request(power=self.skimmer_belt_power))
-            await asyncio.sleep(10)  # How long to offload for # TODO: Adjust this time as needed
+            await asyncio.sleep(8 / abs(self.skimmer_belt_power))  # How long to offload for # TODO: Adjust this time factor as needed
             await self.cli_skimmer_stop.call_async(Stop.Request())  # Stop the skimmer belt
             self.get_logger().info("Autonomous Offload Procedure Complete!\n")
             self.end_autonomous()  # Return to Teleop mode
