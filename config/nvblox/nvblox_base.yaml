@@ -12,11 +12,11 @@
     esdf_2d: false
     publish_esdf_distance_slice: true
     
-    esdf_2d_min_height: -1.0
-    esdf_2d_max_height: 0.7
+    esdf_2d_min_height: -1.5
+    esdf_2d_max_height: 1.0
     # mesh settings
     compute_mesh: true
-    mesh_update_rate_hz: 5.0
+    mesh_update_rate_hz: 2.0
     # color settings
     use_color: true
     max_color_update_hz: 5.0
@@ -32,20 +32,20 @@
     maximum_sensor_message_queue_length: 30
     # Map clearing settings
     map_clearing_radius_m: -1.0 # no map clearing if < 0.0
-    map_clearing_frame_id: "base_link"
+    map_clearing_frame_id: "zed2i_camera_link"
     clear_outside_radius_rate_hz: 1.0
     # QoS settings
     depth_qos: "SYSTEM_DEFAULT"
     color_qos: "SYSTEM_DEFAULT"
     # Rviz visualization
-    slice_visualization_attachment_frame_id: "base_link"
+    slice_visualization_attachment_frame_id: "zed2i_camera_link"
     slice_visualization_side_length: 10.0
 
     # Used for crater detection.
     # one is the floor, two is hole level
     # by going significantly above 'ground', we ignore all the noise from uneven terrain while still detecting obstacles.
-    esdf_above_ground_slice_height: -0.2
-    esdf_underground_detection: -1.1
+    esdf_above_ground_slice_height: 0.4  # TODO: This might need to be adjusted but it works for large obstacles
+    esdf_underground_detection: -2.0  # TODO: This NEEDS to be adjusted
     combine_pointcloud: True
     combine_costmap: True
     invert_below_ground: False

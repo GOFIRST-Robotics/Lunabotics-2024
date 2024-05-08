@@ -6,7 +6,7 @@ Stephen Brawner (brawner@gmail.com)
 
 <robot name="Master_ASM" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <link
-    name="base_link">
+    name="frame_link">
     <inertial>
       <origin
         xyz="0.0012829 -0.31468 -0.0059364"
@@ -27,7 +27,7 @@ Stephen Brawner (brawner@gmail.com)
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robot_description/models/master_ASM/meshes/base_link.STL" />
+          filename="package://robot_description/models/master_ASM/meshes/frame_link.STL" />
       </geometry>
       <material
         name="">
@@ -45,10 +45,10 @@ Stephen Brawner (brawner@gmail.com)
     </collision>
   </link>
 
-  <!-- Connect the base_link to the new link with only a translation -->
+  <!-- Connect the frame_link to the new link with only a translation -->
   <joint name="base_to_translation_end" type="fixed">
     <parent link="translation_end_link"/>
-    <child link="base_link"/>
+    <child link="frame_link"/>
     <origin xyz="-0.343 0.009 0.1254" rpy="0 0 0"/>
   </joint>
 
@@ -153,7 +153,7 @@ Stephen Brawner (brawner@gmail.com)
       xyz="-0.34701 0.55026 -0.59563"
       rpy="1.5708 0 0" />
     <parent
-      link="base_link" />
+      link="frame_link" />
     <child
       link="swerve1_Link" />
     <axis
@@ -249,7 +249,7 @@ Stephen Brawner (brawner@gmail.com)
       xyz="0.34701 -0.55026 -0.59563"
       rpy="1.5708 0 3.1416" />
     <parent
-      link="base_link" />
+      link="frame_link" />
     <child
       link="swerve2_Link" />
     <axis
@@ -347,7 +347,7 @@ Stephen Brawner (brawner@gmail.com)
       xyz="0.34701 0.55014 -0.59563"
       rpy="1.5708 0 3.1416" />
     <parent
-      link="base_link" />
+      link="frame_link" />
     <child
       link="swerve3_Link" />
     <axis
@@ -442,7 +442,7 @@ Stephen Brawner (brawner@gmail.com)
       xyz="-0.34701 -0.55014 -0.59563"
       rpy="1.5708 0 0" />
     <parent
-      link="base_link" />
+      link="frame_link" />
     <child
       link="swerve4_Link" />
     <axis

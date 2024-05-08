@@ -253,11 +253,11 @@ public:
         "motor/get", std::bind(&MotorControlNode::get_callback, this, _1, _2));
 
     // Instantiate all of our PIDControllers here
-    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
-    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
-    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
-    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.5);
-    this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.002, 0.0, 0.0, 0.0, 20, 0.05);
+    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
+    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
+    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
+    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
+    this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 20, 0.05);
 
     // Enable continuous input for the swerve module PID controllers
     this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()]->enableContinuousInput(0, 360 * this->get_parameter("STEERING_MOTOR_GEAR_RATIO").as_int());

@@ -7,4 +7,4 @@
     skimmer_lift_manual_power: 0.05 # Measured in Duty Cycle (0.0-1.0)
     autonomous_field_type: "top" # The type of field ("top", "bottom", "nasa")
     lift_dumping_position: -1000 # Measured in encoder counts!
-    lift_digging_position: -3050 # Measured in encoder counts!
+    lift_digging_position: -3200 # Measured in encoder counts!

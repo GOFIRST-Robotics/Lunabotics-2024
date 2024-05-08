@@ -64,7 +64,7 @@ class SkimmerNode(Node):
         # Current position of the lift motor in degrees
         self.current_position_degrees = 0  # Relative encoders always initialize to 0
         # Goal Threshold (if abs(self.current_goal_position - ACTUAL VALUE) <= self.goal_threshold then we should publish True to /skimmer/goal_reached)
-        self.goal_threshold = 10  # in degrees # TODO: Tune this threshold if needed
+        self.goal_threshold = 180  # in degrees of the motor # TODO: Tune this threshold if needed
         # Current state of the lift system
         self.lift_running = False
 
