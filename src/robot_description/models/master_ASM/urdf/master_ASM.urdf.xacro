@@ -47,9 +47,9 @@ Stephen Brawner (brawner@gmail.com)
 
   <!-- Connect the base_link to the new link with only a translation -->
   <joint name="base_to_translation_end" type="fixed">
-    <parent link="base_link"/>
-    <child link="translation_end_link"/>
-    <origin xyz="0.343 -0.009 -0.1254" rpy="0 0 0"/>
+    <parent link="translation_end_link"/>
+    <child link="base_link"/>
+    <origin xyz="-0.343 0.009 0.1254" rpy="0 0 0"/>
   </joint>
 
   <!-- Add a new link at the end of the translation vector -->
@@ -66,9 +66,9 @@ Stephen Brawner (brawner@gmail.com)
   <xacro:zed_camera name="zed2i" model="zed2i">
   </xacro:zed_camera>
   <joint name="translation_end_to_camera" type="fixed">
-    <parent link="translation_end_link"/>
-    <child link="zed2i_camera_link"/>
-    <origin xyz="0 0 0" rpy="0 0.52359878 0"/>
+    <parent link="zed2i_camera_link"/>
+    <child link="translation_end_link"/>
+    <origin xyz="0 0 0" rpy="0 -0.44 0"/>
   </joint>
 
   <gazebo reference="zed2i_camera_link">

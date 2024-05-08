@@ -67,14 +67,6 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(pkg_robot_description, "launch", "robot_description.launch.py"))
     )
 
-    # odom transform
-    odom_transform = Node(
-        package="isaac_ros_launch",
-        executable="odom_publisher",
-        name="odom_publisher",
-        output="screen",
-    )
-
     load_composable_nodes = LoadComposableNodes(
         target_container=component_container_name_arg,
         composable_node_descriptions=[
@@ -138,7 +130,6 @@ def generate_launch_description():
             stop_svo_recording,
             robot_state_publisher,
             zed2_container,
-            odom_transform,
             load_composable_nodes,
         ]
     )
