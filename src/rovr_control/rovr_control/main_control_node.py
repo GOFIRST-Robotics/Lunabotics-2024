@@ -102,6 +102,9 @@ class MainControlNode(Node):
         self.autonomous_cycle_process = None
         self.travel_automation_process = None
         self.skimmer_goal_reached = True
+        
+        self.joystick_lagging_vertical = 0
+        self.last_joystick_callback = self.get_clock().now().nanoseconds
 
         self.DANGER_THRESHOLD = 1
         self.REAL_DANGER_THRESHOLD = 100
@@ -349,7 +352,17 @@ class MainControlNode(Node):
 
         if self.state == states["Teleop"]:
             # Drive the robot using joystick input during Teleop
-            forward_power = msg.axes[RIGHT_JOYSTICK_VERTICAL_AXIS] * self.max_drive_power  # Forward power
+            
+            # Decrease Acceleration
+            acceleration_constant = (self.get_clock().now().nanoseconds - self.last_joystick_callback) / 1e9
+            joystick_acceleration = 0.1
+            joystick_movement = msg.axes[RIGHT_JOYSTICK_VERTICAL_AXIS] - self.joystick_lagging_vertical
+            
+            self.joystick_lagging_vertical += (1 if joystick_movement > 0 else -1) * min(joystick_acceleration * acceleration_constant, abs(joystick_movement))
+            self.last_joystick_callback = self.get_clock().now().nanoseconds
+            
+            
+            forward_power = self.joystick_lagging_vertical * self.max_drive_power  # Forward power
             horizontal_power = msg.axes[RIGHT_JOYSTICK_HORIZONTAL_AXIS] * self.max_drive_power  # Horizontal power
             turn_power = msg.axes[LEFT_JOYSTICK_HORIZONTAL_AXIS] * self.max_turn_power  # Turning power
             self.drive_power_publisher.publish(
