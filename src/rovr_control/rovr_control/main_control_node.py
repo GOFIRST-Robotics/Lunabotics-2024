@@ -104,6 +104,8 @@ class MainControlNode(Node):
         self.skimmer_goal_reached = True
         
         self.joystick_lagging_vertical = 0
+        self.joystick_lagging_horizontal = 0
+        self.joystick_lagging_turn = 0
         self.last_joystick_callback = self.get_clock().now().nanoseconds
 
         self.DANGER_THRESHOLD = 1
@@ -354,17 +356,21 @@ class MainControlNode(Node):
             # Drive the robot using joystick input during Teleop
             
             # Decrease Acceleration
-            acceleration_constant = (self.get_clock().now().nanoseconds - self.last_joystick_callback) / 1e9
-            joystick_acceleration = 0.1
-            joystick_movement = msg.axes[RIGHT_JOYSTICK_VERTICAL_AXIS] - self.joystick_lagging_vertical
+            joystick_acceleration_constant = 0.1
+            joystick_acceleration = (self.get_clock().now().nanoseconds - self.last_joystick_callback) / 1e9 * joystick_acceleration_constant
+            joystick_vertical_movement = msg.axes[RIGHT_JOYSTICK_VERTICAL_AXIS] - self.joystick_lagging_vertical
+            joystick_horizontal_movement = msg.axes[RIGHT_JOYSTICK_HORIZONTAL_AXIS] - self.joystick_lagging_horizontal
+            joystick_turn_movement = msg.axes[LEFT_JOYSTICK_HORIZONTAL_AXIS] - self.joystick_lagging_turn
             
-            self.joystick_lagging_vertical += (1 if joystick_movement > 0 else -1) * min(joystick_acceleration * acceleration_constant, abs(joystick_movement))
+            self.joystick_lagging_vertical += (1 if joystick_vertical_movement > 0 else -1) * min(joystick_acceleration, abs(joystick_vertical_movement))
+            self.joystick_lagging_horizontal += (1 if joystick_horizontal_movement > 0 else -1) * min(joystick_acceleration, abs(joystick_horizontal_movement))
+            self.joystick_lagging_turn += (1 if joystick_turn_movement > 0 else -1) * min(joystick_acceleration, abs(joystick_turn_movement))
             self.last_joystick_callback = self.get_clock().now().nanoseconds
             
             
             forward_power = self.joystick_lagging_vertical * self.max_drive_power  # Forward power
-            horizontal_power = msg.axes[RIGHT_JOYSTICK_HORIZONTAL_AXIS] * self.max_drive_power  # Horizontal power
-            turn_power = msg.axes[LEFT_JOYSTICK_HORIZONTAL_AXIS] * self.max_turn_power  # Turning power
+            horizontal_power = self.joystick_lagging_horizontal * self.max_drive_power  # Horizontal power
+            turn_power = self.joystick_lagging_turn * self.max_turn_power  # Turning power
             self.drive_power_publisher.publish(
                 Twist(linear=Vector3(x=forward_power, y=horizontal_power), angular=Vector3(z=turn_power))
             )
