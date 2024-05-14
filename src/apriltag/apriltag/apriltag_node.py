@@ -18,7 +18,7 @@ class ApriltagNode(Node):
         super().__init__("apriltag_node")
         current_dir = os.getcwd()
 
-        self.declare_parameter("autonomous_field_type", "top")  # The type of field ("top", "bottom", "nasa")
+        self.declare_parameter("autonomous_field_type", "bottom")  # The type of field ("top", "bottom", "nasa")
         field_type = self.get_parameter("autonomous_field_type").value
         paths = {
             "top": "src/apriltag/apriltag/apriltag_location_ucf_top.urdf.xarco",
@@ -49,7 +49,7 @@ class ApriltagNode(Node):
         self.create_service(ResetOdom, "resetOdom", self.reset_callback)
 
         # Create a timer to broadcast the map -> odom transform
-        self.timer = self.create_timer(0.1, self.broadcast_transform)
+        self.timer = self.create_timer(0.01, self.broadcast_transform)
 
     # Service callback definition
     def reset_callback(self, request, response):
@@ -85,11 +85,11 @@ class ApriltagNode(Node):
             rpy_values = [element.attrib["rpy"] for element in rpy_elements]
             rpy = rpy_values[0].split(" ")
 
-            # Lookup the odom to zed2i_camera_link tf from the tf buffer
+            # Lookup the odom to detected tag tf from the tf buffer
             try:
                 odom_to_tag_transform = self.tf_buffer.lookup_transform("odom", f"{tag.family}:{id}", rclpy.time.Time())
             except TransformException as ex:
-                self.get_logger().warn(f"Could not transform odom to zed2i_camera_link: {ex}")
+                self.get_logger().warn(f"Could not transform odom to the detected tag: {ex}")
                 return
 
             odom_to_tag_transform.child_frame_id = "odom"
@@ -125,8 +125,15 @@ class ApriltagNode(Node):
 
     def broadcast_transform(self):
         """Broadcasts the map -> odom transform"""
-        self.map_transform.header.stamp = self.get_clock().now().to_msg()
-        self.tf_broadcaster.sendTransform(self.map_transform)
+        # Lookup the odom to zed2i_camera_link tf from the tf buffer
+        try:
+            odom_to_camera_link_transform = self.tf_buffer.lookup_transform("odom", "zed2i_camera_link", rclpy.time.Time())
+            self.map_transform.header.stamp = odom_to_camera_link_transform.header.stamp
+            self.tf_broadcaster.sendTransform(self.map_transform)
+        except TransformException as ex:
+            self.get_logger().warn(f"Could not transform odom to zed2i_camera_link: {ex}")
+            self.map_transform.header.stamp = self.get_clock().now().to_msg()
+            self.tf_broadcaster.sendTransform(self.map_transform)
 
 
 def main(args=None):

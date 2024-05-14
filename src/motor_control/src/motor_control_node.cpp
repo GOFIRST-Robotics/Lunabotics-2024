@@ -253,10 +253,10 @@ public:
         "motor/get", std::bind(&MotorControlNode::get_callback, this, _1, _2));
 
     // Instantiate all of our PIDControllers here
-    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
-    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
-    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
-    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.5);
+    this->pid_controllers[this->get_parameter("BACK_LEFT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.4);
+    this->pid_controllers[this->get_parameter("FRONT_LEFT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.4);
+    this->pid_controllers[this->get_parameter("BACK_RIGHT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.4);
+    this->pid_controllers[this->get_parameter("FRONT_RIGHT_TURN").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 10, 0.4);
     this->pid_controllers[this->get_parameter("SKIMMER_LIFT_MOTOR").as_int()] = new PIDController(42, 0.005, 0.0, 0.0, 0.0, 20, 0.05);
 
     // Enable continuous input for the swerve module PID controllers
@@ -282,7 +282,7 @@ private:
     for (auto pair : this->current_msg) {
       uint32_t motorId = pair.first;
       // If the motor controller has previously received a command, send the most recent command again
-      if ((this->pid_controllers[motorId] && this->pid_controllers[motorId]->isActive == false) || !this->pid_controllers[motorId]) {
+      if ((this->pid_controllers[motorId] && this->pid_controllers[motorId]->isActive == false) || this->pid_controllers[motorId] == NULL) {
         send_can(std::get<0>(this->current_msg[motorId]), std::get<1>(this->current_msg[motorId]));
       }
     }

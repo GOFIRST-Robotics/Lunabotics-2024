@@ -86,7 +86,7 @@ class ClientWidget(QWidget):
         print("Requesting Camera 1")
         req = SetActiveCamera.Request()
         req.srctype = "v4l2src"
-        req.device = "/dev/video2"
+        req.device = "/dev/video0"
         req.width = 640
         req.height = 480
         req.framerate = 30
@@ -99,7 +99,7 @@ class ClientWidget(QWidget):
         print("Requesting Camera 2")
         req = SetActiveCamera.Request()
         req.srctype = "v4l2src"
-        req.device = "/dev/video6"
+        req.device = "/dev/video5"
         req.width = 640
         req.height = 480
         req.framerate = 30
@@ -112,7 +112,7 @@ class ClientWidget(QWidget):
         print("Requesting Camera 3")
         req = SetActiveCamera.Request()
         req.srctype = "v4l2src"
-        req.device = "/dev/video4"
+        req.device = "/dev/video7"
         req.width = 640
         req.height = 480
         req.framerate = 30
@@ -125,7 +125,7 @@ class ClientWidget(QWidget):
         print("Requesting Camera 4")
         req = SetActiveCamera.Request()
         req.srctype = "v4l2src"
-        req.device = "/dev/video7"
+        req.device = "/dev/video6"
         req.width = 640
         req.height = 480
         req.framerate = 30
@@ -138,7 +138,7 @@ class ClientWidget(QWidget):
         print("Requesting Camera 5")
         req = SetActiveCamera.Request()
         req.srctype = "v4l2src"
-        req.device = "/dev/video5"
+        req.device = "/dev/video4"
         req.width = 640
         req.height = 480
         req.framerate = 30
