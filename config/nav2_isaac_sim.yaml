@@ -19,7 +19,7 @@
 bt_navigator:
   ros__parameters:
     use_sim_time: False
-    global_frame: odom
+    global_frame: map
     robot_base_frame: zed2i_camera_link
     odom_topic: /odom
     bt_loop_duration: 20
@@ -102,24 +102,6 @@ controller_server:
       stateful: True
     # DWB parameters
     FollowPath:
-      # NOTE(remos):
-      #   The RotationShimController did not work for Isaac Sim 2023.1.0 at the time of the release.
-      #   Therefore we comment it here and use the DWBLocalPlanner for the moment.
-      # TODO(remos):
-      #   Bring back the RotationShimController when the issue is fixed
-      #   as it offers better navigation performance when doing narrow turns.
-
-      # Rotation Shim Controller params
-      # This will turn the robot in place when the heading difference between the robot
-      # and the path is too big.
-      # plugin: "nav2_rotation_shim_controller::RotationShimController"
-      # primary_controller: "dwb_core::DWBLocalPlanner"
-      # angular_dist_threshold: 0.3 # ~= 17 degree
-      # forward_sampling_distance: 1.0
-      # rotate_to_heading_angular_vel: 1.8
-      # max_angular_accel: 3.2
-      # simulate_ahead_time: 1.0
-
       # Primary controller params (DWBLocalPlanner)
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
@@ -194,7 +176,7 @@ local_costmap:
     ros__parameters:
       update_frequency: 10.0
       publish_frequency: 10.0
-      global_frame: odom
+      global_frame: map
       robot_base_frame: zed2i_camera_link
       use_sim_time: False
       rolling_window: True
@@ -226,7 +208,7 @@ global_costmap:
     ros__parameters:
       update_frequency: 10.0
       publish_frequency: 10.0
-      global_frame: odom
+      global_frame: map
       robot_base_frame: zed2i_camera_link
       use_sim_time: False
       rolling_window: True
@@ -302,7 +284,7 @@ behavior_server:
       plugin: "nav2_behaviors/DriveOnHeading"
     wait:
       plugin: "nav2_behaviors/Wait"
-    global_frame: odom
+    global_frame: map
     robot_base_frame: zed2i_camera_link
     transform_tolerance: 0.2
     use_sim_time: False

@@ -64,7 +64,7 @@ class SkimmerNode(Node):
         # Current position of the lift motor in degrees
         self.current_position_degrees = 0  # Relative encoders always initialize to 0
         # Goal Threshold (if abs(self.current_goal_position - ACTUAL VALUE) <= self.goal_threshold then we should publish True to /skimmer/goal_reached)
-        self.goal_threshold = 180  # in degrees of the motor # TODO: Tune this threshold if needed
+        self.goal_threshold = 320  # in degrees of the motor # TODO: Tune this threshold if needed
         # Current state of the lift system
         self.lift_running = False
 
@@ -188,9 +188,8 @@ class SkimmerNode(Node):
 
     def done_callback(self, future):
         self.current_position_degrees = future.result().data
-
         goal_reached_msg = Bool(
-            data=abs(self.current_goal_position - self.current_position_degrees) <= self.goal_threshold
+            data=abs(self.current_goal_position + self.lift_encoder_offset - self.current_position_degrees) <= self.goal_threshold
         )
         self.publisher_goal_reached.publish(goal_reached_msg)
 
@@ -205,12 +204,12 @@ class SkimmerNode(Node):
         self.bottom_limit_pressed = limit_switches_msg.bottom_limit_switch
         if self.top_limit_pressed:  # If the top limit switch is pressed
             self.lift_encoder_offset = self.current_position_degrees
-            self.get_logger().info("Current position in degrees: " + str(self.current_position_degrees))
-            self.get_logger().info("New lift encoder offset: " + str(self.lift_encoder_offset))
+            self.get_logger().debug("Current position in degrees: " + str(self.current_position_degrees))
+            self.get_logger().debug("New lift encoder offset: " + str(self.lift_encoder_offset))
         elif self.bottom_limit_pressed:  # If the bottom limit switch is pressed
             self.lift_encoder_offset = self.current_position_degrees - self.MAX_ENCODER_DEGREES
-            self.get_logger().info("Current position in degrees: " + str(self.current_position_degrees))
-            self.get_logger().info("New lift encoder offset: " + str(self.lift_encoder_offset))
+            self.get_logger().debug("Current position in degrees: " + str(self.current_position_degrees))
+            self.get_logger().debug("New lift encoder offset: " + str(self.lift_encoder_offset))
 
 
 def main(args=None):

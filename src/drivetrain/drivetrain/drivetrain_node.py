@@ -86,10 +86,10 @@ class DrivetrainNode(Node):
         self.declare_parameter("HALF_WHEEL_BASE", 0.5)
         self.declare_parameter("HALF_TRACK_WIDTH", 0.5)
         self.declare_parameter("STEERING_MOTOR_GEAR_RATIO", 40)
-        self.declare_parameter("FRONT_LEFT_MAGNET_OFFSET", 823)
-        self.declare_parameter("FRONT_RIGHT_MAGNET_OFFSET", 378)
-        self.declare_parameter("BACK_LEFT_MAGNET_OFFSET", 906)
-        self.declare_parameter("BACK_RIGHT_MAGNET_OFFSET", 392)
+        self.declare_parameter("FRONT_LEFT_MAGNET_OFFSET", 97)
+        self.declare_parameter("FRONT_RIGHT_MAGNET_OFFSET", 873)
+        self.declare_parameter("BACK_LEFT_MAGNET_OFFSET", 50)
+        self.declare_parameter("BACK_RIGHT_MAGNET_OFFSET", 647)
         self.declare_parameter("ABSOLUTE_ENCODER_COUNTS", 1024)
         self.declare_parameter("GAZEBO_SIMULATION", False)
 
@@ -135,6 +135,7 @@ class DrivetrainNode(Node):
         # Define services (methods callable from the outside) here
         self.srv_stop = self.create_service(Stop, "drivetrain/stop", self.stop_callback)
         self.srv_drive = self.create_service(Drive, "drivetrain/drive", self.drive_callback)
+        self.srv_calibrate = self.create_service(Stop, "drivetrain/calibrate", self.calibrate_callback)
 
         # Define timers here
         self.absolute_angle_timer = self.create_timer(0.05, self.absolute_angle_reset)
@@ -289,6 +290,30 @@ class DrivetrainNode(Node):
         """This service request drives the robot with the specified speeds."""
         self.drive(request.forward_power, request.horizontal_power, request.turning_power)
         response.success = 0  # indicates success
+        return response
+
+    def calibrate_callback(self, request, response):
+        """This service request calibrates the drivetrain."""
+        if self.front_left.current_absolute_angle is not None:
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
+            front_left_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.FRONT_LEFT_TURN))
+            front_left_future.add_done_callback(lambda future: self.front_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
+            front_right_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.FRONT_RIGHT_TURN))
+            front_right_future.add_done_callback(lambda future: self.front_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
+            back_left_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.BACK_LEFT_TURN))
+            back_left_future.add_done_callback(lambda future: self.back_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
+            back_right_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.BACK_RIGHT_TURN))
+            back_right_future.add_done_callback(lambda future: self.back_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+
+            response.success = 0  # indicates success
+        else:
+            response.success = 1  # indicates failure
         return response
 
     # Define subscriber callback methods here

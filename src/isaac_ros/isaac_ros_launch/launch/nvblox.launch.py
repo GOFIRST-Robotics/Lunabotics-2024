@@ -70,7 +70,7 @@ def generate_launch_description():
             SetParametersFromFile(base_config),
             SetParametersFromFile(zed_config, condition=setup_for_zed),
             SetParametersFromFile(gazebo_simulation_config, condition=setup_for_gazebo),
-            SetParameter(name="global_frame", value=LaunchConfiguration("global_frame", default="odom")),
+            SetParameter(name="global_frame", value=LaunchConfiguration("global_frame", default="map")),
             # Remappings for zed data
             SetRemap(src=["depth/image"], dst=["/zed2i/zed_node/depth/depth_registered"], condition=setup_for_zed),
             SetRemap(src=["depth/camera_info"], dst=["/zed2i/zed_node/depth/camera_info"], condition=setup_for_zed),

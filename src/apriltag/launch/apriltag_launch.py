@@ -12,7 +12,7 @@ def generate_launch_description():
         parameters=["config/rovr_control.yaml"],
     )
 
-    apriltag_node = ComposableNode(
+    isaac_ros_apriltag = ComposableNode(
         package="isaac_ros_apriltag",
         plugin="nvidia::isaac_ros::apriltag::AprilTagNode",
         name="isaac_ros_apriltag",
@@ -37,7 +37,7 @@ def generate_launch_description():
         name="apriltag_container",
         namespace="",
         executable="component_container_mt",
-        composable_node_descriptions=[apriltag_node, image_format_converter_node_left],
+        composable_node_descriptions=[isaac_ros_apriltag, image_format_converter_node_left],
         output="screen",
     )
 
