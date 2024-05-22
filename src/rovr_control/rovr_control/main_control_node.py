@@ -3,7 +3,6 @@
 # Maintainer: Anthony Brogni <brogn002@umn.edu>
 # Last Updated: November 2023
 
-import sys
 
 # Import the ROS 2 module
 import rclpy
@@ -35,7 +34,6 @@ from .gamepad_constants import *
 # Uncomment the line below to use the Xbox controller mappings instead
 # from .xbox_controller_constants import *
 
-from .costmap_2d import PyCostmap2D
 
 # GLOBAL VARIABLES #
 buttons = [0] * 11  # This is to help with button press detection
@@ -49,7 +47,7 @@ def create_pose_stamped(x, y, yaw):
     pose_stamped_msg.header.frame_id = "map"
     pose_stamped_msg.pose.position.x = x
     pose_stamped_msg.pose.position.y = y
-    quat = R.from_euler("z", yaw - 15, degrees=True).as_quat()  # TODO: Why does this need to be offset?
+    quat = R.from_euler("z", yaw, degrees=True).as_quat()
     pose_stamped_msg.pose.orientation.x = quat[0]
     pose_stamped_msg.pose.orientation.y = quat[1]
     pose_stamped_msg.pose.orientation.z = quat[2]
@@ -115,7 +113,7 @@ class MainControlNode(Node):
             self.travel_automation_location = create_pose_stamped(6.2, -1.2, 0)
         elif self.autonomous_field_type == "bottom":
             self.autonomous_berm_location = create_pose_stamped(7.25, -1.4, 270)
-            self.travel_automation_location = create_pose_stamped(6.2, -3.2, 0)
+            self.travel_automation_location = create_pose_stamped(6.2, -3.2, 270)
         elif self.autonomous_field_type == "nasa":
             self.autonomous_berm_location = create_pose_stamped(1.3, -0.6, 90)  # TODO: Test this location in simulation
             self.travel_automation_location = create_pose_stamped(6.2, -1.2, 0)  # TODO: Test this location in simulation
@@ -151,40 +149,36 @@ class MainControlNode(Node):
         while not self.cli_lift_zero.wait_for_service(timeout_sec=1):
             self.get_logger().warn("Waiting for the lift/zero service to be available (BLOCKING)")
         self.cli_lift_zero.call_async(Stop.Request())  # Zero the lift by slowly raising it up
-        
 
-    def optimal_dig_location(self) -> list:
-        available_dig_spots = []
-        
-        try:
-            costmap = PyCostmap2D(self.nav2.getGlobalCostmap())
-            resolution = costmap.getResolution()
-
-            # NEEDED MEASUREMENTS:
-            robot_width = 1.749 / 2
-            robot_width_pixels = robot_width // resolution
-            danger_threshold, real_danger_threshold = 50, 150
-            dig_zone_depth, dig_zone_start, dig_zone_end = 2.57 // 2, 4.07, 8.14
-            dig_zone_border_y = 2.0
-            
-
-            while len(available_dig_spots) == 0:
-                if danger_threshold > real_danger_threshold:
-                    self.get_logger().warn("No safe digging spots available. Switch to manual control.")
-                    return None
-                i = dig_zone_start + robot_width
-                while i <= dig_zone_end - robot_width:
-                    if costmap.getDigCost(i, dig_zone_border_y, robot_width_pixels, dig_zone_depth) <= self.DANGER_THRESHOLD:
-                        available_dig_spots.append(create_pose_stamped(i, -dig_zone_border_y, 90))
-                        i += robot_width
-                    else:
-                        i += resolution
-                if len(available_dig_spots) > 0:
-                    return available_dig_spots
-                danger_threshold += 5
-        except Exception as e:
-            self.get_logger().error(f"Error in optimal_dig_location: {e} on line {sys.exc_info()[-1].tb_lineno}")
-            return None
+    # def optimal_dig_location(self) -> list:
+    #     available_dig_spots = []
+    #     try:
+    #         costmap = PyCostmap2D(self.nav2.getGlobalCostmap())
+    #         resolution = costmap.getResolution()
+    #         print(resolution)
+    #         # NEEDED MEASUREMENTS:
+    #         robot_width = 1.749 / 2
+    #         robot_width_pixels = robot_width // resolution
+    #         danger_threshold, real_danger_threshold = 50, 150
+    #         dig_zone_depth, dig_zone_start, dig_zone_end = 2.57, 4.07, 8.14
+    #         dig_zone_border_y = 2.0
+    #         while len(available_dig_spots) == 0:
+    #             if danger_threshold > real_danger_threshold:
+    #                 self.get_logger().warn("No safe digging spots available. Switch to manual control.")
+    #                 return None
+    #             i = dig_zone_start + robot_width
+    #             while i <= dig_zone_end - robot_width:
+    #                 if costmap.getDigCost(i, dig_zone_border_y, robot_width_pixels, dig_zone_depth) <= self.DANGER_THRESHOLD:
+    #                     available_dig_spots.append(create_pose_stamped(i, -dig_zone_border_y, 270))
+    #                     i += robot_width
+    #                 else:
+    #                     i += resolution
+    #             if len(available_dig_spots) > 0:
+    #                 return available_dig_spots
+    #             danger_threshold += 5
+    #     except Exception as e:
+    #         self.get_logger().error(f"Error in optimal_dig_location: {e} on line {sys.exc_info()[-1].tb_lineno}")
+    #         return None
 
     def start_calibration_callback(self) -> None:
         """This method publishes the odometry of the robot."""
@@ -229,24 +223,24 @@ class MainControlNode(Node):
         self.apriltag_timer.cancel()
         self.end_autonomous()  # Return to Teleop mode
 
-    async def travel_automation(self) -> None:
-        """This method is used to automate the travel of the robot to the excavation zone."""
-        self.get_logger().info("Starting Travel Automation!")
-        try:
-            await self.calibrate_field_coordinates()  # Calibrate the field coordinates first
-            self.nav2.goToPose(self.travel_automation_location)  # Navigate to the excavation zone
-            while not self.nav2.isTaskComplete():  # Wait for the excavation zone to be reached
-                await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
-            if self.nav2.getResult() == TaskResult.FAILED:
-                self.get_logger().error("Failed to reach the excavation zone!")
-                self.end_autonomous()  # Return to Teleop mode
-                return
-            self.get_logger().info("Travel Automation Complete!")
-            if self.travel_automation_process is None:
-                self.end_autonomous()  # Return to Teleop mode
-        except asyncio.CancelledError:
-            self.get_logger().warn("Travel Automation Terminated!")
-            self.end_autonomous()  # Return to Teleop mode
+    # async def travel_automation(self) -> None:
+    #     """This method is used to automate the travel of the robot to the excavation zone."""
+    #     self.get_logger().info("Starting Travel Automation!")
+    #     try:
+    #         await self.calibrate_field_coordinates()  # Calibrate the field coordinates first
+    #         self.nav2.goToPose(self.travel_automation_location)  # Navigate to the excavation zone
+    #         while not self.nav2.isTaskComplete():  # Wait for the excavation zone to be reached
+    #             await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
+    #         if self.nav2.getResult() == TaskResult.FAILED:
+    #             self.get_logger().error("Failed to reach the excavation zone!")
+    #             self.end_autonomous()  # Return to Teleop mode
+    #             return
+    #         self.get_logger().info("Travel Automation Complete!")
+    #         if self.travel_automation_process is None:
+    #             self.end_autonomous()  # Return to Teleop mode
+    #     except asyncio.CancelledError:
+    #         self.get_logger().warn("Travel Automation Terminated!")
+    #         self.end_autonomous()  # Return to Teleop mode
 
     # TODO: This autonomous routine has not been tested yet!
     async def auto_dig_procedure(self) -> None:
@@ -266,8 +260,8 @@ class MainControlNode(Node):
             elapsed = self.get_clock().now().nanoseconds - start_time
             # accelerate for 2 seconds
             while elapsed < 2e9:
-                await self.cli_lift_set_power.call_async(SetPower.Request(power=-0.05e-9*(elapsed)))
-                await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=0.25e-9*(elapsed), turning_power=0.0))
+                await self.cli_lift_set_power.call_async(SetPower.Request(power=-0.05e-9 * (elapsed)))
+                await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=0.25e-9 * (elapsed), turning_power=0.0))
                 self.get_logger().info("Accelerating lift and drive train")
                 elapsed = self.get_clock().now().nanoseconds - start_time
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
@@ -310,7 +304,7 @@ class MainControlNode(Node):
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             self.get_logger().info("Commence Offloading!")
             await self.cli_skimmer_setPower.call_async(SetPower.Request(power=self.skimmer_belt_power))
-            await asyncio.sleep(8 / abs(self.skimmer_belt_power))  # How long to offload for # TODO: Adjust this time factor as needed
+            await asyncio.sleep(8 / abs(self.skimmer_belt_power))  # How long to offload for
             await self.cli_skimmer_stop.call_async(Stop.Request())  # Stop the skimmer belt
             self.get_logger().info("Autonomous Offload Procedure Complete!\n")
             if self.autonomous_cycle_process is None:
@@ -329,7 +323,7 @@ class MainControlNode(Node):
                 self.get_logger().error("Field coordinates must be calibrated first!")
                 self.end_autonomous()  # Return to Teleop mode
                 return
-            self.nav2.goToPose(self.optimal_dig_location()[0])  # Navigate to the dig location
+            self.nav2.goToPose(self.travel_automation_location)  # Navigate to the dig location
             while not self.nav2.isTaskComplete():  # Wait for the dig location to be reached
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             if self.nav2.getResult() == TaskResult.FAILED:
@@ -446,6 +440,18 @@ class MainControlNode(Node):
             elif self.state == states["Autonomous"]:
                 self.autonomous_offload_process.cancel()  # Terminate the auto offload process
                 self.autonomous_offload_process = None
+
+        # # Check if the autonomous cycle button is pressed
+        # if msg.buttons[RIGHT_BUMPER] == 1 and buttons[RIGHT_BUMPER] == 0:
+        #     if self.state == states["Teleop"]:
+        #         self.stop_all_subsystems()  # Stop all subsystems
+        #         self.state = states["Autonomous"]
+        #         self.autonomous_cycle_process = asyncio.ensure_future(
+        #             self.auto_cycle_procedure()
+        #         )  # Start the autonomous cycle!
+        #     elif self.state == states["Autonomous"]:
+        #         self.autonomous_cycle_process.cancel()  # Terminate the autonomous cycle process
+        #         self.autonomous_cycle_process = None
 
         # Update button states (this allows us to detect changing button states)
         for index in range(len(buttons)):
