@@ -44,9 +44,9 @@
     # Used for crater detection.
     # one is the floor, two is hole level
     # by going significantly above 'ground', we ignore all the noise from uneven terrain while still detecting obstacles.
-    esdf_above_ground_slice_height: 0.4  # TODO: This might need to be adjusted but it works for large obstacles
-    esdf_underground_detection: -1.0  # TODO: This NEEDS to be adjusted
-    combine_pointcloud: False
+    esdf_above_ground_slice_height: 0.4  # TODO: This might need to be adjusted
+    esdf_underground_detection: -1.0  # TODO: This might need to be adjusted
+    combine_pointcloud: True
     combine_costmap: True
     invert_below_ground: False
     above_ground_denoise_level: 0.5

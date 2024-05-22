@@ -26,6 +26,7 @@ and handling semantics found in the costmap 2d C++ API.
 import numpy as np
 from typing import Tuple
 
+
 class PyCostmap2D:
     """
     PyCostmap2D.
@@ -200,7 +201,7 @@ class PyCostmap2D:
 
         """
         return my * self.size_x + mx
-    
+
     def getDigCost(self, wx, wy, robot_width, dig_length):
         mx, my = self.worldToMapValidated(wx, wy)
-        return np.amax(self.costmap[int(mx-robot_width):int(mx+robot_width), int(my):int(my+dig_length)])
+        return np.amax(self.costmap[int(mx - robot_width) : int(mx + robot_width), int(my) : int(my + dig_length)])

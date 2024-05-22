@@ -19,7 +19,7 @@
 bt_navigator:
   ros__parameters:
     use_sim_time: False
-    global_frame: map
+    global_frame: odom
     robot_base_frame: zed2i_camera_link
     odom_topic: /odom
     bt_loop_duration: 20
@@ -79,7 +79,7 @@ bt_navigator_rclcpp_node:
 
 controller_server:
   ros__parameters:
-    use_sim_time: false
+    use_sim_time: False
     controller_frequency: 10.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.001
@@ -176,7 +176,7 @@ local_costmap:
     ros__parameters:
       update_frequency: 10.0
       publish_frequency: 10.0
-      global_frame: map
+      global_frame: odom
       robot_base_frame: zed2i_camera_link
       use_sim_time: False
       rolling_window: True
@@ -208,7 +208,7 @@ global_costmap:
     ros__parameters:
       update_frequency: 10.0
       publish_frequency: 10.0
-      global_frame: map
+      global_frame: odom
       robot_base_frame: zed2i_camera_link
       use_sim_time: False
       rolling_window: True
@@ -284,7 +284,7 @@ behavior_server:
       plugin: "nav2_behaviors/DriveOnHeading"
     wait:
       plugin: "nav2_behaviors/Wait"
-    global_frame: map
+    global_frame: odom
     robot_base_frame: zed2i_camera_link
     transform_tolerance: 0.2
     use_sim_time: False

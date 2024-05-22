@@ -40,7 +40,7 @@ def generate_launch_description():
     # Conditionals for setup
     setup_for_zed = IfCondition(LaunchConfiguration("setup_for_zed", default="False"))
     setup_for_gazebo = IfCondition(LaunchConfiguration("setup_for_gazebo", default="False"))
-    
+
     # Option to attach the nodes to a shared component container for speed ups through intra process communication.
     # Make sure to set the 'component_container_name' to the name of the component container you want to attach to.
     attach_to_shared_component_container_arg = LaunchConfiguration(
@@ -70,7 +70,7 @@ def generate_launch_description():
             SetParametersFromFile(base_config),
             SetParametersFromFile(zed_config, condition=setup_for_zed),
             SetParametersFromFile(gazebo_simulation_config, condition=setup_for_gazebo),
-            SetParameter(name="global_frame", value=LaunchConfiguration("global_frame", default="map")),
+            SetParameter(name="global_frame", value=LaunchConfiguration("global_frame", default="odom")),
             # Remappings for zed data
             SetRemap(src=["depth/image"], dst=["/zed2i/zed_node/depth/depth_registered"], condition=setup_for_zed),
             SetRemap(src=["depth/camera_info"], dst=["/zed2i/zed_node/depth/camera_info"], condition=setup_for_zed),

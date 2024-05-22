@@ -125,15 +125,8 @@ class ApriltagNode(Node):
 
     def broadcast_transform(self):
         """Broadcasts the map -> odom transform"""
-        # Lookup the odom to zed2i_camera_link tf from the tf buffer
-        try:
-            odom_to_camera_link_transform = self.tf_buffer.lookup_transform("odom", "zed2i_camera_link", rclpy.time.Time())
-            self.map_transform.header.stamp = odom_to_camera_link_transform.header.stamp
-            self.tf_broadcaster.sendTransform(self.map_transform)
-        except TransformException as ex:
-            self.get_logger().warn(f"Could not transform odom to zed2i_camera_link: {ex}")
-            self.map_transform.header.stamp = self.get_clock().now().to_msg()
-            self.tf_broadcaster.sendTransform(self.map_transform)
+        self.map_transform.header.stamp = self.get_clock().now().to_msg()
+        self.tf_broadcaster.sendTransform(self.map_transform)
 
     def broadcast_transform(self):
         """Broadcasts the map -> odom transform"""
