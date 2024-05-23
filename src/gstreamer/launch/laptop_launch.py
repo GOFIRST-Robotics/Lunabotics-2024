@@ -1,4 +1,3 @@
-import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
@@ -11,11 +10,9 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 def generate_launch_description():
     ld = LaunchDescription()
 
-    bringup_dir = os.path.join("config", "rviz")
-
     # Config
     config_name = LaunchConfiguration("config_name", default="zed_example.rviz")
-    config_path = PathJoinSubstitution([bringup_dir, config_name])
+    config_path = PathJoinSubstitution(["config", "rviz", config_name])
     global_frame = LaunchConfiguration("global_frame", default="odom")
 
     run_rviz_arg = DeclareLaunchArgument("run_rviz_client", default_value="True", description="Whether to start RVIZ")
@@ -30,6 +27,7 @@ def generate_launch_description():
         cmd=["rqt", "--force-discover", "--standalone", "CameraClient"], shell=True, output="screen"
     )
 
+    # NOTE: RVIZ uses a lot of bandwidth, so it should be turned off during competition matches
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",

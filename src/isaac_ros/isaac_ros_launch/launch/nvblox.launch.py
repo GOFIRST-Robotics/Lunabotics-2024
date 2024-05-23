@@ -15,7 +15,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 
 # from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -25,17 +24,18 @@ from launch_ros.actions import LoadComposableNodes, Node
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import SetParameter, SetParametersFromFile, SetRemap
 from launch_ros.descriptions import ComposableNode
+from launch.substitutions import PathJoinSubstitution
 
 
 def generate_launch_description():
 
-    base_config_dir = os.path.join("config", "nvblox")
-    specialization_dir = os.path.join(base_config_dir, "specializations")
+    base_config_dir = PathJoinSubstitution(["config", "nvblox"])
+    specialization_dir = PathJoinSubstitution([base_config_dir, "specializations"])
 
     # Config files
-    base_config = os.path.join(base_config_dir, "nvblox_base.yaml")
-    zed_config = os.path.join(specialization_dir, "nvblox_zed.yaml")
-    gazebo_simulation_config = os.path.join(specialization_dir, "nvblox_gazebo_sim.yaml")
+    base_config = PathJoinSubstitution([base_config_dir, "nvblox_base.yaml"])
+    zed_config = PathJoinSubstitution([specialization_dir, "nvblox_zed.yaml"])
+    gazebo_simulation_config = PathJoinSubstitution([specialization_dir, "nvblox_gazebo_sim.yaml"])
 
     # Conditionals for setup
     setup_for_zed = IfCondition(LaunchConfiguration("setup_for_zed", default="False"))
