@@ -41,6 +41,9 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             [PathJoinSubstitution([FindPackageShare("robot_description"), "launch", "robot_description.launch.py"])]
         ),
+        launch_arguments={
+            "setup_for_gazebo": "True",
+        }.items(),
     )
 
     # Launch Arguments
@@ -60,7 +63,9 @@ def generate_launch_description():
         executable="parameter_bridge",
         parameters=[
             {
-                "config_file": PathJoinSubstitution([FindPackageShare("ros_gz_launch"), "config", "ros_gz_bridge.yaml"]),
+                "config_file": PathJoinSubstitution(
+                    [FindPackageShare("ros_gz_launch"), "config", "ros_gz_bridge.yaml"]
+                ),
                 "qos_overrides./tf_static.publisher.durability": "transient_local",
             }
         ],
