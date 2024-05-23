@@ -65,7 +65,10 @@ def generate_launch_description():
     robot_state_publisher = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([FindPackageShare("robot_description"), "launch", "robot_description.launch.py"])
-        )
+        ),
+        launch_arguments={
+            "setup_for_gazebo": "False",
+        }.items(),
     )
 
     load_composable_nodes = LoadComposableNodes(
