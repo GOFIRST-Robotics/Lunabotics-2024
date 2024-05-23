@@ -15,7 +15,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 from datetime import datetime
 
 from launch import LaunchDescription
@@ -27,18 +26,18 @@ from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, Exec
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.event_handlers import OnShutdown
 
-from ament_index_python.packages import get_package_share_directory
+from launch.substitutions import PathJoinSubstitution
+
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    bringup_dir = os.path.join("config", "sensors")
 
-    # Config file
-    config_file_camera = os.path.join(bringup_dir, "zed2i.yaml")
+    config_dir = PathJoinSubstitution(["config", "sensors"])
 
-    config_file_common = os.path.join(bringup_dir, "zed_common.yaml")
-
-    pkg_robot_description = get_package_share_directory("robot_description")
+    # Config files
+    config_file_camera = PathJoinSubstitution([config_dir, "zed2i.yaml"])
+    config_file_common = PathJoinSubstitution([config_dir, "zed_common.yaml"])
 
     # Option to attach the nodes to a shared component container for speed ups through intra process communication.
     # Make sure to set the 'component_container_name' to the name of the component container you want to attach to.
@@ -64,7 +63,9 @@ def generate_launch_description():
 
     # Robot State Publisher node (publishing static tfs for the camera)
     robot_state_publisher = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_robot_description, "launch", "robot_description.launch.py"))
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([FindPackageShare("robot_description"), "launch", "robot_description.launch.py"])
+        )
     )
 
     load_composable_nodes = LoadComposableNodes(

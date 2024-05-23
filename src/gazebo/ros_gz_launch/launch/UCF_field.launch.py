@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
-from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -24,28 +21,26 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    # Configure ROS nodes for launch
-
-    # Setup project paths
-    pkg_project_bringup = get_package_share_directory("ros_gz_launch")
-    pkg_project_gazebo = get_package_share_directory("gazebo_files")
-    pkg_ros_gz_sim = get_package_share_directory("ros_gz_sim")
-    pkg_robot_description = get_package_share_directory("robot_description")
 
     # Setup to launch the simulator and Gazebo world
     gz_sim = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_ros_gz_sim, "launch", "gz_sim.launch.py")),
+        PythonLaunchDescriptionSource(
+            [PathJoinSubstitution([FindPackageShare("ros_gz_sim"), "launch", "gz_sim.launch.py"])]
+        ),
         launch_arguments={
-            "gz_args": PathJoinSubstitution([pkg_project_gazebo, "worlds", "UCF_field.sdf"])
+            "gz_args": PathJoinSubstitution([FindPackageShare("gazebo_files"), "worlds", "UCF_field.sdf"])
         }.items(),
     )
 
     # Takes the description and joint angles as inputs and publishes the 3D poses of the robot links
     robot_state_publisher = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_robot_description, "launch", "robot_description.launch.py"))
+        PythonLaunchDescriptionSource(
+            [PathJoinSubstitution([FindPackageShare("robot_description"), "launch", "robot_description.launch.py"])]
+        ),
     )
 
     # Launch Arguments
@@ -55,7 +50,7 @@ def generate_launch_description():
     rviz = Node(
         package="rviz2",
         executable="rviz2",
-        arguments=["-d", os.path.join(pkg_project_bringup, "config", "camera.rviz")],
+        arguments=["-d", PathJoinSubstitution([FindPackageShare("ros_gz_launch"), "config", "camera.rviz"])],
         condition=IfCondition(LaunchConfiguration("run_rviz")),
     )
 
@@ -65,7 +60,7 @@ def generate_launch_description():
         executable="parameter_bridge",
         parameters=[
             {
-                "config_file": os.path.join(pkg_project_bringup, "config", "ros_gz_bridge.yaml"),
+                "config_file": PathJoinSubstitution([FindPackageShare("ros_gz_launch"), "config", "ros_gz_bridge.yaml"]),
                 "qos_overrides./tf_static.publisher.durability": "transient_local",
             }
         ],

@@ -1,13 +1,12 @@
-from launch.actions import IncludeLaunchDescription,DeclareLaunchArgument
+from launch_ros.substitutions import FindPackageShare
+
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch import LaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from ament_index_python.packages import get_package_share_directory
-from launch.substitutions import LaunchConfiguration
-import os
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 
 def generate_launch_description():
-    bringup_dir = get_package_share_directory("isaac_ros_launch")
 
     use_nvblox_arg = DeclareLaunchArgument(
         "use_nvblox",
@@ -16,7 +15,9 @@ def generate_launch_description():
     )
 
     ld = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(bringup_dir, "isaac_launch.py")),
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([FindPackageShare("isaac_ros_launch"), "isaac_launch.py"])
+        ),
         launch_arguments={
             "setup_for_zed": "False",
             "setup_for_gazebo": "True",
@@ -24,4 +25,4 @@ def generate_launch_description():
         }.items(),
     )
 
-    return LaunchDescription([use_nvblox_arg,ld])
+    return LaunchDescription([use_nvblox_arg, ld])

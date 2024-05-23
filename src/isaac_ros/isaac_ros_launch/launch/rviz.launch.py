@@ -15,20 +15,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import os
-
-# from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    bringup_dir = os.path.join("config", "rviz")
 
     # Config
     config_name = LaunchConfiguration("config_name", default="zed_example.rviz")
-    config_path = PathJoinSubstitution([bringup_dir, config_name])
+    config_path = PathJoinSubstitution(["config", "rviz", config_name])
     global_frame = LaunchConfiguration("global_frame", default="odom")
 
     # Rviz node
