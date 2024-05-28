@@ -101,7 +101,6 @@ class MainControlNode(Node):
         self.autonomous_digging_process = None
         self.autonomous_offload_process = None
         self.autonomous_cycle_process = None
-        self.travel_automation_process = None
         self.skimmer_goal_reached = True
 
         self.DANGER_THRESHOLD = 1
@@ -110,13 +109,13 @@ class MainControlNode(Node):
         # Define important map locations
         if self.autonomous_field_type == "top":
             self.autonomous_berm_location = create_pose_stamped(7.25, -3.2, 90)  # TODO: Test this location in simulation
-            self.travel_automation_location = create_pose_stamped(6.2, -1.2, 0)
+            self.dig_location = create_pose_stamped(6.2, -1.2, 0)
         elif self.autonomous_field_type == "bottom":
             self.autonomous_berm_location = create_pose_stamped(7.25, -1.4, 270)
-            self.travel_automation_location = create_pose_stamped(6.2, -3.2, 270)
+            self.dig_location = create_pose_stamped(6.2, -3.2, 270)
         elif self.autonomous_field_type == "nasa":
             self.autonomous_berm_location = create_pose_stamped(1.3, -0.6, 90)  # TODO: Test this location in simulation
-            self.travel_automation_location = create_pose_stamped(6.2, -1.2, 0)  # TODO: Test this location in simulation
+            self.dig_location = create_pose_stamped(6.2, -1.2, 0)  # TODO: Test this location in simulation
 
         # Define timers here
         self.apriltag_timer = self.create_timer(0.1, self.start_calibration_callback)
@@ -150,6 +149,7 @@ class MainControlNode(Node):
             self.get_logger().warn("Waiting for the lift/zero service to be available (BLOCKING)")
         self.cli_lift_zero.call_async(Stop.Request())  # Zero the lift by slowly raising it up
 
+    # NOTE: This method is meant to find a safe digging location on the field, but it has not been tested enough yet.
     # def optimal_dig_location(self) -> list:
     #     available_dig_spots = []
     #     try:
@@ -223,24 +223,6 @@ class MainControlNode(Node):
         self.apriltag_timer.cancel()
         self.end_autonomous()  # Return to Teleop mode
 
-    # async def travel_automation(self) -> None:
-    #     """This method is used to automate the travel of the robot to the excavation zone."""
-    #     self.get_logger().info("Starting Travel Automation!")
-    #     try:
-    #         await self.calibrate_field_coordinates()  # Calibrate the field coordinates first
-    #         self.nav2.goToPose(self.travel_automation_location)  # Navigate to the excavation zone
-    #         while not self.nav2.isTaskComplete():  # Wait for the excavation zone to be reached
-    #             await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
-    #         if self.nav2.getResult() == TaskResult.FAILED:
-    #             self.get_logger().error("Failed to reach the excavation zone!")
-    #             self.end_autonomous()  # Return to Teleop mode
-    #             return
-    #         self.get_logger().info("Travel Automation Complete!")
-    #         if self.travel_automation_process is None:
-    #             self.end_autonomous()  # Return to Teleop mode
-    #     except asyncio.CancelledError:
-    #         self.get_logger().warn("Travel Automation Terminated!")
-    #         self.end_autonomous()  # Return to Teleop mode
 
     # TODO: This autonomous routine has not been tested yet!
     async def auto_dig_procedure(self) -> None:
@@ -323,7 +305,7 @@ class MainControlNode(Node):
                 self.get_logger().error("Field coordinates must be calibrated first!")
                 self.end_autonomous()  # Return to Teleop mode
                 return
-            self.nav2.goToPose(self.travel_automation_location)  # Navigate to the dig location
+            self.nav2.goToPose(self.dig_location)  # Navigate to the dig location
             while not self.nav2.isTaskComplete():  # Wait for the dig location to be reached
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             if self.nav2.getResult() == TaskResult.FAILED:
