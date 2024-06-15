@@ -8,28 +8,28 @@
 	branch =  master
 [submodule "src/isaac_ros/isaac_ros_common"]
 	path = src/isaac_ros/isaac_ros_common
-	url = https://github.com/GOFIRST-Robotics/isaac_ros_common.git
-	branch = main
+	url = https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common.git
+	branch = v3.0.1
 [submodule "src/isaac_ros/isaac_ros_nvblox"]
 	path = src/isaac_ros/isaac_ros_nvblox
 	url = https://github.com/GOFIRST-Robotics/isaac_ros_nvblox.git
-	branch = main
+	branch = v3.0.1
 [submodule "src/isaac_ros/isaac_ros_apriltag"]
 	path = src/isaac_ros/isaac_ros_apriltag
 	url = https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag.git
-	branch = main
+	branch = v3.0.1
 [submodule "src/isaac_ros/isaac_ros_image_pipeline"]
 	path = src/isaac_ros/isaac_ros_image_pipeline
 	url = https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_image_pipeline.git
-	branch = main
+	branch = v3.0.1
 [submodule "src/isaac_ros/isaac_ros_nitros"]
 	path = src/isaac_ros/isaac_ros_nitros
 	url = https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nitros.git
-	branch = main
+	branch = v3.0.1
 [submodule "src/isaac_ros/isaac_ros_visual_slam"]
 	path = src/isaac_ros/isaac_ros_visual_slam
 	url = https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam.git
-	branch = main
+	branch = v3.0.1
 [submodule "src/realsense-ros"]
 	path = src/realsense-ros
 	url = https://github.com/IntelRealSense/realsense-ros.git

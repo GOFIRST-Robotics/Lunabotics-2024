@@ -1,0 +1,10 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+USER root
+
+RUN apt-get update && apt-get install -y \
+    ros-humble-ros-gz \
+    ros-humble-sdformat-urdf \
+    ros-humble-joint-state-publisher-gui \
+    && rm -rf /var/lib/apt/lists/*

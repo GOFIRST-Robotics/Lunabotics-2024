@@ -1,0 +1,282 @@
+# Copyright (c) 2023-2024, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+ARG BASE_IMAGE
+FROM $BASE_IMAGE
+
+# Store list of packages (must be first)
+RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/ros2_${ROS_DISTRO}-start-packages.csv
+
+# disable terminal interaction for apt
+ENV DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
+SHELL ["/bin/bash", "-c"]
+
+# Env setup
+RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV ROS_PYTHON_VERSION=3
+ENV ROS_DISTRO=jazzy
+ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+# Avoid setup.py and easy_install deprecation warnings caused by colcon and setuptools
+# https://github.com/colcon/colcon-core/issues/454
+ENV PYTHONWARNINGS=ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources,ignore:::setuptools.command.develop
+RUN echo "Warning: Using the PYTHONWARNINGS environment variable to silence setup.py and easy_install deprecation warnings caused by colcon"
+
+# Add ROS 2 apt repository
+RUN --mount=type=cache,target=/var/cache/apt \
+    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
+    && apt-get update
+
+# ROS fundamentals
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+        devscripts \
+        dh-make \
+        fakeroot \
+        libxtensor-dev \
+        python3-bloom \
+        python3-colcon-common-extensions \
+        python3-pip \
+        python3-pybind11 \
+        python3-pytest-cov \
+        python3-rosdep \
+        python3-rosinstall-generator \
+        python3-vcstool \
+        quilt
+
+# ROS Python fundamentals
+RUN python3 -m pip install -U \
+        flake8-blind-except \
+        flake8-builtins \
+        flake8-class-newline \
+        flake8-comprehensions \
+        flake8-deprecated \
+        flake8-docstrings \
+        flake8-import-order \
+        flake8-quotes \
+        numpy>=1.24.4 \
+        matplotlib \
+        pandas \
+        rosbags \
+        setuptools==65.7.0
+
+# Install ROS 2 ${ROS_DISTRO}
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-ros-base \
+    ros-${ROS_DISTRO}-angles \
+    ros-${ROS_DISTRO}-apriltag \
+    ros-${ROS_DISTRO}-behaviortree-cpp-v3 \
+    ros-${ROS_DISTRO}-bondcpp \
+    ros-${ROS_DISTRO}-camera-calibration-parsers \
+    ros-${ROS_DISTRO}-camera-info-manager \
+    ros-${ROS_DISTRO}-compressed-image-transport \
+    ros-${ROS_DISTRO}-compressed-depth-image-transport \
+    ros-${ROS_DISTRO}-cv-bridge \
+    ros-${ROS_DISTRO}-demo-nodes-cpp \
+    ros-${ROS_DISTRO}-demo-nodes-py \
+    ros-${ROS_DISTRO}-diagnostic-aggregator \
+    ros-${ROS_DISTRO}-diagnostic-updater \
+    ros-${ROS_DISTRO}-example-interfaces \
+    ros-${ROS_DISTRO}-foxglove-bridge \
+    ros-${ROS_DISTRO}-image-geometry \
+    ros-${ROS_DISTRO}-image-pipeline \
+    ros-${ROS_DISTRO}-image-transport \
+    ros-${ROS_DISTRO}-image-transport-plugins \
+    ros-${ROS_DISTRO}-launch-xml \
+    ros-${ROS_DISTRO}-launch-yaml \
+    ros-${ROS_DISTRO}-launch-testing \
+    ros-${ROS_DISTRO}-launch-testing-ament-cmake \
+    ros-${ROS_DISTRO}-nav2-bringup \
+    ros-${ROS_DISTRO}-nav2-msgs \
+    ros-${ROS_DISTRO}-nav2-mppi-controller \
+    ros-${ROS_DISTRO}-nav2-graceful-controller \
+    ros-${ROS_DISTRO}-navigation2 \
+    ros-${ROS_DISTRO}-ompl \
+    ros-${ROS_DISTRO}-resource-retriever \
+    ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
+    ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
+    ros-${ROS_DISTRO}-rosbag2 \
+    ros-${ROS_DISTRO}-rosbag2-compression-zstd \
+    ros-${ROS_DISTRO}-rosbag2-cpp \
+    ros-${ROS_DISTRO}-rosbag2-py \
+    ros-${ROS_DISTRO}-rosbag2-storage-mcap \
+    ros-${ROS_DISTRO}-rosbridge-suite \
+    ros-${ROS_DISTRO}-rqt-graph \
+    ros-${ROS_DISTRO}-rqt-image-view \
+    ros-${ROS_DISTRO}-rqt-reconfigure \
+    ros-${ROS_DISTRO}-rqt-robot-monitor \
+    ros-${ROS_DISTRO}-rviz2 \
+    ros-${ROS_DISTRO}-rviz-common \
+    ros-${ROS_DISTRO}-rviz-default-plugins \
+    ros-${ROS_DISTRO}-sensor-msgs \
+    ros-${ROS_DISTRO}-slam-toolbox \
+    ros-${ROS_DISTRO}-v4l2-camera \
+    ros-${ROS_DISTRO}-vision-opencv \
+    ros-${ROS_DISTRO}-vision-msgs \
+    ros-${ROS_DISTRO}-vision-msgs-rviz-plugins
+
+# Setup rosdep
+COPY rosdep/extra_rosdeps.yaml /etc/ros/rosdep/sources.list.d/nvidia-isaac.yaml
+RUN --mount=type=cache,target=/var/cache/apt \
+    rosdep init \
+    && echo "yaml file:///etc/ros/rosdep/sources.list.d/nvidia-isaac.yaml" | tee /etc/ros/rosdep/sources.list.d/00-nvidia-isaac.list \
+    && rosdep update
+
+####### -- Install updated packages over installed debians
+
+# Install negotiated from source
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/osrf/negotiated && cd negotiated && git checkout master \
+    && source ${ROS_ROOT}/setup.bash \
+    && cd negotiated_interfaces && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb \
+    && cd negotiated && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb
+
+# Install image_proc from 55bf2a38 with backported resize node fix
+# https://github.com/ros-perception/image_pipeline/pull/786/commits/969d6c763df99b42844742946f7a70c605a72a15
+# Revert breaking QoS changes in https://github.com/ros-perception/image_pipeline/pull/814
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/ros-perception/image_pipeline.git && cd image_pipeline && git checkout 55bf2a38c327b829c3da444f963a6c66bfe0598f \
+    && git config user.email "builder@nvidia.com" && git config user.name "NVIDIA Builder" \
+    && git remote add fork https://github.com/schornakj/image_pipeline.git && git fetch fork && git cherry-pick 969d6c763df99b42844742946f7a70c605a72a15 \
+    && source ${ROS_ROOT}/setup.bash \
+    && cd image_proc && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y --allow-downgrades ./*.deb \
+    && echo "image_pipeline (image_proc) https://github.com/ros-perception/image_pipeline/pull/786/commits/969d6c763df99b42844742946f7a70c605a72a15 on 55bf2a38" >> ${ROS_ROOT}/VERSION \
+    && cd ../ && rm -Rf src build log
+
+# Install patched rclcpp package with backported multithreadedexecutor fix
+# https://github.com/ros2/rclcpp/commit/232262c02a1265830c7785b7547bd51e1124fcd8
+COPY patches/rclcpp-disable-tests.patch /tmp/
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && export RCLCPP_VERSION="release/${ROS_DISTRO}/rclcpp/$(apt-cache madison ros-${ROS_DISTRO}-rclcpp | grep -m1 -oP 'ros-${ROS_DISTRO}-rclcpp \| \K[^j]+(?=jammy)')" \
+    && echo ${RCLCPP_VERSION} \
+    && git clone https://github.com/ros2-gbp/rclcpp-release.git && cd rclcpp-release && git checkout ${RCLCPP_VERSION} \
+    && patch -i /tmp/rclcpp-disable-tests.patch \
+    && unset RCLCPP_VERSION \
+    && git config user.email "builder@nvidia.com" && git config user.name "NVIDIA Builder" \
+    && git remote add rclcpp https://github.com/ros2/rclcpp.git && git fetch rclcpp \
+    && git cherry-pick 232262c02a1265830c7785b7547bd51e1124fcd8 \
+    && source ${ROS_ROOT}/setup.bash \
+    && cd ../ && rosdep install -i -r --from-paths rclcpp-release/ --rosdistro ${ROS_DISTRO} -y \
+    && cd rclcpp-release && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y --allow-downgrades ./*.deb \
+    && echo "rclcpp https://github.com/ros2/rclcpp/commit/232262c02a1265830c7785b7547bd51e1124fcd8" >> ${ROS_ROOT}/VERSION \
+    && cd ../ && rm -Rf src build log
+
+# Install Moveit 2 ROS packages
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-ament-cmake \
+    ros-${ROS_DISTRO}-ament-cmake-gtest \
+    ros-${ROS_DISTRO}-control-msgs \
+    ros-${ROS_DISTRO}-controller-manager \
+    ros-${ROS_DISTRO}-geometric-shapes \
+    ros-${ROS_DISTRO}-gripper-controllers \
+    ros-${ROS_DISTRO}-interactive-markers \
+    ros-${ROS_DISTRO}-joint-state-broadcaster \
+    ros-${ROS_DISTRO}-joint-state-publisher \
+    ros-${ROS_DISTRO}-joint-trajectory-controller \
+    ros-${ROS_DISTRO}-joy \
+    ros-${ROS_DISTRO}-launch-param-builder \
+    ros-${ROS_DISTRO}-moveit \
+    ros-${ROS_DISTRO}-moveit-common \
+    ros-${ROS_DISTRO}-moveit-configs-utils \
+    ros-${ROS_DISTRO}-moveit-core \
+    ros-${ROS_DISTRO}-moveit-msgs \
+    ros-${ROS_DISTRO}-moveit-ros-perception \
+    ros-${ROS_DISTRO}-moveit-ros-planning \
+    ros-${ROS_DISTRO}-moveit-ros-planning-interface \
+    ros-${ROS_DISTRO}-moveit-servo \
+    ros-${ROS_DISTRO}-moveit-visual-tools \
+    ros-${ROS_DISTRO}-pluginlib \
+    ros-${ROS_DISTRO}-robot-state-publisher \
+    ros-${ROS_DISTRO}-ros2-control \
+    ros-${ROS_DISTRO}-rviz-visual-tools \
+    ros-${ROS_DISTRO}-rviz2 \
+    ros-${ROS_DISTRO}-srdfdom \
+    ros-${ROS_DISTRO}-tf2-eigen \
+    ros-${ROS_DISTRO}-tf2-geometry-msgs \
+    ros-${ROS_DISTRO}-tf2-ros \
+    ros-${ROS_DISTRO}-topic-based-ros2-control \
+    ros-${ROS_DISTRO}-ur-description \
+    ros-${ROS_DISTRO}-ur-moveit-config \
+    ros-${ROS_DISTRO}-ur-msgs \
+    ros-${ROS_DISTRO}-xacro
+
+# Install various moveit_resources packages from source.
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/ros-planning/moveit_resources.git -b ${ROS_DISTRO} \
+    && cd moveit_resources && source ${ROS_ROOT}/setup.bash \
+    && cd fanuc_description && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd .. && apt-get install -y ./*.deb && rm *.deb \
+    && cd fanuc_moveit_config && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd .. && apt-get install -y ./*.deb && rm *.deb \
+    && cd panda_description && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd .. && apt-get install -y ./*.deb && rm *.deb \
+    && cd panda_moveit_config && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd .. && apt-get install -y ./*.deb && rm *.deb \
+    && cd pr2_description && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd .. && apt-get install -y ./*.deb && rm *.deb \
+    && cd moveit_resources && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd .. && apt-get install -y ./*.deb && rm *.deb
+
+# Install MoveIt task constructor from source.  The "demo" package depends on moveit_resources_panda_moveit_config,
+# installed from source above.
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/ros-planning/moveit_task_constructor.git -b ${ROS_DISTRO} \
+    && cd moveit_task_constructor && source ${ROS_ROOT}/setup.bash \
+    && cd msgs && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb \
+    && cd rviz_marker_tools && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb \
+    && cd core && bloom-generate rosdebian && fakeroot debian/rules binary DEB_BUILD_OPTIONS=nocheck \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb \
+    && cd capabilities && bloom-generate rosdebian && fakeroot debian/rules binary DEB_BUILD_OPTIONS=nocheck \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb \
+    && cd visualization && bloom-generate rosdebian && fakeroot debian/rules binary DEB_BUILD_OPTIONS=nocheck \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb \
+    && cd demo && bloom-generate rosdebian && fakeroot debian/rules binary DEB_BUILD_OPTIONS=nocheck \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb
+
+# MoveIt 2's hybrid planning package depends on moveit_resources_panda_moveit_config, installed from source above.
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-moveit-hybrid-planning
+
+# Install moveit2_tutorials from source (depends on moveit_hybrid_planning).
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/ros-planning/moveit2_tutorials.git -b ${ROS_DISTRO} \
+    && cd moveit2_tutorials && source ${ROS_ROOT}/setup.bash \
+    && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb
+
+# Install paho-mqtt for isaac_ros_mission_client
+RUN python3 -m pip install -U \
+        paho-mqtt==1.6.1
+
+# Patch gtest to make it work with CXX 17
+RUN sudo sed -i '917i #ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL' /usr/src/googletest/googletest/include/gtest/internal/gtest-internal.h \
+    && sudo sed -i '920i #endif' /usr/src/googletest/googletest/include/gtest/internal/gtest-internal.h \
+    && sudo sed -i '2392i #if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \\\n    GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L\n#define GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL 1\n#endif' \
+    /usr/src/googletest/googletest/include/gtest/internal/gtest-port.h
+
+# Store list of packages (must be last)
+RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/ros2_${ROS_DISTRO}-end-packages.csv

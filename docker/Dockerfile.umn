@@ -1,0 +1,31 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+USER root
+
+# to get list of packages rosdep install --reinstall --simulate --from-path src --ignore-src --skip-keys 'nvblox negotiated'| awk '{print $5 }'
+RUN apt-get update  && apt-get install -y \
+    ros-humble-rclc \
+    libboost-all-dev \
+    python3-pytest \
+    ros-humble-joy \
+    ros-humble-ament-cmake-clang-format \
+    python3-numpy \
+    ros-humble-launch-pytest \
+    python3-tqdm \
+    python3-requests \
+    libeigen3-dev \
+    ros-humble-grid-map-rviz-plugin \
+    ros-humble-can-msgs \
+    ros-humble-usb-cam \
+    python3-pytest \
+    python3-opencv \
+    python3-serial \
+    python3-numpy \
+    libboost-all-dev \
+    python3-tqdm \
+    python3-requests \
+    python3-scipy \
+    libeigen3-dev \
+    ros-humble-librealsense2 \
+    && rm -rf /var/lib/apt/lists/*

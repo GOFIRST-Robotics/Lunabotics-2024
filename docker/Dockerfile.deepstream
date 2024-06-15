@@ -1,0 +1,22 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+USER root
+RUN apt-get update && \
+    apt-get install -y \
+    gstreamer1.0-tools \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly && \
+    rm -rf /var/lib/apt/lists/*
+  
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
+    wget --content-disposition 'https://api.ngc.nvidia.com/v2/resources/org/nvidia/deepstream/7.0/files?redirect=true&path=deepstream-7.0_7.0.0-1_amd64.deb' -O deepstream.deb; \
+  else \
+    wget --content-disposition 'https://api.ngc.nvidia.com/v2/resources/org/nvidia/deepstream/7.0/files?redirect=true&path=deepstream-7.0_7.0.0-1_arm64.deb' -O deepstream.deb; \
+  fi
+
+RUN apt-get update && apt-get install -y ./deepstream.deb && \
+    rm deepstream.deb && \
+    rm -rf /var/lib/apt/lists/*
