@@ -30,10 +30,10 @@ import asyncio  # Allows the use of asynchronous methods!
 from scipy.spatial.transform import Rotation as R
 
 # Import our logitech gamepad button mappings
-from .gamepad_constants import *
+from . import gamepad_constants as bindings
 
 # Uncomment the line below to use the Xbox controller mappings instead
-# from .xbox_controller_constants import *
+# from . import xbox_controller_constants as bindings
 
 
 # GLOBAL VARIABLES #
@@ -79,9 +79,15 @@ class MainControlNode(Node):
         self.skimmer_belt_power = self.get_parameter("skimmer_belt_power").value
         self.skimmer_lift_manual_power = self.get_parameter("skimmer_lift_manual_power").value
         self.autonomous_field_type = self.get_parameter("autonomous_field_type").value
-        self.lift_dumping_position = self.get_parameter("lift_dumping_position").value * 360 / 42  # Convert encoder counts to degrees
-        self.lift_digging_start_position = self.get_parameter("lift_digging_start_position").value * 360 / 42  # Convert encoder counts to degrees
-        self.lift_digging_end_position = self.get_parameter("lift_digging_end_position").value * 360 / 42  # Convert encoder counts to degrees
+        self.lift_dumping_position = (
+            self.get_parameter("lift_dumping_position").value * 360 / 42
+        )  # Convert encoder counts to degrees
+        self.lift_digging_start_position = (
+            self.get_parameter("lift_digging_start_position").value * 360 / 42
+        )  # Convert encoder counts to degrees
+        self.lift_digging_end_position = (
+            self.get_parameter("lift_digging_end_position").value * 360 / 42
+        )  # Convert encoder counts to degrees
 
         # Print the ROS Parameters to the terminal below #
         self.get_logger().info("autonomous_driving_power has been set to: " + str(self.autonomous_driving_power))
@@ -128,7 +134,9 @@ class MainControlNode(Node):
 
         # Define important map locations
         if self.autonomous_field_type == "top":
-            self.autonomous_berm_location = create_pose_stamped(7.25, -3.2, 90)  # TODO: Test this location in simulation
+            self.autonomous_berm_location = create_pose_stamped(
+                7.25, -3.2, 90
+            )  # TODO: Test this location in simulation
             self.dig_location = create_pose_stamped(6.2, -1.2, 0)
         elif self.autonomous_field_type == "bottom":
             self.autonomous_berm_location = create_pose_stamped(7.25, -1.4, 270)
@@ -158,7 +166,9 @@ class MainControlNode(Node):
         # Define publishers and subscribers here
         self.drive_power_publisher = self.create_publisher(Twist, "cmd_vel", 10)
         self.joy_subscription = self.create_subscription(Joy, "joy", self.joystick_callback, 10)
-        self.skimmer_goal_subscription = self.create_subscription(Bool, "/skimmer/goal_reached", self.skimmer_goal_callback, 10)
+        self.skimmer_goal_subscription = self.create_subscription(
+            Bool, "/skimmer/goal_reached", self.skimmer_goal_callback, 10
+        )
 
         self.started_calibration = False
         self.field_calibrated = False
@@ -188,7 +198,10 @@ class MainControlNode(Node):
     #                 return None
     #             i = dig_zone_start + robot_width
     #             while i <= dig_zone_end - robot_width:
-    #                 if costmap.getDigCost(i, dig_zone_border_y, robot_width_pixels, dig_zone_depth) <= self.DANGER_THRESHOLD:
+    #                 if (
+    #                     costmap.getDigCost(i, dig_zone_border_y, robot_width_pixels, dig_zone_depth)
+    #                     <= self.DANGER_THRESHOLD
+    #                 ):
     #                     available_dig_spots.append(create_pose_stamped(i, -dig_zone_border_y, 270))
     #                     i += robot_width
     #                 else:
@@ -230,7 +243,9 @@ class MainControlNode(Node):
             while not self.cli_drivetrain_drive.wait_for_service():  # Wait for the drivetrain services to be available
                 self.get_logger().warn("Waiting for drivetrain services to become available...")
                 await asyncio.sleep(0.1)
-            await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=0.0, turning_power=0.3))
+            await self.cli_drivetrain_drive.call_async(
+                Drive.Request(forward_power=0.0, horizontal_power=0.0, turning_power=0.3)
+            )
         while not self.field_calibrated:
             future = self.cli_set_apriltag_odometry.call_async(ResetOdom.Request())
             future.add_done_callback(self.future_odom_callback)
@@ -243,14 +258,15 @@ class MainControlNode(Node):
         self.apriltag_timer.cancel()
         self.end_autonomous()  # Return to Teleop mode
 
-
     # TODO: This autonomous routine has not been tested yet!
     async def auto_dig_procedure(self) -> None:
         """This method lays out the procedure for autonomously digging!"""
         self.get_logger().info("\nStarting Autonomous Digging Procedure!")
         try:  # Wrap the autonomous procedure in a try-except
             await self.cli_lift_zero.call_async(Stop.Request())
-            await self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_digging_start_position))  # Lower the skimmer onto the ground
+            await self.cli_lift_setPosition.call_async(
+                SetPosition.Request(position=self.lift_digging_start_position)
+            )  # Lower the skimmer onto the ground
             self.skimmer_goal_reached = False
             # Wait for the goal height to be reached
             while not self.skimmer_goal_reached:
@@ -263,7 +279,9 @@ class MainControlNode(Node):
             # accelerate for 2 seconds
             while elapsed < 2e9:
                 await self.cli_lift_set_power.call_async(SetPower.Request(power=-0.05e-9 * (elapsed)))
-                await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=0.25e-9 * (elapsed), turning_power=0.0))
+                await self.cli_drivetrain_drive.call_async(
+                    Drive.Request(forward_power=0.0, horizontal_power=0.25e-9 * (elapsed), turning_power=0.0)
+                )
                 self.get_logger().info("Accelerating lift and drive train")
                 elapsed = self.get_clock().now().nanoseconds - start_time
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
@@ -273,7 +291,9 @@ class MainControlNode(Node):
                 await asyncio.sleep(0.1)  # Allows other async tasks to continue running (this is non-blocking)
             await self.cli_drivetrain_stop.call_async(Stop.Request())
             await self.cli_skimmer_stop.call_async(Stop.Request())
-            await self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_dumping_position))  # Raise the skimmer back up
+            await self.cli_lift_setPosition.call_async(
+                SetPosition.Request(position=self.lift_dumping_position)
+            )  # Raise the skimmer back up
             self.skimmer_goal_reached = False
             # Wait for the lift goal to be reached
             while not self.skimmer_goal_reached:
@@ -291,7 +311,9 @@ class MainControlNode(Node):
         self.get_logger().info("\nStarting Autonomous Offload Procedure!")
         try:  # Wrap the autonomous procedure in a try-except
             # Drive backward into the berm zone
-            await self.cli_drivetrain_drive.call_async(Drive.Request(forward_power=0.0, horizontal_power=-0.25, turning_power=0.0))
+            await self.cli_drivetrain_drive.call_async(
+                Drive.Request(forward_power=0.0, horizontal_power=-0.25, turning_power=0.0)
+            )
             start_time = self.get_clock().now().nanoseconds
             while self.get_clock().now().nanoseconds - start_time < 10e9:
                 self.get_logger().info("Auto Driving")
@@ -320,7 +342,8 @@ class MainControlNode(Node):
         """This method lays out the procedure for doing a complete autonomous cycle!"""
         self.get_logger().info("\nStarting an Autonomous Cycle!")
         try:  # Wrap the autonomous procedure in a try-except
-            ## Navigate to the dig_location, run the dig procedure, then navigate to the berm zone and run the offload procedure ##
+            # Navigate to the dig_location, run the dig procedure,
+            # then navigate to the berm zone and run the offload procedure
             if not self.field_calibrated:
                 self.get_logger().error("Field coordinates must be calibrated first!")
                 self.end_autonomous()  # Return to Teleop mode
@@ -372,9 +395,9 @@ class MainControlNode(Node):
             joystick_threshold = 0.1
             
             joystick_acceleration = (self.get_clock().now().nanoseconds - self.last_joystick_callback) / 1e9 * joystick_acceleration_constant
-            joystick_vertical_movement = msg.axes[RIGHT_JOYSTICK_VERTICAL_AXIS] - self.joystick_lagging_vertical
-            joystick_horizontal_movement = msg.axes[RIGHT_JOYSTICK_HORIZONTAL_AXIS] - self.joystick_lagging_horizontal
-            joystick_turn_movement = msg.axes[LEFT_JOYSTICK_HORIZONTAL_AXIS] - self.joystick_lagging_turn
+            joystick_vertical_movement = msg.axes[bindings.RIGHT_JOYSTICK_VERTICAL_AXIS] - self.joystick_lagging_vertical
+            joystick_horizontal_movement = msg.axes[bindings.RIGHT_JOYSTICK_HORIZONTAL_AXIS] - self.joystick_lagging_horizontal
+            joystick_turn_movement = msg.axes[bindings.LEFT_JOYSTICK_HORIZONTAL_AXIS] - self.joystick_lagging_turn
             
             self.joystick_lagging_vertical += 0 if abs(joystick_vertical_movement) < joystick_threshold else math.copysign(min(joystick_acceleration, abs(joystick_vertical_movement)), joystick_vertical_movement)
             self.joystick_lagging_horizontal += 0 if abs(joystick_horizontal_movement) < joystick_threshold else math.copysign(min(joystick_acceleration, abs(joystick_horizontal_movement), joystick_horizontal_movement))
@@ -390,39 +413,39 @@ class MainControlNode(Node):
             )
 
             # Check if the skimmer button is pressed #
-            if msg.buttons[X_BUTTON] == 1 and buttons[X_BUTTON] == 0:
+            if msg.buttons[bindings.X_BUTTON] == 1 and buttons[bindings.X_BUTTON] == 0:
                 self.cli_skimmer_toggle.call_async(SetPower.Request(power=self.skimmer_belt_power))
 
             # Check if the reverse skimmer button is pressed #
-            if msg.buttons[Y_BUTTON] == 1 and buttons[Y_BUTTON] == 0:
+            if msg.buttons[bindings.Y_BUTTON] == 1 and buttons[bindings.Y_BUTTON] == 0:
                 self.cli_skimmer_setPower.call_async(SetPower.Request(power=-self.skimmer_belt_power))
 
             # Check if the lift dumping position button is pressed #
-            if msg.buttons[B_BUTTON] == 1 and buttons[B_BUTTON] == 0:
+            if msg.buttons[bindings.B_BUTTON] == 1 and buttons[bindings.B_BUTTON] == 0:
                 self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_dumping_position))
 
             # Check if the lift digging position button is pressed #
-            if msg.buttons[A_BUTTON] == 1 and buttons[A_BUTTON] == 0:
+            if msg.buttons[bindings.A_BUTTON] == 1 and buttons[bindings.A_BUTTON] == 0:
                 self.cli_lift_setPosition.call_async(SetPosition.Request(position=self.lift_digging_start_position))
 
             # Manually adjust the height of the skimmer with the left and right triggers
-            if msg.buttons[RIGHT_TRIGGER] == 1 and buttons[RIGHT_TRIGGER] == 0:
+            if msg.buttons[bindings.RIGHT_TRIGGER] == 1 and buttons[bindings.RIGHT_TRIGGER] == 0:
                 self.cli_lift_set_power.call_async(SetPower.Request(power=self.skimmer_lift_manual_power))
-            elif msg.buttons[RIGHT_TRIGGER] == 0 and buttons[RIGHT_TRIGGER] == 1:
+            elif msg.buttons[bindings.RIGHT_TRIGGER] == 0 and buttons[bindings.RIGHT_TRIGGER] == 1:
                 self.cli_lift_stop.call_async(Stop.Request())
-            elif msg.buttons[LEFT_TRIGGER] == 1 and buttons[LEFT_TRIGGER] == 0:
+            elif msg.buttons[bindings.LEFT_TRIGGER] == 1 and buttons[bindings.LEFT_TRIGGER] == 0:
                 self.cli_lift_set_power.call_async(SetPower.Request(power=-self.skimmer_lift_manual_power))
-            elif msg.buttons[LEFT_TRIGGER] == 0 and buttons[LEFT_TRIGGER] == 1:
+            elif msg.buttons[bindings.LEFT_TRIGGER] == 0 and buttons[bindings.LEFT_TRIGGER] == 1:
                 self.cli_lift_stop.call_async(Stop.Request())
 
             # Check if the calibration button is pressed
-            if msg.buttons[RIGHT_BUMPER] == 1 and buttons[RIGHT_BUMPER] == 0:
+            if msg.buttons[bindings.RIGHT_BUMPER] == 1 and buttons[bindings.RIGHT_BUMPER] == 0:
                 self.cli_drivetrain_calibrate.call_async(Stop.Request())
 
         # THE CONTROLS BELOW ALWAYS WORK #
 
         # Check if the Apriltag calibration button is pressed
-        if msg.buttons[START_BUTTON] == 1 and buttons[START_BUTTON] == 0:
+        if msg.buttons[bindings.START_BUTTON] == 1 and buttons[bindings.START_BUTTON] == 0:
             # Start the field calibration process
             if self.apriltag_timer.is_canceled():
                 self.started_calibration = False
@@ -436,7 +459,7 @@ class MainControlNode(Node):
                 self.end_autonomous()  # Return to Teleop mode
 
         # Check if the autonomous digging button is pressed
-        if msg.buttons[BACK_BUTTON] == 1 and buttons[BACK_BUTTON] == 0:
+        if msg.buttons[bindings.BACK_BUTTON] == 1 and buttons[bindings.BACK_BUTTON] == 0:
             if self.state == states["Teleop"]:
                 self.stop_all_subsystems()  # Stop all subsystems
                 self.state = states["Autonomous"]
@@ -448,7 +471,7 @@ class MainControlNode(Node):
                 self.autonomous_digging_process = None
 
         # Check if the autonomous offload button is pressed
-        if msg.buttons[LEFT_BUMPER] == 1 and buttons[LEFT_BUMPER] == 0:
+        if msg.buttons[bindings.LEFT_BUMPER] == 1 and buttons[bindings.LEFT_BUMPER] == 0:
             if self.state == states["Teleop"]:
                 self.stop_all_subsystems()  # Stop all subsystems
                 self.state = states["Autonomous"]

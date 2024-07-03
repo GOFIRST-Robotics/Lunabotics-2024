@@ -103,7 +103,8 @@ def generate_launch_description():
                 " service call ",
                 "/zed2i/zed_node/start_svo_rec ",
                 "zed_interfaces/srv/StartSvoRec ",
-                f"\"{{compression_mode: 2, bitrate: 10000, svo_filename: '{svo_filename}'}}\"",  # Tune this bitrate to adjust file size
+                # Tune this bitrate to adjust file size
+                f"\"{{compression_mode: 2, bitrate: 10000, svo_filename: '{svo_filename}'}}\"",
             ]
         ],
         shell=True,

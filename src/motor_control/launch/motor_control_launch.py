@@ -12,7 +12,7 @@ def generate_launch_description():
         output="screen",
         emulate_tty=True,
     )
-    
+
     ld.add_action(motor_control)
 
     return ld

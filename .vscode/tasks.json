@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build All Task",
+            "type": "colcon",
+            "args": [
+                "build",
+                "--symlink-install"
+            ],
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Build No GPU Task",
+            "type": "colcon",
+            "args": [
+                "build",
+                "--symlink-install",
+                "--packages-up-to",
+                "rovr_control",
+                "motor_control",
+                "ros2socketcan_bridge"
+            ],
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Test All",
+            "type": "colcon",
+            "args": [
+                "test"
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        },
+    ]
+}

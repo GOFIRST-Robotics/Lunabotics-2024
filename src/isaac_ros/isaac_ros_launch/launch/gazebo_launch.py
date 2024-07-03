@@ -15,9 +15,7 @@ def generate_launch_description():
     )
 
     ld = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution([FindPackageShare("isaac_ros_launch"), "isaac_launch.py"])
-        ),
+        PythonLaunchDescriptionSource(PathJoinSubstitution([FindPackageShare("isaac_ros_launch"), "isaac_launch.py"])),
         launch_arguments={
             "setup_for_zed": "False",
             "setup_for_gazebo": "True",

@@ -2,6 +2,8 @@
 
 The official NASA Lunabotics 2024 repository for University of Minnesota Robotics.
 
+[![Lint Check](https://github.com/GOFIRST-Robotics/Lunabotics-2024/actions/workflows/linter_check.yml/badge.svg)](https://github.com/GOFIRST-Robotics/Lunabotics-2024/actions/workflows/linter_check.yml) [![Trufflehog Scan](https://github.com/GOFIRST-Robotics/Lunabotics-2024/actions/workflows/trufflehog_scan.yml/badge.svg)](https://github.com/GOFIRST-Robotics/Lunabotics-2024/actions/workflows/trufflehog_scan.yml)
+
 ```mermaid
 graph LR
     subgraph A[Operator Laptop]
@@ -47,20 +49,23 @@ graph LR
 Open vscode then press ctrl+shift+p and type "Clone Repository in Container Volume". Select "Dev Containers: Clone Repository in Container Volume" and then select "Clone a repository from GitHub in a Container Volume". Search for and select our Lunabotics-2024 repository.
 <br><br>
 
-After opening the container, run the following commands in the terminal:
-```
-source /opt/ros/humble/setup.bash
-colcon build --symlink-install
-source install/setup.bash
-```
-
-If your machine does not have an Nvidia GPU, select only the packages you want like this:
+If your machine does not have an Nvidia GPU or you haven't set it up with [container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), run the following commands in the Command Palette (Ctrl + Shift + P):
 
 ```
-colcon build --symlink-install --packages-up-to rovr_control motor_control ros2socketcan_bridge
+Tasks: Configure Default Build Task
+Build No GPU Tasks
 ```
 
+After opening the container, run the following commands in the Command Palette (Ctrl + Shift + P):
+```
+Tasks: Run Build Task
+```
+</details>
+<details>
+<summary>Updating Dev Container For Windows/Mac</summary>
+<br>
 If you ever need to rebuild the remote container image, first update the x86_64 and aarch64 images:
+
 ```
 cd ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/docker
 
@@ -88,29 +93,48 @@ devcontainer build --push true --workspace-folder . --platform="linux/amd64,linu
 </details>
 
 <details>
-<summary>How to Run Inside ISAAC ROS Container On Linux/Jetson</summary>
+<summary>How to Run Inside ISAAC ROS Container/Dev Container On Linux/Jetson</summary>
 <br>
-1a.) First, do the following before running run_dev.sh:
+First, do the following before running run_dev.sh:
 
 ```
 printf "CONFIG_IMAGE_KEY=ros2_humble.realsense.deepstream.user.zed.umn \n" > ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/scripts/.isaac_ros_common-config 
 ``` 
-1b.) To use Gazebo in the ISAAC ROS container, do this instead:
+To use Gazebo in the ISAAC ROS container, do this instead:
 
 ```
 printf "CONFIG_IMAGE_KEY=ros2_humble.realsense.deepstream.user.zed.umn.gazebo \n" > ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/scripts/.isaac_ros_common-config 
 ``` 
-2.) To make it so zed modules won't rerun every time you start the container, do this:
+<details>
+<summary>Regular Container</summary>
+<br>
+To make it so zed modules won't rerun every time you start the container, do this:
 
 ```
 echo "-v /usr/local/zed/resources:/usr/local/zed/resources -v /ssd:/ssd" > ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/scripts/.isaac_ros_dev-dockerargs
 ```
-3.) Then run this command:
+Then run this command:
 
 ```
 cd ~/Lunabotics-2024/src/isaac_ros/isaac_ros_common/docker
 ../scripts/run_dev.sh ~/Lunabotics-2024
 ```
+</details>
+<details>
+<summary>Dev Container</summary>
+<br>
+First run this command to build the container:
+
+```
+../scripts/build_devcontainer_image.sh
+```
+
+Then use Command Palette (Ctrl + Shift + P) to open devcontainer
+```
+>Dev Containers: Reopen in Container
+```
+
+</details>
 It is also worth noting that the docker buildkit doesn't respect Nvidia runtime for building which is needed for zed, so if you set up a new jetson you will need to do one of the following (https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/issues/98#issuecomment-1777711989)
 </details>
 
