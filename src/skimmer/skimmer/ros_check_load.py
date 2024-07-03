@@ -31,7 +31,8 @@ class ros_check_load(Node):
         self.bridge = CvBridge()
         self.pub = self.create_publisher(Bool, "readyDump", 10)
         self.prior_checks = []
-        depth_image_topic = "/skimmer/camera/depth/image_rect_raw"  # The launch file should remap so the realsense publishes to this topic
+        # The launch file should remap so the realsense publishes to this topic
+        depth_image_topic = "/skimmer/camera/depth/image_rect_raw"
         self.getSkimmerHeight = self.create_subscription(Float32, skimmer_height_topic, self.setHeight, 10)
         self.oneTimeSub = self.create_subscription(Image, depth_image_topic, self.setParamCallback, 10)
         self.subscriber = self.create_subscription(Image, depth_image_topic, self.depth_image_callback, 10)
@@ -54,8 +55,8 @@ class ros_check_load(Node):
         self.depth_image = self.bridge.imgmsg_to_cv2(msg, msg.encoding)
 
     def publish_distance(self):
-        """does the actual math to determine if the skimmer is ready to offload. Publishes a bool to the readyDump topic.
-        Called every POLLRATE seconds.
+        """does the actual math to determine if the skimmer is ready to offload.
+        Publishes a bool to the readyDump topic. Called every POLLRATE seconds.
         Will kill the node after 5 seconds of not receiving a depth image / throwing consecutive errors."""
         if self.depth_image is None:
             self.get_logger().fatal("Camera not working")

@@ -31,7 +31,7 @@ def generate_launch_description():
         output="screen",
         emulate_tty=True,
     )
-    
+
     skimmer = Node(
         package="skimmer",
         executable="skimmer_node",
@@ -39,13 +39,13 @@ def generate_launch_description():
         parameters=["config/motor_control.yaml"],
         output="screen",
     )
-    
+
     read_serial = Node(
         package="rovr_control",
         executable="read_serial",
         name="read_serial",
     )
-    
+
     can_bus = Node(
         package="ros2socketcan_bridge",
         executable="ros2socketcan",

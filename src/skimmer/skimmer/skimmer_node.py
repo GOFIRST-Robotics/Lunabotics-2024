@@ -63,7 +63,9 @@ class SkimmerNode(Node):
         self.current_goal_position = 0
         # Current position of the lift motor in degrees
         self.current_position_degrees = 0  # Relative encoders always initialize to 0
-        # Goal Threshold (if abs(self.current_goal_position - ACTUAL VALUE) <= self.goal_threshold then we should publish True to /skimmer/goal_reached)
+        # Goal Threshold
+        # if abs(self.current_goal_position - ACTUAL VALUE) <= self.goal_threshold,
+        # then we should publish True to /skimmer/goal_reached
         self.goal_threshold = 320  # in degrees of the motor # TODO: Tune this threshold if needed
         # Current state of the lift system
         self.lift_running = False
@@ -182,14 +184,15 @@ class SkimmerNode(Node):
     # Define timer callback methods here
     def timer_callback(self):
         """Publishes whether or not the current goal position has been reached."""
-        # This MotorCommandGet service call will return a future object, that will eventually contain the position in degrees
+        # This service call will return a future object, that will eventually contain the position in degrees
         future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.SKIMMER_LIFT_MOTOR))
         future.add_done_callback(self.done_callback)
 
     def done_callback(self, future):
         self.current_position_degrees = future.result().data
         goal_reached_msg = Bool(
-            data=abs(self.current_goal_position + self.lift_encoder_offset - self.current_position_degrees) <= self.goal_threshold
+            data=abs(self.current_goal_position + self.lift_encoder_offset - self.current_position_degrees)
+            <= self.goal_threshold
         )
         self.publisher_goal_reached.publish(goal_reached_msg)
 

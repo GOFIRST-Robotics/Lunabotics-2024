@@ -32,7 +32,8 @@ rosbags/
 # eclipse stuff
 .project
 .cproject
-.vscode
+.vscode/*
+!.vscode/tasks.json
 
 # qcreator stuff
 CMakeLists.txt.user
@@ -56,3 +57,4 @@ qtcreator-*
 CATKIN_IGNORE
 
 .fake
+
