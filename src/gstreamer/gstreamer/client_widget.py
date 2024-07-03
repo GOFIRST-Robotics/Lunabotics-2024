@@ -3,7 +3,7 @@ from rclpy.node import Node, Client
 from ament_index_python import get_package_share_directory
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import Slot
-from python_qt_binding.QtWidgets import QWidget, QComboBox, QPushButton
+from python_qt_binding.QtWidgets import QWidget, QComboBox
 from rovr_interfaces.srv import SetClientIp, SetActiveCamera, SetEncoding
 from .client_gstreamer import GstreamerClient
 import rclpy
@@ -12,18 +12,18 @@ import fcntl
 import struct
 from rqt_py_common.extended_combo_box import ExtendedComboBox
 
+
 class ClientWidget(QWidget):
-    timeout = 2e9 # 2 seconds with nano seconds as unit
+    timeout = 2e9  # 2 seconds with nano seconds as unit
     encodings = ["av1", "h265"]
+
     def __init__(self, node: Node):
         super(ClientWidget, self).__init__()
         self.setObjectName("ClientWidget")
         self.node = node
         self.display_window = GstreamerClient()
         self.display_window.run()
-        ui_file = os.path.join(
-            get_package_share_directory("gstreamer"), "resource", "gstreamer-select.ui"
-        )
+        ui_file = os.path.join(get_package_share_directory("gstreamer"), "resource", "gstreamer-select.ui")
         loadUi(ui_file, self, {"ExtendedComboBox": ExtendedComboBox})
         network_dropdown: QComboBox = self.findChild(QComboBox, "network_dropdown")
         self.add_network_interfaces(network_dropdown)
@@ -35,7 +35,7 @@ class ClientWidget(QWidget):
         self.on_encoding_push_button_clicked()
 
     def add_network_interfaces(self, comboBox: QComboBox):
-        for _,interface in socket.if_nameindex():
+        for _, interface in socket.if_nameindex():
             if interface != "lo":
                 comboBox.addItem(interface)
         comboBox.setCurrentIndex(0)
@@ -44,7 +44,7 @@ class ClientWidget(QWidget):
         for encoding in self.encodings:
             comboBox.addItem(encoding)
         comboBox.setCurrentIndex(0)
-    
+
     def get_ip_address(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         interface = str(self.network_dropdown.currentText())
@@ -52,13 +52,11 @@ class ClientWidget(QWidget):
             fcntl.ioctl(
                 s.fileno(),
                 0x8915,
-                struct.pack(
-                    "256s", interface[:15].encode("utf-8")
-                ),  # SIOCGIFADDR
+                struct.pack("256s", interface[:15].encode("utf-8")),  # SIOCGIFADDR
             )[20:24]
-            )
-        
-    def wait_cli(self,cli:Client,req):
+        )
+
+    def wait_cli(self, cli: Client, req):
         future = cli.call_async(req)
         start_time = self.node.get_clock().now().nanoseconds
 
@@ -68,7 +66,7 @@ class ClientWidget(QWidget):
         if not future.done():
             print("Service Call Failed")
             return
-        
+
         print("Service Call Returned")
         result = future.result().success
         if result == -1:
@@ -77,10 +75,10 @@ class ClientWidget(QWidget):
             print("No encoding set")
         elif result == -3:
             print("No camera selected")
-            
-        # self.restart_window() 
+
+        # self.restart_window()
         self.node.destroy_client(cli)
-    
+
     @Slot()
     def on_camera1_push_button_clicked(self):
         print("Requesting Camera 1")
@@ -92,7 +90,7 @@ class ClientWidget(QWidget):
         req.framerate = 30
         req.format = "NV12"
         cli = self.node.create_client(SetActiveCamera, "/set_active_camera")
-        self.wait_cli(cli,req)
+        self.wait_cli(cli, req)
 
     @Slot()
     def on_camera2_push_button_clicked(self):
@@ -105,7 +103,7 @@ class ClientWidget(QWidget):
         req.framerate = 30
         req.format = "NV12"
         cli = self.node.create_client(SetActiveCamera, "/set_active_camera")
-        self.wait_cli(cli,req)
+        self.wait_cli(cli, req)
 
     @Slot()
     def on_camera3_push_button_clicked(self):
@@ -118,7 +116,7 @@ class ClientWidget(QWidget):
         req.framerate = 30
         req.format = "NV12"
         cli = self.node.create_client(SetActiveCamera, "/set_active_camera")
-        self.wait_cli(cli,req)
+        self.wait_cli(cli, req)
 
     @Slot()
     def on_camera4_push_button_clicked(self):
@@ -131,8 +129,8 @@ class ClientWidget(QWidget):
         req.framerate = 30
         req.format = "NV12"
         cli = self.node.create_client(SetActiveCamera, "/set_active_camera")
-        self.wait_cli(cli,req)
-        
+        self.wait_cli(cli, req)
+
     @Slot()
     def on_camera5_push_button_clicked(self):
         print("Requesting Camera 5")
@@ -144,7 +142,7 @@ class ClientWidget(QWidget):
         req.framerate = 30
         req.format = "NV12"
         cli = self.node.create_client(SetActiveCamera, "/set_active_camera")
-        self.wait_cli(cli,req)
+        self.wait_cli(cli, req)
 
     def restart_window(self):
         self.display_window.stop()
@@ -160,11 +158,11 @@ class ClientWidget(QWidget):
             print(e)
             return
         cli = self.node.create_client(SetClientIp, "/set_client_ip")
-        self.wait_cli(cli,req)
-    
+        self.wait_cli(cli, req)
+
     @Slot()
     def on_encoding_push_button_clicked(self):
         req = SetEncoding.Request()
         req.encoding = str(self.encoding_dropdown.currentText())
         cli = self.node.create_client(SetEncoding, "/set_encoding")
-        self.wait_cli(cli,req)
+        self.wait_cli(cli, req)

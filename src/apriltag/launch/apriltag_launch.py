@@ -17,7 +17,10 @@ def generate_launch_description():
         plugin="nvidia::isaac_ros::apriltag::AprilTagNode",
         name="isaac_ros_apriltag",
         namespace="",
-        remappings=[("image", "zed2i/zed_node/left/image_rect_color_rgb"), ("camera_info", "zed2i/zed_node/left/camera_info")],
+        remappings=[
+            ("image", "zed2i/zed_node/left/image_rect_color_rgb"),
+            ("camera_info", "zed2i/zed_node/left/camera_info"),
+        ],
     )
 
     image_format_converter_node_left = ComposableNode(
@@ -29,7 +32,10 @@ def generate_launch_description():
                 "encoding_desired": "rgb8",
             }
         ],
-        remappings=[("image_raw", "zed2i/zed_node/left/image_rect_color"), ("image", "zed2i/zed_node/left/image_rect_color_rgb")],
+        remappings=[
+            ("image_raw", "zed2i/zed_node/left/image_rect_color"),
+            ("image", "zed2i/zed_node/left/image_rect_color_rgb"),
+        ],
     )
 
     apriltag_container = ComposableNodeContainer(

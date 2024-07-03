@@ -1,7 +1,9 @@
 from threading import Thread, Event
 import gi
+
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst  # noqa: E402
+
 
 class GstreamerClient:
     def __init__(self):
@@ -37,11 +39,10 @@ class GstreamerClient:
         vid_conv.link(sink)
 
     def init_h265(self, source, queue):
-        # gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp,payload=96" ! rtph265depay ! h265parse ! queue ! nvv4l2decoder ! nveglglessink
+        # gst-launch-1.0 udpsrc port=5000 ! "application/x-rtp,payload=96" ! rtph265depay
+        # ! h265parse ! queue ! nvv4l2decoder ! nveglglessink
         caps_udp = Gst.ElementFactory.make("capsfilter", "caps_udp")
-        caps_udp.set_property(
-            "caps", Gst.Caps.from_string("application/x-rtp,payload=96")
-        )
+        caps_udp.set_property("caps", Gst.Caps.from_string("application/x-rtp,payload=96"))
         self.pipeline.add(caps_udp)
         source.link(caps_udp)
 
@@ -56,7 +57,8 @@ class GstreamerClient:
         h265parse.link(queue)
 
     def init_av1(self, source, queue):
-        # gst-launch-1.0 udpsrc port=5000 ! "video/x-av1,width=640,height=480,framerate=30/1" ! queue ! nvv4l2decoder ! nvvideoconvert ! ximagesink
+        # gst-launch-1.0 udpsrc port=5000 ! "video/x-av1,width=640,height=480,framerate=30/1" ! queue
+        # ! nvv4l2decoder ! nvvideoconvert ! ximagesink
         caps_v4l2src = Gst.ElementFactory.make("capsfilter", "caps_v4l2src")
         caps_v4l2src.set_property(
             "caps",
@@ -75,10 +77,11 @@ class GstreamerClient:
         self.stop_event = Event()
         change_source_thread = Thread()
         change_source_thread.start()
-        
+
     def stop(self):
         self.stop_event.set()
         self.pipeline.set_state(Gst.State.NULL)
+
 
 if __name__ == "__main__":
     client = GstreamerClient()
@@ -88,7 +91,7 @@ if __name__ == "__main__":
     change_source_thread.start()
     while True:
         try:
-            message:Gst.Message = client.pipeline.get_bus().timed_pop(Gst.SECOND)
+            message: Gst.Message = client.pipeline.get_bus().timed_pop(Gst.SECOND)
             if message is None:
                 pass
             elif message.type == Gst.MessageType.EOS:

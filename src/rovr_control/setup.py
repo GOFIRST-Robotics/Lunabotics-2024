@@ -24,9 +24,11 @@ setup(
     license="MIT License",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [{
-            "main_control_node = rovr_control.main_control_node:main",
-            "read_serial = rovr_control.read_serial:main",
-        }],
+        "console_scripts": [
+            {
+                "main_control_node = rovr_control.main_control_node:main",
+                "read_serial = rovr_control.read_serial:main",
+            }
+        ],
     },
 )

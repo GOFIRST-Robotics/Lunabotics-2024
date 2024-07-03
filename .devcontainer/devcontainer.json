@@ -1,25 +1,33 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
-	"name": "Existing Dockerfile",
-	"build": {
-		// Sets the run context to one level up instead of the .devcontainer folder.
-		// "context": "..",
-		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
-		"dockerfile": "Dockerfile"
-	},
-	// TODO: fix these to somehow sync with isaac_ros
+	"name": "UMN Lunabotics",
+	"image": "umnrobotics/isaac_ros",
 	"runArgs": [
 		"--privileged",
-		"--env=DISPLAY=${localEnv:DISPLAY}"
+		"--network",
+		"host"
 	],
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-	"initializeCommand": "git config --global --add safe.directory /workspaces/Lunabotics-2024 && git reset --soft && git submodule update --init --recursive && git config --global submodule.recurse true && git pull",
-	"postCreateCommand": "echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc",
+	"containerEnv": {
+		"DISPLAY": "${localEnv:DISPLAY}",
+		"NVIDIA_VISIBLE_DEVICES": "all",
+		"NVIDIA_DRIVER_CAPABILITIES": "all",
+		"FASTFASTRTPS_DEFAULT_PROFILES_FILE": "/usr/local/share/middleware_profiles/rtps_udp_profile.xml",
+		// "ROS_DOMAIN_ID": "${localEnv:ROS_DOMAIN_ID}"
+	},
+	"initializeCommand": "git config --global --add safe.directory /workspaces/Lunabotics-2024 && git reset --soft && git submodule update --init --recursive && git config --global submodule.recurse true && git pull || true",
+	"postCreateCommand": "echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc && echo 'source /workspaces/Lunabotics-2024/install/setup.bash' >> ~/.bashrc",
 	"postStartCommand": "sudo apt-get update && rosdep update && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys 'nvblox'",
+	// "mounts": [
+	// 	"type=bind,source=/tmp/.X11-unix,target=/tmp/.X11-unix",
+	// 	"type=bind,source=${localEnv:HOME}/.Xauthority,target=/home/admin/.Xauthority",
+	// 	"type=bind,source=/usr/local/zed/resources,target=/usr/local/zed/resources",
+	// 	"type=bind,source=/ssd,target=/ssd",
+	// 	"type=bind,source=/usr/local/zed/settings,target=/usr/local/zed/settings",
+	// 	"type=bind,source=${localWorkspaceFolder},target=/workspaces/isaac_ros-dev",
+	// 	"type=bind,source=/dev,target=/dev",
+	// 	"type=bind,source=/etc/localtime,target=/etc/localtime,readonly"
+	// ],
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
@@ -28,12 +36,10 @@
 				"ms-vscode.cpptools-extension-pack",
 				"VisualStudioExptTeam.vscodeintellicode",
 				"ms-python.python",
-				"donjayamanne.python-extension-pack",
-				"ms-python.black-formatter",
-				"charliermarsh.ruff",
+				"ms-python.isort",
+				"charliermarsh.ruff@prerelease",
 				"wayou.vscode-todo-highlight",
-				"ms-azuretools.vscode-docker",
-				"nonanonno.vscode-ros2"
+				"ms-iot.vscode-ros@prerelease"
 			],
 			"settings": {
 				"git.autofetch": true,
@@ -41,22 +47,38 @@
 				"files.autoSave": "afterDelay",
 				"editor.formatOnSave": true,
 				"[python]": {
-					"editor.defaultFormatter": "ms-python.black-formatter",
-					"editor.codeActionsOnSave": {
-						"source.fixAll": true
-					}
+					"editor.formatOnPaste": false,
+					"editor.formatOnSaveMode": "file"
+				},
+				"[workbench.view.extension]": {
+					"ms-python.python": false
 				},
 				"black-formatter.args": [
 					"--line-length",
 					"120"
 				],
-				"ruff.lint.args": [
-					"--ignore=E501" // Ignore line too long
-				],
-				"[c++]": {
-					"editor.defaultFormatter": "ms-vscode.cpptools"
+				"[C_Cpp]": {
+					"default.cppStandard": "c++17",
+					"default.cStandard": "c99"
 				},
-				"C_Cpp.clang_format_fallbackStyle": "{ ColumnLimit: 120 }"
+				"ruff.lineLength": 99,
+				"ruff.lint.enable": true,
+				"ruff.format.args": [
+					"line-length=99"
+				],
+				"ruff.lint.select": [
+					"A",
+					"C",
+					"CNL",
+					"D",
+					"E",
+					"F",
+					"I",
+					"Q",
+					"W"
+				],
+				"ruff.nativeServer": true,
+				"C_Cpp.clang_format_fallbackStyle": "Google"
 			}
 		}
 	},

@@ -31,20 +31,26 @@ class SwerveModule:
         self.drivetrain = drivetrain
 
     def set_power(self, power: float) -> None:
-        self.drivetrain.cli_motor_set.call_async(MotorCommandSet.Request(can_id=self.drive_motor_can_id, type="duty_cycle", value=power))
+        self.drivetrain.cli_motor_set.call_async(
+            MotorCommandSet.Request(can_id=self.drive_motor_can_id, type="duty_cycle", value=power)
+        )
 
     def set_angle(self, angle: float) -> None:
         angle = (360 - angle) % 360
 
         self.drivetrain.cli_motor_set.call_async(
             MotorCommandSet.Request(
-                can_id=self.turning_motor_can_id, type="position", value=(angle - self.encoder_offset) * self.drivetrain.STEERING_MOTOR_GEAR_RATIO
+                can_id=self.turning_motor_can_id,
+                type="position",
+                value=(angle - self.encoder_offset) * self.drivetrain.STEERING_MOTOR_GEAR_RATIO,
             )
         )
 
     def reset(self, current_relative_angle) -> None:
         self.encoder_offset = self.current_absolute_angle - current_relative_angle
-        self.drivetrain.get_logger().info(f"CAN ID {self.turning_motor_can_id} Absolute Encoder angle offset set to: {self.encoder_offset}")
+        self.drivetrain.get_logger().info(
+            f"CAN ID {self.turning_motor_can_id} Absolute Encoder angle offset set to: {self.encoder_offset}"
+        )
         self.set_angle(0)  # Rotate the module to the 0 degree position
 
     def set_state(self, power: float, angle: float) -> None:
@@ -176,22 +182,42 @@ class DrivetrainNode(Node):
         if self.front_left.current_absolute_angle is not None:
             print("Absolute Encoder angles reset")
 
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            front_left_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.FRONT_LEFT_TURN))
-            front_left_future.add_done_callback(lambda future: self.front_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            front_left_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.FRONT_LEFT_TURN)
+            )
+            front_left_future.add_done_callback(
+                lambda future: self.front_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
 
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            front_right_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.FRONT_RIGHT_TURN))
-            front_right_future.add_done_callback(lambda future: self.front_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            front_right_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.FRONT_RIGHT_TURN)
+            )
+            front_right_future.add_done_callback(
+                lambda future: self.front_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
 
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            back_left_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.BACK_LEFT_TURN))
-            back_left_future.add_done_callback(lambda future: self.back_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            back_left_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.BACK_LEFT_TURN)
+            )
+            back_left_future.add_done_callback(
+                lambda future: self.back_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
 
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            back_right_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.BACK_RIGHT_TURN))
-            back_right_future.add_done_callback(lambda future: self.back_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
-            
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            back_right_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.BACK_RIGHT_TURN)
+            )
+            back_right_future.add_done_callback(
+                lambda future: self.back_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
+
             self.absolute_angle_timer.cancel()
 
     # Define subsystem methods here
@@ -295,21 +321,41 @@ class DrivetrainNode(Node):
     def calibrate_callback(self, request, response):
         """This service request calibrates the drivetrain."""
         if self.front_left.current_absolute_angle is not None:
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            front_left_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.FRONT_LEFT_TURN))
-            front_left_future.add_done_callback(lambda future: self.front_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            front_left_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.FRONT_LEFT_TURN)
+            )
+            front_left_future.add_done_callback(
+                lambda future: self.front_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
 
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            front_right_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.FRONT_RIGHT_TURN))
-            front_right_future.add_done_callback(lambda future: self.front_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            front_right_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.FRONT_RIGHT_TURN)
+            )
+            front_right_future.add_done_callback(
+                lambda future: self.front_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
 
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            back_left_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.BACK_LEFT_TURN))
-            back_left_future.add_done_callback(lambda future: self.back_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            back_left_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.BACK_LEFT_TURN)
+            )
+            back_left_future.add_done_callback(
+                lambda future: self.back_left.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
 
-            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees. Divide this by the gear ratio to get the wheel position.
-            back_right_future = self.cli_motor_get.call_async(MotorCommandGet.Request(type="position", can_id=self.BACK_RIGHT_TURN))
-            back_right_future.add_done_callback(lambda future: self.back_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO))
+            # future.result().data will contain the position of the MOTOR (not the wheel) in degrees.
+            # Divide this by the gear ratio to get the wheel position.
+            back_right_future = self.cli_motor_get.call_async(
+                MotorCommandGet.Request(type="position", can_id=self.BACK_RIGHT_TURN)
+            )
+            back_right_future.add_done_callback(
+                lambda future: self.back_right.reset(future.result().data / self.STEERING_MOTOR_GEAR_RATIO)
+            )
 
             response.success = 0  # indicates success
         else:
