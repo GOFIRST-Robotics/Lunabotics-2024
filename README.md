@@ -5,41 +5,114 @@ The official NASA Lunabotics GitHub repository for University of Minnesota Robot
 [![Lint Check](https://github.com/GOFIRST-Robotics/Lunabotics/actions/workflows/linter_check.yml/badge.svg)](https://github.com/GOFIRST-Robotics/Lunabotics/actions/workflows/linter_check.yml) [![Trufflehog Scan](https://github.com/GOFIRST-Robotics/Lunabotics/actions/workflows/trufflehog_scan.yml/badge.svg)](https://github.com/GOFIRST-Robotics/Lunabotics/actions/workflows/trufflehog_scan.yml)
 
 ```mermaid
+---
+title: Connectivity Chart
+---
 graph LR
-    subgraph A[Operator Laptop]
-        B[RQT Camera Frontend]
-        J[joy_node]
-    end
-    subgraph C[Robot]
-        subgraph F[Nvidia Jetson AGX Orin]
-            G[motor_control]
-            H[GStreamer NVENC AV1 Encoding]
-            I[isaac_ros_nvblox]
-            L[ros2socketcan_bridge]
-            M[Nav2]
-            N[Subsystem ROS 2 Nodes]
-            O[rovr_control]
-            P[ZED ROS 2 Wrapper]
+    Laptop
+    Router
+
+    subgraph Robot
+        direction TB
+        Jetson
+        Arduino
+        VESCs
+        limit[Limit Switches]
+        absEncoder[Absolute Encoders]
+        Cameras
+
+        subgraph Motors
+            hall[Relative Encoders]
         end
-        D[Arduino Microcontroller]
-        K[Limit Switches and Absolute Encoders]
-        E[VESC Motor Controllers]
     end
-    K --> D
-    O <-- Serial Bus --> D
-    H -- WiFi Connection --> B
-    L <-- CAN Bus --> E
-    P --> I
-    I -- Cost Map --> M
-    M --> O
-    J -- /joy --> O
-    M -- /cmd_vel --> N
-    G -- /CAN/can0/transmit --> L
-    L -- /CAN/can0/receive --> G
-    O -- /cmd_vel --> N
-    O -- ROS 2 Services --> N
-    N -- ROS 2 Services --> G
+
+    Laptop <-- Ethernet --> Router <-- Wifi --> Jetson
+    limit & absEncoder --> Arduino -- USB --> Jetson
+    Cameras -- USB --> Jetson
+    Jetson <-- Can Bus --> VESCs 
+
+    hall -- Encoder Cables --> VESCs -- Motor Cables --> Motors
 ```
+
+
+
+```mermaid
+graph TB
+    subgraph laptop[Driver Laptop]
+        B[RQT Camera Frontend]
+        joy_node
+    end
+    subgraph Robot
+        direction TB
+        subgraph jetson[Nvidia Jetson AGX Orin]
+            motor_control
+            H[GStreamer NVENC AV1 Encoding]
+            isaac_ros_nvblox
+            ros2socketcan_bridge
+            Nav2
+            skimmer_node
+            drivetrain_node
+            apriltag_node
+            rovr_control
+            P[ZED ROS 2 Wrapper]
+
+            motor_control -- /CAN/can0/transmit --> ros2socketcan_bridge
+            ros2socketcan_bridge -- /CAN/can0/receive --> motor_control
+            Nav2 --> rovr_control
+            P --> isaac_ros_nvblox
+
+        end
+        arduino[Arduino Microcontroller]
+        K[Limit Switches and Absolute Encoders]
+        vesc[VESC Motor Controllers]
+
+        K --> arduino
+        rovr_control <-- Serial Bus --> arduino
+        ros2socketcan_bridge <-- CAN Bus --> vesc
+        isaac_ros_nvblox -- Cost Map --> Nav2
+        Nav2 -- /cmd_vel --> drivetrain_node
+    
+        rovr_control -- /cmd_vel --> drivetrain_node
+        rovr_control -- ROS 2 Services --> skimmer_node
+        drivetrain_node & skimmer_node -- ROS 2 Services --> motor_control
+
+
+
+    end
+
+    H -- WiFi Connection --> B
+    joy_node -- /joy --> rovr_control
+
+    
+```
+
+```mermaid
+---
+title: VESCs Behavior
+---
+sequenceDiagram
+    participant j as Jetson
+    participant v as VESCs
+    participant m as Motor
+
+    loop CANBUS
+        v ->> j: status frames
+    end
+
+    alt Power Request
+        j ->> v: id: power
+        v ->> m: power
+    else Position Request
+        j ->> v: 5 id: position
+        loop PID
+            m ->> v: position
+            v ->> m: power
+        end
+    end
+    
+
+```
+
 
 ## How to Run Inside Docker Container
 
