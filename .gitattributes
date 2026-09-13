@@ -1,4 +1,4 @@
 *.svo filter=lfs diff=lfs merge=lfs -text
 
 # This keeps line endings consistent
-* text=auto
+* text=lf

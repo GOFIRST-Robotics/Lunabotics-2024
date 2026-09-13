@@ -56,5 +56,10 @@ RUN echo '#!/bin/bash\n\
 rosdep update && rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys "nvblox negotiated draco_point_cloud_transport point_cloud_transport_plugins ffmpeg_encoder_decoder ffmpeg_image_transport isaac_ros_peoplesemseg_models_install isaac_ros_h264_decoder isaac_ros_unet isaac_ros_triton isaac_ros_dnn_image_encoder nova_carter_navigation"\n\
 exec "$@"' > /home/admin/entrypoint.sh && chmod +x /home/admin/entrypoint.sh
 
+# Linking .zig-cache like this fixes an error when running 'zig build' on Windows
+RUN set -eux; \
+    mkdir /tmp/.zig-cache; \
+    ln -s /tmp/.zig-cache /workspaces/isaac_ros-dev;
+
 ENTRYPOINT ["/home/admin/entrypoint.sh"]
 CMD ["bash"]

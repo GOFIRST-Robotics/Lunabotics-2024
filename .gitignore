@@ -61,5 +61,5 @@ CATKIN_IGNORE
 docker/deepstream
 
 # zig
-zig-out/
-.zig-cache/
+zig-out
+.zig-cache

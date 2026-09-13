@@ -25,6 +25,9 @@ If you do not already have WSL installed you will need to run the following comm
 `wsl --install`
 A reboot will be required for it to take effect.
 
+To access controllers through wsl USBIPD-WIN must be installed.
+`winget install --interactive --exact dorssel.usbipd-win`
+
 ## Zig & ZLS
 
 **Zig Version 0.16 is absolutely required, double check the version after installation!**
