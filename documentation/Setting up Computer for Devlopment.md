@@ -4,8 +4,8 @@
 
 #### For Linux/Mac:
 You should install git with your distribution's package manager. 
-`sudo apt install git`
-`sudo pacman -S git`
+`sudo apt install git`\
+`sudo pacman -S git`\
 `brew install git`
 
 #### For Windows
@@ -15,18 +15,23 @@ All the default options should be fine.
 ## Docker
 
 #### For Linux/Mac
-`sudo apt install docker`
-`sudo pacman -S docker`
+`sudo apt install docker`\
+`sudo pacman -S docker`\
 `brew install --cask docker`
+
+Run `systemctl status docker` to see if the Docker daemon is running. If it is not run `systemctl start docker`. If Docker is not enabled then it will need to be manually started every time your computer reboots, if you would prefer it starting on boot run `systemctl enable docker`.
 
 #### For Windows
 Installer found here: https://docs.docker.com/desktop/setup/install/windows-install/
-If you do not already have WSL installed you will need to run the following command in powershell as administrator:
-`wsl --install`
+If you do not already have WSL installed you will need to run the following command in powershell as administrator: `wsl --install`
 A reboot will be required for it to take effect.
+After installing WSL in Docker go to Settings -> Resources -> WSL integration, and enable it.
+You may be required to open up docker desktop to get the Docker daemon running or to reenable WSL. Besides this the Docker desktop is not required for interacting with the containers.
 
-To access controllers through wsl USBIPD-WIN must be installed.
+To access controllers through WSL USBIPD-WIN must be installed.
 `winget install --interactive --exact dorssel.usbipd-win`
+
+Run `./scripts/enable_joysticks_windows.ps1` in a powershell terminal to allow WSL to access plugged in controllers. You may need to rerun this at times. Run `ls /dev/input/by-id` to see if WSL can access the controllers. File names with 'Logitech Controller' and 'Stream Deck' in them should be seen.
 
 ## Zig & ZLS
 
@@ -36,27 +41,25 @@ If you are using VSCode then you do not have to separately install Zig or ZLS. I
 
 First see if you are able to install via CLI (including windows): https://ziglang.org/learn/getting-started/#managers.
 
-If you are on Linux your distribution's package manager may or may not have Zig, and even if it does it may be out of date.
+If you are on Linux your distribution's package manager may or may not have Zig, and even if it does it may be an old version.
 
 Here is the raw downloads page if none of the above are possible: https://ziglang.org/download/
-Make sure to install version 0.16. For convenience add Zig to path.
+
+Run `zig version` to double check version 0.16 is installed. For convenience add Zig to path.
 
 #### Zig Language Server (ZLS)
 
-ZLS's website has tutorials on how to set it up for many IDE's and how to install: https://zigtools.org/zls/install/.
-If you are using the VSCode the extension mentioned previously it should work out of the box.
-ZLS is closely coupled with Zig so its version must specifically support the version of Zig running.
+ZLS's website has tutorials on how to set it up for many IDEs and how to install: https://zigtools.org/zls/install/.
+If you are using the VSCode extension mentioned previously it should work out of the box. ZLS is closely coupled with Zig so its version must specifically support the version of Zig being used.
 
 # Setting up Environment
 
 ## Cloning Repository
-run: `git clone git@github.com:GOFIRST-Robotics/Lunabotics.git`
-It is intentional that this is a ssh source rather than an https because this will facilitate validation with ssh keys when pushing code.
+Run `git clone https://github.com/GOFIRST-Robotics/Lunabotics.git`
 
-There are multiple sub git repositories that must be initialized, run the following (inside of the repo):
-`git submodule update --init --recursive`
+There are multiple sub git repositories that must be initialized, run the following (inside of the repo): `git submodule update --init --recursive`
 
-run `git config --global core.autocrlf true`. Windows and Linux encode the end of lines differently. This option accounts for that issue.
+Run `git config --global core.autocrlf true`. Windows and Linux encode the end of lines differently. This option accounts for that issue.
 
 ## Running Docker
 The purpose of the docker image is to ensure everyone is developing in the same environment. Some of the robot code is also directly tied to the Linux kernel and Windows machines are not able to directly run it.
@@ -73,7 +76,7 @@ To delete the container run `docker rm -f lunabotics_dev`. If you messed up the 
 To delete the image run `docker rmi lunabotics_dev && docker rm -f lunabotics_dev`. You should do this if you want to force a rebuild when running `enter_dev_container.sh`.
 
 ### Creating VCAN Interface
-To allow for debugging CAN while not actually being on the robot you can create a virtual CAN interface that will act like the real thing. Run `./scripts/vcan_startup.sh` (in the container) and it will create the two virtual CAN interfaces called can0 and can1. Rerunning this command may be necessary if the container is killed or if your computer reboots. You should see the VCAN interfaces when running the command `ip addr`. 
+To allow for debugging CAN while not actually being on the robot you can create a virtual CAN interface that will act like the real thing. Run `./scripts/vcan_startup.sh` (in the container) and it will create the two virtual CAN interfaces called can0 and can1. Rerunning this command may be necessary if the container is killed. You should see the VCAN interfaces when running the command `ip addr`. 
 
 If on the Jetson run `./scripts/can_start.sh` to create actual CAN interfaces.
 
@@ -83,8 +86,11 @@ There are two parts of the code that run separably, ROS2 and Zig.
 ## Zig
 To build:
 `zig build`
+
 To run the controller client:
-`./zig-out/bin/client <ip address>`
+`./zig-out/bin/client <ip address>`\
+Running the client executable may require `sudo` on Windows under WSL.
+
 To run the robot code:
 `./zig-out/bin/MFR_local`
  

@@ -1,4 +1,6 @@
 *.svo filter=lfs diff=lfs merge=lfs -text
 
-# This keeps line endings consistent
-* text=lf
+# All shell scripts are being run in WSL on Windows so they should end in \n
+*.sh text eol=lf
+# All other files may end in \n\r if desired
+* text=auto
